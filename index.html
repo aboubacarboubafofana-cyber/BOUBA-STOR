@@ -1,173 +1,29 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>BOUBA STORE - PRINCESSE ROMAINE</title>
-<style>
-*{margin:0;box-sizing:border-box}
-body{background:#000;color:#fff;font-family:Arial;padding-bottom:90px}
-.header{border:2px solid #d4af37;padding:10px;position:sticky;top:0;background:#000;z-index:100}
-.b{width:42px;height:42px;border-radius:50%;border:2px solid gold;object-fit:cover;background:#0a331a}
-.search{margin-top:10px;border:1px solid #d4af37;border-radius:30px;padding:10px 15px;display:flex}
-.search input{background:transparent;border:0;outline:0;color:#fff;width:100%}
-.cats{display:flex;gap:6px;margin-top:10px;overflow-x:auto}
-.cat{padding:8px 16px;border-radius:20px;border:1px solid #d4af37;background:transparent;color:#d4af37;font-size:13px}
-.cat.active{background:#d4af37;color:#000;font-weight:700}
-.banner{background:linear-gradient(90deg,#8B5A2B,#D4AF37);color:#000;text-align:center;padding:8px;font-size:11px;font-weight:900}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px}
-.card{background:#111;border:1px solid #d4af37;color:#fff;border-radius:12px;overflow:hidden}
-.card img{width:100%;height:170px;object-fit:cover}
-.info{padding:7px}
-.btn{width:100%;background:linear-gradient(gold,#b8860b);border:0;padding:9px;border-radius:7px;font-weight:800;font-size:12px}
-.shareBtn{width:100%;background:#25D366;border:0;padding:6px;border-radius:6px;color:#fff;font-size:10px;font-weight:700;margin-top:4px}
-.nav{position:fixed;bottom:0;width:100%;background:#000;border-top:1px solid #d4af37;display:flex;justify-content:space-around;padding:6px 0;font-size:9px;text-align:center;z-index:100}
-.page{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:200;overflow-y:auto;padding:15px;padding-bottom:90px}
-.page.active{display:block}
-.input{width:100%;padding:12px;border-radius:8px;border:1px solid #d4af37;background:#111;color:#fff;margin-bottom:10px}
-#miniCart{position:fixed;bottom:-400px;left:0;width:100%;background:#111;border-top:2px solid gold;border-radius:20px 20px 0 0;padding:15px;z-index:300;transition:0.4s}
-#miniCart.show{bottom:55px}
-.adminBtn{position:fixed;bottom:70px;right:15px;background:gold;width:55px;height:55px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;z-index:90;color:#000;font-weight:900}
-.shareFloat{position:fixed;bottom:70px;left:15px;background:#25D366;width:55px;height:55px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;z-index:90}
-#gate{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(#111,#000);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
-.gateBox{background:#0f0f0f;border:2px solid gold;border-radius:20px;padding:20px;width:100%;max-width:380px;text-align:center}
-.profilePic{width:90px;height:90px;border-radius:50%;border:3px solid gold;object-fit:cover;margin:0 auto 10px;display:block;background:#111}
-.userBadge{width:32px;height:32px;border-radius:50%;border:2px solid gold;object-fit:cover}
-.panierItem{background:#111;border:1px solid #333;border-radius:12px;display:flex;gap:10px;padding:10px;margin-bottom:8px;align-items:center}
-.panierItem img{width:65px;height:65px;border-radius:8px;object-fit:cover}
-.qtyBtn{width:32px;height:32px;border-radius:50%;border:1px solid gold;background:#000;color:gold;font-weight:900}
-.qtyNum{margin:0 8px;font-weight:900;color:gold}
-.ctrl{border:1px solid #333;border-radius:10px;padding:10px;margin-bottom:10px;background:#0f0f0f}
-.onglet4{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.btn4{padding:18px 8px;border-radius:14px;border:0;font-weight:900;font-size:14px;min-height:70px;color:#fff;display:flex;flex-direction:column;align-items:center;gap:6px}
-</style>
-</head>
-<body>
-<div id="gate">
-<div class="gateBox">
-<img id="gatePreview" src="https://via.placeholder.com/90?text=Photo" class="profilePic">
-<h1 style="color:gold">BOUBA STORE</h1>
-<p style="font-size:11px;color:#aaa;margin-bottom:10px">PRINCIPESSA ROMANA • ABIDJAN</p>
-<input id="uName" class="input" placeholder="Nom complet *">
-<input id="uPhone" class="input" placeholder="WhatsApp *">
-<input id="uCity" class="input" placeholder="Ville *">
-<button onclick="document.getElementById('uPhoto').click()" style="width:100%;padding:10px;background:#222;border:1px dashed gold;color:gold;border-radius:8px;margin-bottom:10px">📷 Photo de Profil *</button>
-<input type="file" id="uPhoto" accept="image/*" style="display:none" onchange="handleGatePhoto(event)">
-<input type="password" id="uPass" class="input" placeholder="Mot de passe *">
-<button onclick="register()" style="width:100%;padding:14px;background:gold;border:0;border-radius:10px;font-weight:900;color:#000;margin-top:8px">✅ CRÉER MON COMPTE</button>
-</div>
-</div><div class="header">
-<div style="display:flex;justify-content:space-between;align-items:center">
-<div style="display:flex;gap:8px;align-items:center">
-<img id="logoHeader" class="b" src="https://via.placeholder.com/42?text=B" alt="Logo">
-<b style="color:gold" id="storeName">BOUBA STORE</b>
-</div>
-<div style="display:flex;gap:6px;align-items:center">
-<img id="headerUserPic" class="userBadge" src="https://via.placeholder.com/32" style="display:none" onclick="openPage('profilePage')">
-<span onclick="openPage('panierPage')">👜(<span id="cartC">0</span>)</span>
-</div>
-</div>
-<div class="search">🔍<input id="s" placeholder="Rechercher..." oninput="doSearch()"></div>
-<div class="cats">
-<button class="cat active" onclick="filterCat(this,'all')">Tous</button>
-<button class="cat" onclick="filterCat(this,'Femme')">Femme</button>
-<button class="cat" onclick="filterCat(this,'Homme')">Homme</button>
-<button class="cat" onclick="filterCat(this,'Ensembles')">Ensembles</button>
-</div>
-</div><div class="banner" id="bannerText">SPQR • BONS PLANS JUMIA CI • IMPERIUM • LIVRAISON 24H</div>
-<div class="grid" id="grid"></div>
-<div id="miniCart">
-<h3 style="color:gold">✅ Article ajouté</h3>
-<div id="miniContent" style="margin:10px 0"></div>
-<div style="display:flex;gap:8px">
-<button onclick="openPage('panierPage');closeMini()" style="flex:1;padding:12px;background:transparent;border:1px solid gold;color:gold;border-radius:8px">Voir Panier</button>
-<button onclick="commander()" style="flex:1;padding:12px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">Commander</button>
-</div>
-</div>
-<div class="adminBtn" onclick="openPage('adminPage')">⚙️</div>
-<div class="shareFloat" onclick="openPage('sharePage')">📤</div>
-<div id="sharePage" class="page">
-<h2 style="color:gold">📤 PARTAGER IMPERIAL</h2>
-<div class="ctrl" style="border-color:gold">
-<div class="onglet4">
-<button class="btn4" style="background:#25D366" onclick="shareNetwork('whatsapp')"><span>💬</span>WhatsApp</button>
-<button class="btn4" style="background:#1877F2" onclick="shareNetwork('facebook')"><span>📘</span>Facebook</button>
-<button class="btn4" style="background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)" onclick="shareNetwork('instagram')"><span>📸</span>Instagram</button>
-<button class="btn4" style="background:#000;border:1px solid #444" onclick="shareNetwork('tiktok')"><span>🎵</span>TikTok</button>
-</div>
-<div style="display:flex;gap:6px;margin-top:12px">
-<button onclick="copyCatalog()" style="flex:1;padding:12px;background:#333;color:#fff;border-radius:8px;border:1px solid #555">🔗 Copier Lien</button>
-<button onclick="shareNative()" style="flex:1;padding:12px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">📲 Partager</button>
-</div>
-</div>
-<button onclick="closePage('sharePage')" style="width:100%;margin-top:12px;padding:14px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Fermer</button>
-</div>
-<div id="profilePage" class="page">
-<h2 style="color:gold">👤 MON COMPTE IMPERIAL</h2>
-<div class="ctrl" style="text-align:center;border-color:gold">
-<img id="profilePicBig" src="https://via.placeholder.com/120" class="profilePic" style="width:120px;height:120px">
-<h3 id="profileName" style="color:gold">Nom Client</h3>
-<p id="profilePhone" style="font-size:12px;color:#aaa">WhatsApp</p>
-<p id="profileCity" style="font-size:12px;color:#aaa">Ville</p>
-<div style="display:flex;gap:6px;margin-top:10px">
-<button onclick="document.getElementById('profilePhotoInput').click()" style="flex:1;padding:10px;background:#222;border:1px solid gold;color:gold;border-radius:8px">📷 Changer Photo</button>
-<button onclick="editProfile()" style="flex:1;padding:10px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">✏️ Modifier</button>
-</div>
-<input type="file" id="profilePhotoInput" accept="image/*" style="display:none" onchange="handleProfilePhoto(event)">
-</div><div class="ctrl">
-<h4 style="color:gold">📝 MODIFIER INFOS</h4>
-<input id="editName" class="input" placeholder="Nom complet">
-<input id="editPhone" class="input" placeholder="WhatsApp">
-<input id="editCity" class="input" placeholder="Ville">
-<button onclick="saveProfile()" style="width:100%;padding:12px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">✅ Sauver</button>
-</div>
-<button onclick="logout()" style="width:100%;padding:12px;background:#300;border:1px solid #f44;color:#f44;border-radius:8px">🚪 Déconnexion</button>
-<button onclick="closePage('profilePage')" style="width:100%;margin-top:8px;padding:12px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Fermer</button>
-</div>
-<div id="adminPage" class="page">
-<h2 style="color:gold">⚙️ CONTROLE + CLIENTS</h2>
-<div class="ctrl"><h4 style="color:gold">👥 CLIENTS INSCRITS</h4><div id="clientsList" style="font-size:11px"></div></div>
-<div class="ctrl"><h4>🏆 LOGO</h4><img id="logoAdmin" src="https://via.placeholder.com/100" style="width:100px;height:100px;border-radius:50%;border:2px solid gold;display:block;margin:8px auto"><input id="logoLink" class="input" placeholder="Lien logo"><div style="display:flex;gap:6px"><button onclick="document.getElementById('logoInput').click()" style="flex:1;padding:10px;background:#222;border:1px solid gold;color:gold;border-radius:8px">📷 Logo</button><button onclick="saveLogoLink()" style="flex:1;padding:10px;background:gold;border:0;border-radius:8px">✅</button></div><input type="file" id="logoInput" accept="image/*" style="display:none" onchange="setLogo(event)"></div>
-<div class="ctrl"><h4>🏪 NOM & BANNIERE</h4><input id="ctrlName" class="input" placeholder="Nom boutique"><input id="ctrlBanner" class="input" placeholder="Bannière"><button onclick="saveStoreInfo()" style="width:100%;padding:10px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">✅ Sauver</button></div>
-<div class="ctrl"><h4>➕ PRODUIT</h4><input id="pName" class="input" placeholder="Nom"><input id="pPrice" class="input" type="number" placeholder="Prix"><select id="pCat" class="input"><option>Femme</option><option>Homme</option><option>Ensembles</option></select><input id="pImg" class="input" placeholder="Lien image"><button onclick="document.getElementById('fileInput').click()" style="width:100%;padding:10px;background:#222;border:1px solid #555;color:#fff;border-radius:8px">📷 Photo</button><input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(event)"><div id="preview"></div><button onclick="addProduct()" style="width:100%;padding:12px;background:gold;border:0;border-radius:10px;font-weight:900;color:#000;margin-top:6px">✅ AJOUTER</button></div>
-<button onclick="closePage('adminPage')" style="width:100%;margin-top:10px;padding:12px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Fermer</button>
-</div>
-<div id="panierPage" class="page">
-<h2 style="color:gold">👜 MON PANIER</h2>
-<div id="panierList"></div>
-<div id="total" style="color:gold;font-weight:900;margin-top:12px;font-size:16px"></div>
-<div style="display:flex;gap:6px;margin-top:10px"><button onclick="viderPanier()" style="flex:1;padding:12px;background:#222;border:1px solid #555;color:#fff;border-radius:8px">🗑️ Vider</button><button onclick="closePage('panierPage')" style="flex:1;padding:12px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Continuer</button></div>
-<button onclick="commander()" style="width:100%;padding:14px;background:#25D366;border:0;border-radius:10px;font-weight:900;color:#fff;margin-top:10px">✅ COMMANDER WHATSAPP</button>
-</div>
-<div class="nav">
-<div onclick="closeAll()">🏠<br>Accueil</div>
-<div onclick="openPage('adminPage')">⚙️<br>Controle</div>
-<div onclick="openPage('sharePage')" style="color:gold">📤<br>Partager</div>
-<div onclick="openPage('panierPage')">👜<br>Panier</div>
-<div onclick="openPage('profilePage')">👤<br>Compte</div>
-</div><script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyDRD5Log6Nd5pEB7jctQQt-IDwC88culCk",
-    authDomain: "bouba-51a6f.firebaseapp.com",
-    databaseURL: "https://bouba-51a6f-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "bouba-51a6f",
-    storageBucket: "bouba-51a6f.firebasestorage.app",
-    messagingSenderId: "267309248026",
-    appId: "1:267309248026:web:8a43e3dfc934c45adeeba3",
-    measurementId: "G-S65Q6ZH9Y8"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
-</body>
-</html>
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>BOUBA STORE</title><style>*{margin:0;box-sizing:border-box}body{background:#000;color:#fff;font-family:Arial;padding-bottom:90px}.header{border:2px solid #d4af37;padding:10px;position:sticky;top:0;background:#000;z-index:100}.b{width:42px;height:42px;border-radius:50%;border:2px solid gold;object-fit:cover;background:#0a331a}.search{margin-top:10px;border:1px solid #d4af37;border-radius:30px;padding:10px 15px;display:flex}.search input{background:transparent;border:0;outline:0;color:#fff;width:100%}.cats{display:flex;gap:6px;margin-top:10px;overflow-x:auto}.cat{padding:8px 16px;border-radius:20px;border:1px solid #d4af37;background:transparent;color:#d4af37;font-size:13px}.cat.active{background:#d4af37;color:#000;font-weight:700}.banner{background:linear-gradient(90deg,#8B5A2B,#D4AF37);color:#000;text-align:center;padding:8px;font-size:11px;font-weight:900}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px}.card{background:#111;border:1px solid #d4af37;color:#fff;border-radius:12px;overflow:hidden}.card img{width:100%;height:170px;object-fit:cover}.info{padding:7px}.btn{width:100%;background:linear-gradient(gold,#b8860b);border:0;padding:9px;border-radius:7px;font-weight:800;font-size:12px}.shareBtn{width:100%;background:#25D366;border:0;padding:6px;border-radius:6px;color:#fff;font-size:10px;font-weight:700;margin-top:4px}.nav{position:fixed;bottom:0;width:100%;background:#000;border-top:1px solid #d4af37;display:flex;justify-content:space-around;padding:6px 0;font-size:9px;text-align:center;z-index:100}.page{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:200;overflow-y:auto;padding:15px;padding-bottom:90px}.page.active{display:block}.input{width:100%;padding:12px;border-radius:8px;border:1px solid #d4af37;background:#111;color:#fff;margin-bottom:10px}#miniCart{position:fixed;bottom:-400px;left:0;width:100%;background:#111;border-top:2px solid gold;border-radius:20px 20px 0 0;padding:15px;z-index:300;transition:0.4s}#miniCart.show{bottom:55px}.adminBtn{position:fixed;bottom:70px;right:15px;background:gold;width:55px;height:55px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;z-index:90;color:#000;font-weight:900}.shareFloat{position:fixed;bottom:70px;left:15px;background:#25D366;width:55px;height:55px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;z-index:90}#gate{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(#111,#000);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}.gateBox{background:#0f0f0f;border:2px solid gold;border-radius:20px;padding:20px;width:100%;max-width:380px;text-align:center}.profilePic{width:90px;height:90px;border-radius:50%;border:3px solid gold;object-fit:cover;margin:0 auto 10px;display:block;background:#111}.userBadge{width:32px;height:32px;border-radius:50%;border:2px solid gold;object-fit:cover}.panierItem{background:#111;border:1px solid #333;border-radius:12px;display:flex;gap:10px;padding:10px;margin-bottom:8px;align-items:center}.panierItem img{width:65px;height:65px;border-radius:8px;object-fit:cover}.qtyBtn{width:32px;height:32px;border-radius:50%;border:1px solid gold;background:#000;color:gold;font-weight:900}.qtyNum{margin:0 8px;font-weight:900;color:gold}.ctrl{border:1px solid #333;border-radius:10px;padding:10px;margin-bottom:10px;background:#0f0f0f}.onglet4{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.btn4{padding:18px 8px;border-radius:14px;border:0;font-weight:900;font-size:14px;min-height:70px;color:#fff;display:flex;flex-direction:column;align-items:center;gap:6px}</style></head><body><div id="gate"><div class="gateBox"><img id="gatePreview" src="https://via.placeholder.com/90?text=Photo" class="profilePic"><h1 style="color:gold">BOUBA STORE</h1><p style="font-size:11px;color:#aaa;margin-bottom:10px">PRINCIPESSA ROMANA • ABIDJAN</p><input id="uName" class="input" placeholder="Nom complet *" value="Aboubacar Bouba fofana"><input id="uPhone" class="input" placeholder="WhatsApp *" value="0787619717"><input id="uCity" class="input" placeholder="Ville *" value="Niakaramandougou"><button onclick="document.getElementById('uPhoto').click()" style="width:100%;padding:10px;background:#222;border:1px dashed gold;color:gold;border-radius:8px;margin-bottom:10px">📷 Photo de Profil *</button><input type="file" id="uPhoto" accept="image/*" style="display:none" onchange="handleGatePhoto(event)"><input type="password" id="uPass" class="input" placeholder="Mot de passe *" value="1234"><button onclick="register()" style="width:100%;padding:14px;background:gold;border:0;border-radius:10px;font-weight:900;color:#000;margin-top:8px">✅ CRÉER MON COMPTE</button></div></div><div class="header"><div style="display:flex;justify-content:space-between;align-items:center"><div style="display:flex;gap:8px;align-items:center"><img id="logoHeader" class="b" src="https://via.placeholder.com/42?text=B"><b style="color:gold" id="storeName">BOUBA STORE</b></div><div style="display:flex;gap:6px;align-items:center"><img id="headerUserPic" class="userBadge" src="https://via.placeholder.com/32" style="display:none" onclick="openPage('profilePage')"><span onclick="openPage('panierPage')">👜(<span id="cartC">0</span>)</span></div></div><div class="search">🔍<input id="s" placeholder="Rechercher..." oninput="doSearch()"></div><div class="cats"><button class="cat active" onclick="filterCat(this,'all')">Tous</button><button class="cat" onclick="filterCat(this,'Femme')">Femme</button><button class="cat" onclick="filterCat(this,'Homme')">Homme</button><button class="cat" onclick="filterCat(this,'Ensembles')">Ensembles</button></div></div><div class="banner" id="bannerText">SPQR • BONS PLANS JUMIA CI • IMPERIUM • LIVRAISON 24H</div><div class="grid" id="grid"></div><div id="miniCart"><h3 style="color:gold">✅ Article ajouté</h3><div id="miniContent" style="margin:10px 0"></div><div style="display:flex;gap:8px"><button onclick="openPage('panierPage');closeMini()" style="flex:1;padding:12px;background:transparent;border:1px solid gold;color:gold;border-radius:8px">Voir Panier</button><button onclick="commander()" style="flex:1;padding:12px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">Commander</button></div></div><div class="adminBtn" onclick="openPage('adminPage')">⚙️</div><div class="shareFloat" onclick="openPage('sharePage')">📤</div><div id="sharePage" class="page"><h2 style="color:gold">📤 PARTAGER IMPERIAL</h2><div class="ctrl" style="border-color:gold"><div class="onglet4"><button class="btn4" style="background:#25D366" onclick="shareNetwork('whatsapp')"><span>💬</span>WhatsApp</button><button class="btn4" style="background:#1877F2" onclick="shareNetwork('facebook')"><span>📘</span>Facebook</button><button class="btn4" style="background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)" onclick="shareNetwork('instagram')"><span>📸</span>Instagram</button><button class="btn4" style="background:#000;border:1px solid #444" onclick="shareNetwork('tiktok')"><span>🎵</span>TikTok</button></div><div style="display:flex;gap:6px;margin-top:12px"><button onclick="copyCatalog()" style="flex:1;padding:12px;background:#333;color:#fff;border-radius:8px;border:1px solid #555">🔗 Copier Lien</button><button onclick="shareNative()" style="flex:1;padding:12px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">📲 Partager</button></div></div><button onclick="closePage('sharePage')" style="width:100%;margin-top:12px;padding:14px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Fermer</button></div><div id="profilePage" class="page"><h2 style="color:gold">👤 MON COMPTE</h2><div class="ctrl" style="text-align:center;border-color:gold"><img id="profilePicBig" src="https://via.placeholder.com/120" class="profilePic" style="width:120px;height:120px"><h3 id="profileName" style="color:gold">Nom Client</h3><p id="profilePhone" style="font-size:12px;color:#aaa">WhatsApp</p><p id="profileCity" style="font-size:12px;color:#aaa">Ville</p><div style="display:flex;gap:6px;margin-top:10px"><button onclick="document.getElementById('profilePhotoInput').click()" style="flex:1;padding:10px;background:#222;border:1px solid gold;color:gold;border-radius:8px">📷 Changer Photo</button><button onclick="editProfile()" style="flex:1;padding:10px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">✏️ Modifier</button></div><input type="file" id="profilePhotoInput" accept="image/*" style="display:none" onchange="handleProfilePhoto(event)"></div><div class="ctrl"><h4 style="color:gold">📝 MODIFIER INFOS</h4><input id="editName" class="input" placeholder="Nom complet"><input id="editPhone" class="input" placeholder="WhatsApp"><input id="editCity" class="input" placeholder="Ville"><button onclick="saveProfile()" style="width:100%;padding:12px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">✅ Sauver</button></div><button onclick="logout()" style="width:100%;padding:12px;background:#300;border:1px solid #f44;color:#f44;border-radius:8px">🚪 Déconnexion</button><button onclick="closePage('profilePage')" style="width:100%;margin-top:8px;padding:12px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Fermer</button></div><div id="adminPage" class="page"><h2 style="color:gold">⚙️ CONTROLE</h2><div class="ctrl"><h4 style="color:gold">👥 CLIENTS</h4><div id="clientsList" style="font-size:11px"></div></div><div class="ctrl"><h4>🏆 LOGO</h4><img id="logoAdmin" src="https://via.placeholder.com/100" style="width:100px;height:100px;border-radius:50%;border:2px solid gold;display:block;margin:8px auto"><input id="logoLink" class="input" placeholder="Lien logo"><div style="display:flex;gap:6px"><button onclick="document.getElementById('logoInput').click()" style="flex:1;padding:10px;background:#222;border:1px solid gold;color:gold;border-radius:8px">📷 Logo</button><button onclick="saveLogoLink()" style="flex:1;padding:10px;background:gold;border:0;border-radius:8px">✅</button></div><input type="file" id="logoInput" accept="image/*" style="display:none" onchange="setLogo(event)"></div><div class="ctrl"><h4>🏪 NOM & BANNIERE</h4><input id="ctrlName" class="input" placeholder="Nom boutique"><input id="ctrlBanner" class="input" placeholder="Bannière"><button onclick="saveStoreInfo()" style="width:100%;padding:10px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">✅ Sauver</button></div><div class="ctrl"><h4>➕ PRODUIT</h4><input id="pName" class="input" placeholder="Nom"><input id="pPrice" class="input" type="number" placeholder="Prix"><select id="pCat" class="input"><option>Femme</option><option>Homme</option><option>Ensembles</option></select><input id="pImg" class="input" placeholder="Lien image"><button onclick="document.getElementById('fileInput').click()" style="width:100%;padding:10px;background:#222;border:1px solid #555;color:#fff;border-radius:8px">📷 Photo</button><input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(event)"><div id="preview"></div><button onclick="addProduct()" style="width:100%;padding:12px;background:gold;border:0;border-radius:10px;font-weight:900;color:#000;margin-top:6px">✅ AJOUTER</button></div><button onclick="closePage('adminPage')" style="width:100%;margin-top:10px;padding:12px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Fermer</button></div><div id="panierPage" class="page"><h2 style="color:gold">👜 MON PANIER</h2><div id="panierList"></div><div id="total" style="color:gold;font-weight:900;margin-top:12px;font-size:16px"></div><div style="display:flex;gap:6px;margin-top:10px"><button onclick="viderPanier()" style="flex:1;padding:12px;background:#222;border:1px solid #555;color:#fff;border-radius:8px">🗑️ Vider</button><button onclick="closePage('panierPage')" style="flex:1;padding:12px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Continuer</button></div><button onclick="commander()" style="width:100%;padding:14px;background:#25D366;border:0;border-radius:10px;font-weight:900;color:#fff;margin-top:10px">✅ COMMANDER WHATSAPP</button></div><div class="nav"><div onclick="closeAll()">🏠<br>Accueil</div><div onclick="openPage('adminPage')">⚙️<br>Controle</div><div onclick="openPage('sharePage')" style="color:gold">📤<br>Partager</div><div onclick="openPage('panierPage')">👜<br>Panier</div><div onclick="openPage('profilePage')">👤<br>Compte</div></div><script type="module">import{initializeApp}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";import{getAnalytics}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-analytics.js";const firebaseConfig={apiKey:"AIzaSyDRD5Log6Nd5pEB7jctQQt-IDwC88culCk",authDomain:"bouba-51a6f.firebaseapp.com",databaseURL:"https://bouba-51a6f-default-rtdb.europe-west1.firebasedatabase.app",projectId:"bouba-51a6f",storageBucket:"bouba-51a6f.firebasestorage.app",messagingSenderId:"267309248026",appId:"1:267309248026:web:8a43e3dfc934c45adeeba3",measurementId:"G-S65Q6ZH9Y8"};const app=initializeApp(firebaseConfig);getAnalytics(app);</script><script>
+let tempPhoto="",products=JSON.parse(localStorage.getItem('boubaProducts')||'[]'),cart=JSON.parse(localStorage.getItem('boubaCart')||'[]'),user=JSON.parse(localStorage.getItem('boubaUser')||'null');
+function handleGatePhoto(e){const r=new FileReader();r.onload=function(ev){tempPhoto=ev.target.result;document.getElementById('gatePreview').src=tempPhoto;};r.readAsDataURL(e.target.files[0]);}
+function register(){let n=document.getElementById('uName').value,p=document.getElementById('uPhone').value,c=document.getElementById('uCity').value,ps=document.getElementById('uPass').value;if(!n||!p||!c||!ps){alert('Remplis tout BOSS!');return;}if(!tempPhoto){alert('Mets ta photo BOSS! Clique sur Photo de Profil');return;}user={name:n,phone:p,city:c,pass:ps,photo:tempPhoto};localStorage.setItem('boubaUser',JSON.stringify(user));let clients=JSON.parse(localStorage.getItem('boubaClients')||'[]');clients.push(user);localStorage.setItem('boubaClients',JSON.stringify(clients));document.getElementById('gate').style.display='none';loadUser();alert('Bienvenue BOSS '+n+'! 🔥');render();}
+function loadUser(){if(user){document.getElementById('gate').style.display='none';let pic=document.getElementById('headerUserPic');if(pic){pic.src=user.photo;pic.style.display='block';}document.getElementById('profilePicBig').src=user.photo;document.getElementById('profileName').innerText=user.name;document.getElementById('profilePhone').innerText=user.phone;document.getElementById('profileCity').innerText=user.city;document.getElementById('editName').value=user.name;document.getElementById('editPhone').value=user.phone;document.getElementById('editCity').value=user.city;}}
+function openPage(id){document.getElementById(id).classList.add('active');if(id=='adminPage')loadClients();if(id=='panierPage')renderPanier();}function closePage(id){document.getElementById(id).classList.remove('active');}function closeAll(){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));}function closeMini(){document.getElementById('miniCart').classList.remove('show');}
+function render(){let g=document.getElementById('grid');if(!g)return;if(products.length==0){g.innerHTML='<p style="grid-column:span 2;text-align:center;color:gold;padding:20px">Aucun produit - Va dans Controle ⚙️ pour ajouter</p>';return;}g.innerHTML=products.map((pr,i)=>`<div class="card"><img src="${pr.img}"><div class="info"><b style="font-size:12px">${pr.name}</b><br><b style="color:gold">${pr.price} FCFA</b><br><small>${pr.cat}</small><button class="btn" onclick="addToCart(${i})">👜 AJOUTER</button><button class="shareBtn" onclick="shareProd(${i})">📤 PARTAGER</button></div></div>`).join('');document.getElementById('cartC').innerText=cart.length;}
+function addProduct(){let n=document.getElementById('pName').value,pr=document.getElementById('pPrice').value,cat=document.getElementById('pCat').value,img=document.getElementById('pImg').value||tempProdImg;if(!n||!pr){alert('Nom + Prix!');return;}products.push({name:n,price:pr,cat:cat,img:img||'https://via.placeholder.com/300'});localStorage.setItem('boubaProducts',JSON.stringify(products));alert('Produit ajouté BOSS!');render();document.getElementById('pName').value='';document.getElementById('pPrice').value='';document.getElementById('pImg').value='';}
+let tempProdImg="";function handleFile(e){let r=new FileReader();r.onload=function(ev){tempProdImg=ev.target.result;document.getElementById('preview').innerHTML=`<img src="${tempProdImg}" style="width:100%;height:100px;object-fit:cover;border-radius:8px;margin-top:6px">`;document.getElementById('pImg').value=tempProdImg;};r.readAsDataURL(e.target.files[0]);}
+function addToCart(i){let pr=products[i];cart.push(pr);localStorage.setItem('boubaCart',JSON.stringify(cart));document.getElementById('cartC').innerText=cart.length;document.getElementById('miniContent').innerHTML=`<div style="display:flex;gap:10px"><img src="${pr.img}" style="width:60px;height:60px;border-radius:8px"><div><b>${pr.name}</b><br><b style="color:gold">${pr.price} FCFA</b></div></div>`;document.getElementById('miniCart').classList.add('show');setTimeout(closeMini,3000);renderPanier();}
+function renderPanier(){let list=document.getElementById('panierList');let tot=0;if(cart.length==0){list.innerHTML='<p style="text-align:center;color:#aaa">Panier vide</p>';document.getElementById('total').innerText='';return;}list.innerHTML=cart.map((pr,i)=>{tot+=parseInt(pr.price);return `<div class="panierItem"><img src="${pr.img}"><div style="flex:1"><b>${pr.name}</b><br><b style="color:gold">${pr.price} FCFA</b></div><button class="qtyBtn" onclick="removeCart(${i})">X</button></div>`}).join('');document.getElementById('total').innerText='TOTAL: '+tot+' FCFA';}
+function removeCart(i){cart.splice(i,1);localStorage.setItem('boubaCart',JSON.stringify(cart));document.getElementById('cartC').innerText=cart.length;renderPanier();}function viderPanier(){cart=[];localStorage.setItem('boubaCart','[]');renderPanier();document.getElementById('cartC').innerText=0;}
+function commander(){if(cart.length==0){alert('Panier vide!');return;}let msg='BONJOUR BOUBA STORE%0AJe veux commander:%0A';let tot=0;cart.forEach(pr=>{msg+=`- ${pr.name} ${pr.price} FCFA%0A`;tot+=parseInt(pr.price);});msg+=`TOTAL ${tot} FCFA%0AClient: ${user?user.name:''} ${user?user.phone:''}`;window.open('https://wa.me/2250787619717?text='+msg,'_blank');}
+function doSearch(){let q=document.getElementById('s').value.toLowerCase();let g=document.getElementById('grid');let filtered=products.filter(p=>p.name.toLowerCase().includes(q));if(filtered.length==0){g.innerHTML='<p style="grid-column:span 2;text-align:center;color:gold">Aucun résultat</p>';return;}g.innerHTML=filtered.map((pr,i)=>`<div class="card"><img src="${pr.img}"><div class="info"><b>${pr.name}</b><br><b style="color:gold">${pr.price} FCFA</b><button class="btn" onclick="addToCart(${products.indexOf(pr)})">👜 AJOUTER</button></div></div>`).join('');}
+function filterCat(el,c){document.querySelectorAll('.cat').forEach(b=>b.classList.remove('active'));el.classList.add('active');if(c=='all'){render();return;}let filtered=products.filter(p=>p.cat==c);let g=document.getElementById('grid');g.innerHTML=filtered.map(pr=>`<div class="card"><img src="${pr.img}"><div class="info"><b>${pr.name}</b><br><b style="color:gold">${pr.price} FCFA</b><button class="btn" onclick="addToCart(${products.indexOf(pr)})">👜 AJOUTER</button></div></div>`).join('');}
+function loadClients(){let clients=JSON.parse(localStorage.getItem('boubaClients')||'[]');document.getElementById('clientsList').innerHTML=clients.map(c=>`<div style="border-bottom:1px solid #333;padding:6px;display:flex;gap:6px;align-items:center"><img src="${c.photo}" style="width:30px;height:30px;border-radius:50%"><div><b>${c.name}</b><br>${c.phone} - ${c.city}</div></div>`).join('')||'Aucun client';}
+function saveStoreInfo(){let n=document.getElementById('ctrlName').value,b=document.getElementById('ctrlBanner').value;if(n)document.getElementById('storeName').innerText=n;if(b)document.getElementById('bannerText').innerText=b;localStorage.setItem('storeName',n);localStorage.setItem('bannerText',b);alert('Sauvé!');}
+function setLogo(e){let r=new FileReader();r.onload=function(ev){document.getElementById('logoHeader').src=ev.target.result;document.getElementById('logoAdmin').src=ev.target.result;localStorage.setItem('logo',ev.target.result);};r.readAsDataURL(e.target.files[0]);}
+function saveLogoLink(){let l=document.getElementById('logoLink').value;if(l){document.getElementById('logoHeader').src=l;document.getElementById('logoAdmin').src=l;localStorage.setItem('logo',l);}}
+function handleProfilePhoto(e){let r=new FileReader();r.onload=function(ev){document.getElementById('profilePicBig').src=ev.target.result;document.getElementById('headerUserPic').src=ev.target.result;user.photo=ev.target.result;localStorage.setItem('boubaUser',JSON.stringify(user));};r.readAsDataURL(e.target.files[0]);}
+function saveProfile(){user.name=document.getElementById('editName').value;user.phone=document.getElementById('editPhone').value;user.city=document.getElementById('editCity').value;localStorage.setItem('boubaUser',JSON.stringify(user));loadUser();alert('Profil sauvé!');}
+function editProfile(){document.getElementById('editName').focus();}
+function logout(){localStorage.removeItem('boubaUser');location.reload();}
+function shareNetwork(net){let url=location.href;let txt='BOUBA STORE - PRINCESSE ROMAINE ABIDJAN - '+url;if(net=='whatsapp')window.open('https://wa.me/?text='+encodeURIComponent(txt));if(net=='facebook')window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(url));if(net=='instagram')alert('Lien copié! Colle sur Instagram: '+url);if(net=='tiktok')alert('Lien copié pour TikTok: '+url);}
+function copyCatalog(){navigator.clipboard.writeText(location.href);alert('Lien copié BOSS!');}
+function shareNative(){if(navigator.share){navigator.share({title:'BOUBA STORE',text:'Mon catalogue',url:location.href});}else{copyCatalog();}}
+function shareProd(i){let pr=products[i];let txt=`${pr.name} - ${pr.price} FCFA - Voir: ${location.href}`;window.open('https://wa.me/?text='+encodeURIComponent(txt));}
+window.onload=function(){loadUser();render();let sn=localStorage.getItem('storeName');if(sn)document.getElementById('storeName').innerText=sn;let sb=localStorage.getItem('bannerText');if(sb)document.getElementById('bannerText').innerText=sb;let lg=localStorage.getItem('logo');if(lg){document.getElementById('logoHeader').src=lg;document.getElementById('logoAdmin').src=lg;}};
+</script></body></html>
