@@ -117,7 +117,7 @@ function render(){
 let c=document.getElementById('catalogue');c.innerHTML='';
 let wa=localStorage.getItem('bouba_wa')||'2250787619717';
 let jf=localStorage.getItem('bouba_jforce')||'https://jforce.jumia.ci/s/SjF1cRh';
-getProduits().forEach(p=>{
+getProduits().forEach(p=>{ 
 let link=p.type==='wa'?`https://wa.me/${wa}?text=Salve%20${encodeURIComponent(p.name)}` : jf;
 c.innerHTML+=`<div class="card-roman"><img src="${p.img}"><div style="padding:12px;text-align:center"><h4 style="color:#D4AF37;font-size:12px" class="roman-text">${p.name}</h4><p style="color:#FFD700;font-weight:bold;margin:5px 0">${p.prix}</p><a href="${link}" target="_blank" style="background:linear-gradient(90deg,#8B5A2B,#D4AF37);color:black;padding:7px 14px;text-decoration:none;display:inline-block;font-size:11px;font-weight:900;letter-spacing:1px" class="roman-text">EMERE • ACHETER ⚜️</a><br><a href="https://wa.me/${wa}?text=${encodeURIComponent(p.name)}" style="color:#25D366;font-size:11px;margin-top:6px;display:inline-block">+${wa}</a></div></div>`;
 });
