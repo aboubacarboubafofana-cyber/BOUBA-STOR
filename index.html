@@ -14,10 +14,11 @@ body{background:#000;color:#fff;font-family:Arial;padding-bottom:90px}
 .cats{display:flex;gap:6px;margin-top:10px;overflow-x:auto}
 .cat{padding:8px 16px;border-radius:20px;border:1px solid #d4af37;background:transparent;color:#d4af37;font-size:13px}
 .cat.active{background:#d4af37;color:#000;font-weight:700}
-.banner{background:#0a331a;color:gold;text-align:center;padding:8px;font-size:11px;font-weight:900}
+.banner{background:linear-gradient(90deg,#8B5A2B,#D4AF37);color:#000;text-align:center;padding:8px;font-size:11px;font-weight:900}
+#net{text-align:center;font-size:11px;padding:4px;font-weight:700;background:#111}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px}
-.card{background:#fff;color:#000;border-radius:12px;overflow:hidden}
-.card img{width:100%;height:170px;object-fit:cover}
+.card{background:#111;border:1px solid #d4af37;color:#fff;border-radius:12px;overflow:hidden}
+.card img{width:100%;height:170px;object-fit:cover;background:#222}
 .info{padding:7px}
 .btn{width:100%;background:linear-gradient(gold,#b8860b);border:0;padding:9px;border-radius:7px;font-weight:800;font-size:12px}
 .shareBtn{width:100%;background:#25D366;border:0;padding:6px;border-radius:6px;color:#fff;font-size:10px;font-weight:700;margin-top:4px}
@@ -31,58 +32,443 @@ body{background:#000;color:#fff;font-family:Arial;padding-bottom:90px}
 .shareFloat{position:fixed;bottom:70px;left:15px;background:#25D366;width:55px;height:55px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;z-index:90}
 #gate{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(#111,#000);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
 .gateBox{background:#0f0f0f;border:2px solid gold;border-radius:20px;padding:20px;width:100%;max-width:380px;text-align:center}
-#iaBtn{position:fixed;bottom:135px;right:15px;background:linear-gradient(135deg,#d4af37,#8a6d00);width:55px;height:55px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;z-index:90}
-#iaChat{position:fixed;bottom:200px;right:10px;width:92%;max-width:360px;height:420px;background:#111;border:2px solid gold;border-radius:15px;z-index:400;display:none;flex-direction:column;overflow:hidden}
-#iaChat.open{display:flex}
-.iaHead{background:linear-gradient(gold,#8a6d00);color:#000;padding:10px;font-weight:900;display:flex;justify-content:space-between}
-.iaMsgs{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
-.msg{padding:8px 12px;border-radius:12px;max-width:85%;font-size:13px}
-.msg.bot{background:#222;color:#fff;border:1px solid #333;align-self:flex-start}
-.msg.user{background:gold;color:#000;align-self:flex-end;font-weight:700}
-.iaInput{display:flex;gap:6px;padding:8px;border-top:1px solid #333}
-.iaInput input{flex:1;padding:10px;border-radius:20px;border:1px solid gold;background:#000;color:#fff}
-.ctrl{border:1px solid #333;border-radius:10px;padding:10px;margin-bottom:10px;background:#0f0f0f}
-.onglet4{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.btn4{padding:18px 8px;border-radius:14px;border:0;font-weight:900;font-size:14px;min-height:70px;color:#fff;display:flex;flex-direction:column;align-items:center;gap:6px}
-.iaCard{background:#000;border:1px solid gold;border-radius:10px;display:flex;gap:8px;padding:8px;margin-top:4px;cursor:pointer}
-.iaCard img{width:55px;height:55px;border-radius:8px;object-fit:cover}
+.profilePic{width:90px;height:90px;border-radius:50%;border:3px solid gold;object-fit:cover;margin:0 auto 10px;display:block;background:#111}
+.userBadge{width:32px;height:32px;border-radius:50%;border:2px solid gold;object-fit:cover}
 .panierItem{background:#111;border:1px solid #333;border-radius:12px;display:flex;gap:10px;padding:10px;margin-bottom:8px;align-items:center}
 .panierItem img{width:65px;height:65px;border-radius:8px;object-fit:cover}
 .qtyBtn{width:32px;height:32px;border-radius:50%;border:1px solid gold;background:#000;color:gold;font-weight:900}
 .qtyNum{margin:0 8px;font-weight:900;color:gold}
-.profilePic{width:90px;height:90px;border-radius:50%;border:3px solid gold;object-fit:cover;margin:0 auto 10px;display:block;background:#111}
-.userBadge{width:32px;height:32px;border-radius:50%;border:2px solid gold;object-fit:cover}
+.ctrl{border:1px solid #333;border-radius:10px;padding:10px;margin-bottom:10px;background:#0f0f0f}
+.onglet4{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.btn4{padding:18px 8px;border-radius:14px;border:0;font-weight:900;font-size:14px;min-height:70px;color:#fff;display:flex;flex-direction:column;align-items:center;gap:6px}
+.row{display:flex;gap:8px;align-items:center;background:#111;padding:6px;border-radius:8px;margin-bottom:5px}
+.row img{width:36px;height:36px;border-radius:50%;object-fit:cover}
 </style>
 </head>
 <body>
-<div id="gate"><div class="gateBox"><img id="gatePreview" src="https://ui-avatars.com/api/?name=BOUBA&background=d4af37&color=000&size=90" class="profilePic"><h1 style="color:gold">BOUBA STORE</h1><p style="font-size:11px;color:#0f0">✅ HYPERSONIQUE AUTO - SANS BLOCAGE</p><input id="uName" class="input" placeholder="Nom complet *"><input id="uPhone" class="input" placeholder="WhatsApp *"><input id="uCity" class="input" placeholder="Ville *"><button onclick="document.getElementById('uPhoto').click()" style="width:100%;padding:10px;background:#222;border:1px dashed gold;color:gold;border-radius:8px;margin-bottom:10px">📷 Photo (Optionnel)</button><input type="file" id="uPhoto" accept="image/*" style="display:none" onchange="handleGatePhoto(event)"><input type="password" id="uPass" class="input" placeholder="Mot de passe *"><button onclick="register()" style="width:100%;padding:14px;background:gold;border:0;border-radius:10px;font-weight:900;color:#000;margin-top:8px">✅ CRÉER MON COMPTE</button></div></div>
-<div class="header"><div style="display:flex;justify-content:space-between;align-items:center"><div style="display:flex;gap:8px;align-items:center"><img id="logoHeader" class="b" src="https://via.placeholder.com/42?text=B"><b style="color:gold" id="storeName">BOUBA STORE</b></div><div style="display:flex;gap:6px;align-items:center"><img id="headerUserPic" class="userBadge" src="https://via.placeholder.com/32" style="display:none" onclick="openPage('profilePage')"><span onclick="openPage('panierPage')">👜(<span id="cartC">0</span>)</span></div></div><div class="search">🔍<input id="s" placeholder="Rechercher..." oninput="doSearch()"></div><div class="cats"><button class="cat active" onclick="filterCat(this,'all')">Tous</button><button class="cat" onclick="filterCat(this,'Femme')">Femme</button><button class="cat" onclick="filterCat(this,'Homme')">Homme</button><button class="cat" onclick="filterCat(this,'Ensembles')">Ensembles</button></div></div>
-<div class="banner" id="bannerText">LIVRAISON 24H ABIDJAN • WAVE • ORANGE MONEY • OFFLINE OK</div><div class="grid" id="grid"></div>
-<div id="miniCart"><h3 style="color:gold">✅ Article sélectionné</h3><div id="miniContent" style="margin:10px 0"></div><div style="display:flex;gap:8px"><button onclick="openPage('panierPage');closeMini()" style="flex:1;padding:12px;background:transparent;border:1px solid gold;color:gold;border-radius:8px">Voir Panier</button><button onclick="commander()" style="flex:1;padding:12px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">Commander</button></div></div>
-<div class="adminBtn" onclick="openPage('adminPage')">⚙️</div><div class="shareFloat" onclick="openPage('sharePage')">📤</div><div id="iaBtn" onclick="toggleIA()">🤖</div>
-<div id="iaChat"><div class="iaHead"><span>🤖 BOUBA IA</span><span onclick="toggleIA()">✕</span></div><div class="iaMsgs" id="iaMsgs"><div class="msg bot">Salam BOSS! Je marche maintenant! 🚀</div></div><div class="iaInput"><input id="iaInput" placeholder="Ex: voir panier..." onkeypress="if(event.key==='Enter')sendIA()"><button onclick="sendIA()" style="background:gold;border:0;border-radius:50%;width:38px;height:38px">➤</button></div></div>
-<div id="sharePage" class="page"><h2 style="color:gold">📤 PARTAGER</h2><div class="ctrl" style="border-color:gold"><div class="onglet4"><button class="btn4" style="background:#25D366" onclick="shareNetwork('whatsapp')">WhatsApp</button><button class="btn4" style="background:#1877F2" onclick="shareNetwork('facebook')">Facebook</button><button class="btn4" style="background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)" onclick="shareNetwork('instagram')">Instagram</button><button class="btn4" style="background:#000;border:1px solid #444" onclick="shareNetwork('tiktok')">TikTok</button></div><div style="display:flex;gap:6px;margin-top:12px"><button onclick="copyCatalog()" style="flex:1;padding:12px;background:#333;color:#fff;border-radius:8px;border:1px solid #555">Copier</button><button onclick="shareNative()" style="flex:1;padding:12px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">Partager</button></div></div><button onclick="closePage('sharePage')" style="width:100%;margin-top:12px;padding:14px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Fermer</button></div>
-<div id="profilePage" class="page"><h2 style="color:gold">👤 MON COMPTE</h2><div class="ctrl" style="text-align:center;border-color:gold"><img id="profilePicBig" src="https://via.placeholder.com/120" class="profilePic" style="width:120px;height:120px"><h3 id="profileName" style="color:gold">Nom Client</h3><p id="profilePhone" style="font-size:12px;color:#aaa">WhatsApp</p><p id="profileCity" style="font-size:12px;color:#aaa">Ville</p><div style="display:flex;gap:6px;margin-top:10px"><button onclick="document.getElementById('profilePhotoInput').click()" style="flex:1;padding:10px;background:#222;border:1px solid gold;color:gold;border-radius:8px">Changer Photo</button><button onclick="editProfile()" style="flex:1;padding:10px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">Modifier</button></div><input type="file" id="profilePhotoInput" accept="image/*" style="display:none" onchange="handleProfilePhoto(event)"></div><div class="ctrl"><h4 style="color:gold">MODIFIER INFOS</h4><input id="editName" class="input" placeholder="Nom complet"><input id="editPhone" class="input" placeholder="WhatsApp"><input id="editCity" class="input" placeholder="Ville"><button onclick="saveProfile()" style="width:100%;padding:12px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">Sauver</button></div><button onclick="logout()" style="width:100%;padding:12px;background:#300;border:1px solid #f44;color:#f44;border-radius:8px">Déconnexion</button><button onclick="closePage('profilePage')" style="width:100%;margin-top:8px;padding:12px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Fermer</button></div>
-<div id="adminPage" class="page"><h2 style="color:gold">⚙️ CONTROLE</h2><div class="ctrl"><h4 style="color:gold">CLIENTS</h4><div id="clientsList" style="font-size:11px"></div></div><div class="ctrl"><h4>LOGO</h4><img id="logoAdmin" src="https://via.placeholder.com/100" style="width:100px;height:100px;border-radius:50%;border:2px solid gold;display:block;margin:8px auto"><input id="logoLink" class="input" placeholder="Lien logo"><div style="display:flex;gap:6px"><button onclick="document.getElementById('logoInput').click()" style="flex:1;padding:10px;background:#222;border:1px solid gold;color:gold;border-radius:8px">Logo</button><button onclick="saveLogoLink()" style="flex:1;padding:10px;background:gold;border:0;border-radius:8px">OK</button></div><input type="file" id="logoInput" accept="image/*" style="display:none" onchange="setLogo(event)"></div><div class="ctrl"><h4>NOM & BANNIERE</h4><input id="ctrlName" class="input" placeholder="Nom boutique"><input id="ctrlBanner" class="input" placeholder="Bannière"><button onclick="saveStoreInfo()" style="width:100%;padding:10px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">Sauver</button></div><div class="ctrl"><h4>PRODUIT</h4><input id="pName" class="input" placeholder="Nom"><input id="pPrice" class="input" type="number" placeholder="Prix"><select id="pCat" class="input"><option>Femme</option><option>Homme</option><option>Ensembles</option></select><input id="pImg" class="input" placeholder="Lien image"><button onclick="document.getElementById('fileInput').click()" style="width:100%;padding:10px;background:#222;border:1px solid #555;color:#fff;border-radius:8px">Photo</button><input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(event)"><div id="preview"></div><button onclick="addProduct()" style="width:100%;padding:12px;background:gold;border:0;border-radius:10px;font-weight:900;color:#000;margin-top:6px">AJOUTER</button></div><button onclick="closePage('adminPage')" style="width:100%;margin-top:10px;padding:12px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Fermer</button></div>
-<div id="panierPage" class="page"><h2 style="color:gold">👜 MON PANIER</h2><div id="panierList"></div><div id="total" style="color:gold;font-weight:900;margin-top:12px;font-size:16px"></div><div style="display:flex;gap:6px;margin-top:10px"><button onclick="viderPanier()" style="flex:1;padding:12px;background:#222;border:1px solid #555;color:#fff;border-radius:8px">Vider</button><button onclick="closePage('panierPage')" style="flex:1;padding:12px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Continuer</button></div><button onclick="commander()" style="width:100%;padding:14px;background:#25D366;border:0;border-radius:10px;font-weight:900;color:#fff;margin-top:10px">COMMANDER WHATSAPP</button></div>
-<div class="nav"><div onclick="closeAll()">🏠<br>Accueil</div><div onclick="openPage('adminPage')">⚙️<br>Controle</div><div onclick="openPage('sharePage')" style="color:gold">📤<br>Partager</div><div onclick="openPage('panierPage')">👜<br>Panier</div><div onclick="openPage('profilePage')">👤<br>Compte</div></div>
-<script>
-let products=JSON.parse(localStorage.getItem('bouba_products')||'null')||[{id:1,name:"Jogging Vert Imperial",price:25000,img:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500",cat:"Ensembles"},{id:2,name:"Jogging Noir Luxe",price:25000,img:"https://images.unsplash.com/photo-1578681994506-b8f463449011?w=500",cat:"Ensembles"},{id:3,name:"Ensemble Femme Jaune",price:22000,img:"https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500",cat:"Femme"}];
-let cart=JSON.parse(localStorage.getItem('bouba_cart')||'[]');let tempImg="";let tempGatePhoto="";let tempProfilePhoto="";let currentUser=JSON.parse(localStorage.getItem('bouba_current')||'null');let allUsers=JSON.parse(localStorage.getItem('bouba_users')||'[]');
-function applyLogo(s){localStorage.setItem('bouba_logo',s);document.querySelectorAll('img.b').forEach(e=>e.src=s);document.getElementById('logoAdmin').src=s;}
-function setLogo(e){let r=new FileReader();r.onload=function(ev){applyLogo(ev.target.result);};r.readAsDataURL(e.target.files[0]);}
-function saveLogoLink(){let l=document.getElementById('logoLink').value;if(l)applyLogo(l);}
-let sv=localStorage.getItem('bouba_logo');if(sv)applyLogo(sv);
-function saveStoreInfo(){let n=document.getElementById('ctrlName').value;let b=document.getElementById('ctrlBanner').value;if(n){localStorage.setItem('bouba_name',n);document.getElementById('storeName').textContent=n;}if(b){localStorage.setItem('bouba_banner',b);document.getElementById('bannerText').textContent=b;}alert('Sauvé!');}
-function handleGatePhoto(e){let r=new FileReader();r.onload=function(ev){tempGatePhoto=ev.target.result;document.getElementById('gatePreview').src=ev.target.result;};r.readAsDataURL(e.target.files[0]);}
-function handleProfilePhoto(e){let r=new FileReader();r.onload=function(ev){tempProfilePhoto=ev.target.result;document.getElementById('profilePicBig').src=ev.target.result;document.getElementById('headerUserPic').src=ev.target.result;if(currentUser){currentUser.photo=ev.target.result;localStorage.setItem('bouba_current',JSON.stringify(currentUser));saveProfilePic();}};r.readAsDataURL(e.target.files[0]);}
-function saveProfilePic(){for(let i=0;i<allUsers.length;i++){if(allUsers[i].phone==currentUser.phone)allUsers[i].photo=currentUser.photo;}localStorage.setItem('bouba_users',JSON.stringify(allUsers));}
-function checkGate(){if(currentUser){document.getElementById('gate').style.display='none';showUserHeader();loadProfile();}else{document.getElementById('gate').style.display='flex';}}
-function showUserHeader(){let pic=document.getElementById('headerUserPic');if(currentUser&&currentUser.photo){pic.src=currentUser.photo;pic.style.display='block';}}
-function register(){let n=document.getElementById('uName').value;let ph=document.getElementById('uPhone').value;let city=document.getElementById('uCity').value;let pass=document.getElementById('uPass').value;if(!n||!ph||!city||!pass){alert('Remplis tout BOSS!');return;}let photo=tempGatePhoto||'https://ui-avatars.com/api/?name='+encodeURIComponent(n)+'&background=d4af37&color=000';currentUser={name:n,phone:ph,city:city,pass:pass,photo:photo,date:Date.now()};let exists=allUsers.find(u=>u.phone==ph);if(!exists){allUsers.push(currentUser);}localStorage.setItem('bouba_current',JSON.stringify(currentUser));localStorage.setItem('bouba_users',JSON.stringify(allUsers));checkGate();render(products);updateClientsList();}
-function loadProfile(){if(!currentUser)return;document.getElementById('profileName').textContent=currentUser.name;document.getElementById('profilePhone').textContent=currentUser.phone;document.getElementById('profileCity').textContent=currentUser.city;document.getElementById('profilePicBig').src=currentUser.photo;document.getElementById('editName').value=currentUser.name;document.getElementById('editPhone').value=currentUser.phone;document.getElementById('editCity').value=currentUser.city;}
-function saveProfile(){let n=document.getElementById('editName').value;let ph=document.getElementById('editPhone').value;let city=document.getElementById('editCity').value;if(!n||!ph||!city){alert('Remplis tout');return;}currentUser.name=n;currentUser.phone=ph;currentUser.city=city;if(tempProfilePhoto)currentUser.photo=tempProfilePhoto;localStorage.setItem('bouba_current',JSON.stringify(currentUser));let idx=allUsers.findIndex(u=>u.phone==currentUser.phone);if(idx>-1)allUsers[idx]=currentUser;localStorage.setItem('bouba_users',JSON.stringify(allUsers));loadProfile();showUserHeader();alert('Modifié ✅');updateClientsList();}
-function logout(){if(confirm('Déconnexion?')){localStorage.removeItem('bouba_current');currentUser=null;document.getElementById('gate').style.display='flex';document.getElementById('headerUserPic').style.display='none';}}
-function updateClientsList(){let el=document.getElementById('clientsList');let h='';for(let i=0;i<allUsers.length;i++){let u=allUsers[i];h+='<div style="display:flex;gap:8px;align-items:center;background:#111;padding:6px;border-radius:8px;margin-bottom:4px"><img src="'+(u.photo||'https://via.placeholder.com/35')+'" style="width:35px;height:35px;border-radius:50%;border:1px solid gold"><div><div style="font-weight:800">'+u.name+'</div><div style="font-size:10px;color:#aaa">'+u.phone+' - '+u.city+'</div></div></div>';}el.innerHTML=h||'Aucun client';}
-function save(){localStorage.setItem('bouba_products',JSON.stringify(products));localStorage.setItem('bouba_cart',JSON.stringify(cart));updateCartCount();}
-function render(list){let h='';for(let i=0;i<list.length;i++){let p=list[i];h+='<div class="card"><img src="'+p.img+'"><div class="info"><div style="font-size:11px;font-weight:800;he
+
+<div id="gate">
+<div class="gateBox">
+<img id="gatePreview" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="profilePic">
+<h1 style="color:gold">BOUBA STORE</h1>
+<p style="font-size:11px;color:#aaa;margin-bottom:10px">PRINCIPESSA ROMANA • ABIDJAN</p>
+<input id="uName" class="input" placeholder="Nom complet *">
+<input id="uPhone" class="input" placeholder="WhatsApp *" type="tel">
+<input id="uCity" class="input" placeholder="Ville *">
+<button onclick="document.getElementById('uPhoto').click()" style="width:100%;padding:10px;background:#222;border:1px dashed gold;color:gold;border-radius:8px;margin-bottom:10px">📷 Photo de Profil *</button>
+<input type="file" id="uPhoto" accept="image/*" style="display:none" onchange="handleGatePhoto(event)">
+<input type="password" id="uPass" class="input" placeholder="Mot de passe *">
+<button onclick="register()" style="width:100%;padding:14px;background:gold;border:0;border-radius:10px;font-weight:900;color:#000;margin-top:8px">✅ CRÉER MON COMPTE / ME CONNECTER</button>
+</div>
+</div>
+
+<div class="header">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div style="display:flex;gap:8px;align-items:center">
+<img id="logoHeader" class="b" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Logo">
+<b style="color:gold" id="storeName">BOUBA STORE</b>
+</div>
+<div style="display:flex;gap:6px;align-items:center">
+<img id="headerUserPic" class="userBadge" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" style="display:none" onclick="openPage('profilePage')">
+<span onclick="openPage('panierPage')">👜(<span id="cartC">0</span>)</span>
+</div>
+</div>
+<div class="search">🔍<input id="s" placeholder="Rechercher..." oninput="doSearch()"></div>
+<div class="cats">
+<button class="cat active" onclick="filterCat(this,'all')">Tous</button>
+<button class="cat" onclick="filterCat(this,'Femme')">Femme</button>
+<button class="cat" onclick="filterCat(this,'Homme')">Homme</button>
+<button class="cat" onclick="filterCat(this,'Ensembles')">Ensembles</button>
+</div>
+</div><div class="banner" id="bannerText">SPQR • IMPERIUM • LIVRAISON 24H ABIDJAN • WAVE • ORANGE MONEY</div>
+<div id="net">⏳ Connexion...</div>
+<div class="grid" id="grid"></div>
+
+<div id="miniCart">
+<h3 style="color:gold">✅ Article ajouté</h3>
+<div id="miniContent" style="margin:10px 0"></div>
+<div style="display:flex;gap:8px">
+<button onclick="openPage('panierPage');closeMini()" style="flex:1;padding:12px;background:transparent;border:1px solid gold;color:gold;border-radius:8px">Voir Panier</button>
+<button onclick="commander()" style="flex:1;padding:12px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">Commander</button>
+</div>
+</div>
+<div class="adminBtn" onclick="openPage('adminPage')">⚙️</div>
+<div class="shareFloat" onclick="openPage('sharePage')">📤</div>
+
+<div id="sharePage" class="page">
+<h2 style="color:gold">📤 PARTAGER</h2>
+<div class="ctrl" style="border-color:gold">
+<div class="onglet4">
+<button class="btn4" style="background:#25D366" onclick="shareNetwork('whatsapp')"><span>💬</span>WhatsApp</button>
+<button class="btn4" style="background:#1877F2" onclick="shareNetwork('facebook')"><span>📘</span>Facebook</button>
+<button class="btn4" style="background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)" onclick="shareNetwork('instagram')"><span>📸</span>Instagram</button>
+<button class="btn4" style="background:#000;border:1px solid #444" onclick="shareNetwork('tiktok')"><span>🎵</span>TikTok</button>
+</div>
+<div style="display:flex;gap:6px;margin-top:12px">
+<button onclick="copyCatalog()" style="flex:1;padding:12px;background:#333;color:#fff;border-radius:8px;border:1px solid #555">🔗 Copier Lien</button>
+<button onclick="shareNative()" style="flex:1;padding:12px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">📲 Partager</button>
+</div>
+</div>
+<button onclick="closePage('sharePage')" style="width:100%;margin-top:12px;padding:14px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Fermer</button>
+</div>
+
+<div id="profilePage" class="page">
+<h2 style="color:gold">👤 MON COMPTE</h2>
+<div class="ctrl" style="text-align:center;border-color:gold">
+<img id="profilePicBig" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="profilePic" style="width:120px;height:120px">
+<h3 id="profileName" style="color:gold">Nom Client</h3>
+<p id="profilePhone" style="font-size:12px;color:#aaa">WhatsApp</p>
+<p id="profileCity" style="font-size:12px;color:#aaa">Ville</p>
+<div style="display:flex;gap:6px;margin-top:10px">
+<button onclick="document.getElementById('profilePhotoInput').click()" style="flex:1;padding:10px;background:#222;border:1px solid gold;color:gold;border-radius:8px">📷 Changer Photo</button>
+<button onclick="document.getElementById('editName').focus()" style="flex:1;padding:10px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">✏️ Modifier</button>
+</div>
+<input type="file" id="profilePhotoInput" accept="image/*" style="display:none" onchange="handleProfilePhoto(event)">
+</div>
+<div class="ctrl">
+<h4 style="color:gold">📝 MODIFIER INFOS</h4>
+<input id="editName" class="input" placeholder="Nom complet">
+<input id="editPhone" class="input" placeholder="WhatsApp">
+<input id="editCity" class="input" placeholder="Ville">
+<button onclick="saveProfile()" style="width:100%;padding:12px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">✅ Sauver</button>
+</div>
+<button onclick="logout()" style="width:100%;padding:12px;background:#300;border:1px solid #f44;color:#f44;border-radius:8px">🚪 Déconnexion</button>
+<button onclick="closePage('profilePage')" style="width:100%;margin-top:8px;padding:12px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Fermer</button>
+</div>
+
+<div id="adminPage" class="page">
+<h2 style="color:gold">⚙️ CONTROLE + CLIENTS</h2>
+<div class="ctrl"><h4 style="color:gold">🧾 COMMANDES</h4><div id="ordersList" style="font-size:11px"></div></div>
+<div class="ctrl"><h4 style="color:gold">👥 CLIENTS INSCRITS</h4><div id="clientsList" style="font-size:11px"></div></div>
+<div class="ctrl"><h4>🏆 LOGO</h4><img id="logoAdmin" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" style="width:100px;height:100px;border-radius:50%;border:2px solid gold;display:block;margin:8px auto;object-fit:cover"><div style="display:flex;gap:6px"><button onclick="document.getElementById('logoInput').click()" style="flex:1;padding:10px;background:#222;border:1px solid gold;color:gold;border-radius:8px">📷 Changer le logo</button></div><input type="file" id="logoInput" accept="image/*" style="display:none" onchange="setLogo(event)"></div>
+<div class="ctrl"><h4>🏪 NOM, BANNIERE, WHATSAPP</h4><input id="ctrlName" class="input" placeholder="Nom boutique"><input id="ctrlBanner" class="input" placeholder="Bannière"><input id="ctrlWa" class="input" type="tel" placeholder="N° WhatsApp commandes (ex: 2250700000000)"><button onclick="saveStoreInfo()" style="width:100%;padding:10px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">✅ Sauver</button></div>
+<div class="ctrl"><h4>➕ PRODUIT</h4><input id="pName" class="input" placeholder="Nom"><input id="pPrice" class="input" type="number" placeholder="Prix"><select id="pCat" class="input"><option>Femme</option><option>Homme</option><option>Ensembles</option></select><input id="pImg" class="input" placeholder="Lien image (ou prends une photo)"><button onclick="document.getElementById('fileInput').click()" style="width:100%;padding:10px;background:#222;border:1px solid #555;color:#fff;border-radius:8px">📷 Photo</button><input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(event)"><div id="preview"></div><button onclick="addProduct()" style="width:100%;padding:12px;background:gold;border:0;border-radius:10px;font-weight:900;color:#000;margin-top:6px">✅ AJOUTER</button></div>
+<button onclick="closePage('adminPage')" style="width:100%;margin-top:10px;padding:12px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Fermer</button>
+</div>
+
+<div id="panierPage" class="page">
+<h2 style="color:gold">👜 MON PANIER</h2>
+<div id="panierList"></div>
+<div id="total" style="color:gold;font-weight:900;margin-top:12px;font-size:16px"></div>
+<div style="display:flex;gap:6px;margin-top:10px"><button onclick="viderPanier()" style="flex:1;padding:12px;background:#222;border:1px solid #555;color:#fff;border-radius:8px">🗑️ Vider</button><button onclick="closePage('panierPage')" style="flex:1;padding:12px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Continuer</button></div>
+<button onclick="commander()" style="width:100%;padding:14px;background:#25D366;border:0;border-radius:10px;font-weight:900;color:#fff;margin-top:10px">✅ COMMANDER WHATSAPP</button>
+</div>
+
+<div class="nav">
+<div onclick="closeAll()">🏠<br>Accueil</div>
+<div onclick="openPage('adminPage')">⚙️<br>Controle</div>
+<div onclick="openPage('sharePage')" style="color:gold">📤<br>Partager</div>
+<div onclick="openPage('panierPage')">👜<br>Panier</div>
+<div onclick="openPage('profilePage')">👤<br>Compte</div>
+</div><script>
+/* ====== À CHANGER ====== */
+const ADMIN_PIN="1234";            // ton code secret admin
+const DEFAULT_WA="2250700000000";  // ton numéro WhatsApp (modifiable aussi dans Controle)
+const FB_CFG={
+ apiKey:"AIzaSyDRD5Log6Nd5pEB7jctQQt-IDwC88culCk",
+ authDomain:"bouba-51a6f.firebaseapp.com",
+ databaseURL:"https://bouba-51a6f-default-rtdb.europe-west1.firebasedatabase.app",
+ projectId:"bouba-51a6f",
+ storageBucket:"bouba-51a6f.firebasestorage.app",
+ messagingSenderId:"267309248026",
+ appId:"1:267309248026:web:8a43e3dfc934c45adeeba3"
+};
+/* ======================= */
+
+const $=id=>document.getElementById(id);
+const LS=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}};
+const SV=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){alert('Mémoire du téléphone pleine')}};
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeImg=u=>/^(https?:|data:image\/)/.test(u||'')?esc(u):'';
+const fmt=n=>Number(n||0).toLocaleString('fr-FR');
+const okId=x=>/^[\w-]+$/.test(x||'');
+
+let S=LS('b_state',null)||{info:{},products:{},users:{},orders:{}};
+let outbox=LS('b_out',[]);
+let cart=LS('b_cart',[]);
+let me=LS('b_me',null);
+let isAdmin=false,cat='all',q='',online=false;
+let tmpGate='',tmpProd='',adminSub=false;
+let fb=null,flushing=false;
+
+function save(){SV('b_state',S);SV('b_out',outbox)}
+
+/* ---------- écriture locale + file d'attente ---------- */
+function setLocal(path,val){
+ const p=path.split('/');let o=S;
+ for(let i=0;i<p.length-1;i++){o=o[p[i]]=o[p[i]]||{}}
+ const k=p[p.length-1];
+ if(val===null)delete o[k];else o[k]=val;
+}
+function write(path,val){
+ setLocal(path,val);
+ outbox.push({path:path,val:val});
+ save();renderAll();flush();
+}
+async function flush(){
+ if(!fb||!online||flushing)return;
+ flushing=true;
+ try{
+  while(outbox.length){
+   const o=outbox[0];
+   const r=fb.D.ref(fb.db,o.path);
+   if(o.val===null)await fb.D.remove(r);else await fb.D.set(r,o.val);
+   outbox.shift();save();setNet();
+  }
+ }catch(e){console.log('flush',e)}
+ flushing=false;setNet();
+}
+
+/* ---------- Firebase (chargé sans bloquer le site) ---------- */
+async function initFB(){
+ try{
+  const V="12.19.0";
+  const A=await import("https://www.gstatic.com/firebasejs/"+V+"/firebase-app.js");
+  const D=await import("https://www.gstatic.com/firebasejs/"+V+"/firebase-database.js");
+  const app=A.initializeApp(FB_CFG);
+  const db=D.getDatabase(app);
+  fb={db:db,D:D};
+  D.onValue(D.ref(db,'.info/connected'),s=>{online=!!s.val();setNet();if(online)flush()});
+  sub('info');sub('products');
+  if(isAdmin)subAdmin();
+ }catch(e){console.log('Mode local (Firebase indisponible)',e);setNet()}
+}
+function sub(root){
+ fb.D.onValue(fb.D.ref(fb.db,root),s=>{
+  S[root]=s.val()||{};
+  outbox.filter(o=>o.path.split('/')[0]===root).forEach(o=>setLocal(o.path,o.val));
+  save();renderAll();
+ });
+}
+function subAdmin(){
+ if(!fb||adminSub)return;adminSub=true;sub('users');sub('orders');
+}
+function setNet(){
+ const n=outbox.length;
+ $('net').innerHTML=online
+  ?'<span style="color:#25D366">🟢 EN DIRECT</span>'+(n?' • envoi de '+n+'…':'')
+  :'<span style="color:orange">🟠 HORS LIGNE</span>'+(n?' • '+n+' action(s) en attente (envoi auto)':' • tout est sauvegardé');
+}
+window.addEventListener('online',()=>{setTimeout(flush,1500)});
+window.addEventListener('offline',()=>{online=false;setNet()});
+
+/* ---------- utilitaires ---------- */
+function compress(file,max,cb){
+ if(!file)return;
+ const r=new FileReader();
+ r.onload=e=>{const i=new Image();i.onload=()=>{
+  const k=Math.min(1,max/Math.max(i.width,i.height));
+  const c=document.createElement('canvas');c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);
+  c.getContext('2d').drawImage(i,0,0,c.width,c.height);
+  cb(c.toDataURL('image/jpeg',0.6));
+ };i.src=e.target.result};
+ r.readAsDataURL(file);
+}
+async function hash(p){
+ try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('bouba'+p));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+ catch(e){return btoa(unescape(encodeURIComponent('bouba'+p)))}
+}
+
+/* ---------- navigation ---------- */
+function closeAll(){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))}
+function closePage(id){$(id).classList.remove('active')}
+function openPage(id){
+ if(id==='adminPage'&&!isAdmin){
+  const c=prompt('Code admin :');
+  if(c!==ADMIN_PIN){if(c!==null)alert('Code incorrect');return}
+  isAdmin=true;subAdmin();renderAll();
+ }
+ closeAll();$(id).classList.add('active');
+ if(id==='panierPage')renderCart();
+}
+function closeMini(){$('miniCart').classList.remove('show')}
+
+/* ---------- boutique ---------- */
+function applyInfo(){
+ const i=S.info||{};
+ if(i.name){$('storeName').textContent=i.name;document.title=i.name}
+ if(i.banner)$('bannerText').textContent=i.banner;
+ if(i.logo){document.querySelectorAll('img.b').forEach(x=>x.src=i.logo);$('logoAdmin').src=i.logo}
+}
+function saveStoreInfo(){
+ const n=$('ctrlName').value.trim(),b=$('ctrlBanner').value.trim(),w=$('ctrlWa').value.replace(/\D/g,'');
+ const info=Object.assign({},S.info||{});
+ if(n)info.name=n;if(b)info.banner=b;if(w)info.whatsapp=w;
+ write('info',info);alert('Sauvé ✅');
+}
+function setLogo(e){compress(e.target.files[0],200,d=>write('info/logo',d))}
+
+function doSearch(){q=$('s').value.toLowerCase();render()}
+function filterCat(btn,c){
+ cat=c;document.querySelectorAll('.cat').forEach(x=>x.classList.remove('active'));
+ btn.classList.add('active');render();
+}
+function render(){
+ const l=Object.values(S.products||{})
+  .filter(p=>p&&okId(p.id)&&(cat==='all'||p.cat===cat)&&(!q||(p.name||'').toLowerCase().includes(q)))
+  .sort((a,b)=>(b.date||0)-(a.date||0));
+ $('grid').innerHTML=l.length?l.map(p=>
+  '<div class="card"><img loading="lazy" src="'+safeImg(p.img)+'" alt=""><div class="info">'+
+  '<div style="font-size:13px">'+esc(p.name)+'</div>'+
+  '<div style="color:gold;font-weight:900;margin:4px 0">'+fmt(p.price)+' F</div>'+
+  '<button class="btn" onclick="addCart(\''+p.id+'\')">🛒 Ajouter</button>'+
+  '<button class="shareBtn" onclick="shareProd(\''+p.id+'\')">💬 Partager</button>'+
+  (isAdmin?'<button class="shareBtn" style="background:#a00" onclick="delProduct(\''+p.id+'\')">🗑️ Supprimer</button>':'')+
+  '</div></div>').join('')
+  :'<p style="grid-column:1/3;text-align:center;color:#aaa;padding:30px">Aucun produit pour le moment</p>';
+}
+function handleFile(e){
+ compress(e.target.files[0],700,d=>{tmpProd=d;$('preview').innerHTML='<img src="'+d+'" style="width:100%;border-radius:8px;margin:8px 0">'});
+}
+function addProduct(){
+ const name=$('pName').value.trim(),price=Number($('pPrice').value),c=$('pCat').value;
+ const img=tmpProd||$('pImg').value.trim();
+ if(!name||!price||!img){alert('Nom, prix et image obligatoires');return}
+ const id='p'+Date.now();
+ write('products/'+id,{id:id,name:name,price:price,cat:c,img:img,date:Date.now()});
+ $('pName').value='';$('pPrice').value='';$('pImg').value='';$('preview').innerHTML='';tmpProd='';
+ alert('Produit ajouté ✅');
+}
+function delProduct(id){if(confirm('Supprimer ce produit ?'))write('products/'+id,null)}
+
+/* ---------- panier & commande ---------- */
+function cartItems(){return cart.map(c=>({p:(S.products||{})[c.id],qty:c.qty})).filter(x=>x.p)}
+function addCart(id){
+ const p=S.products[id];if(!p)return;
+ const f=cart.find(c=>c.id===id);
+ if(f)f.qty++;else cart.push({id:id,qty:1});
+ SV('b_cart',cart);renderCart();
+ $('miniContent').textContent=p.name+' — '+fmt(p.price)+' F';
+ $('miniCart').classList.add('show');
+ clearTimeout(window._mt);window._mt=setTimeout(closeMini,4000);
+}
+function qty(id,d){
+ const f=cart.find(c=>c.id===id);if(!f)return;
+ f.qty+=d;if(f.qty<=0)cart=cart.filter(c=>c.id!==id);
+ SV('b_cart',cart);renderCart();
+}
+function viderPanier(){cart=[];SV('b_cart',cart);renderCart()}
+function renderCart(){
+ const it=cartItems();
+ $('cartC').textContent=it.reduce((s,x)=>s+x.qty,0);
+ $('panierList').innerHTML=it.length?it.map(x=>
+  '<div class="panierItem"><img src="'+safeImg(x.p.img)+'"><div style="flex:1"><div>'+esc(x.p.name)+'</div><div style="color:gold">'+fmt(x.p.price)+' F</div></div>'+
+  '<div><button class="qtyBtn" onclick="qty(\''+x.p.id+'\',-1)">−</button><span class="qtyNum">'+x.qty+'</span><button class="qtyBtn" onclick="qty(\''+x.p.id+'\',1)">+</button></div></div>').join('')
+  :'<p style="color:#aaa;text-align:center;padding:20px">Panier vide</p>';
+ $('total').textContent=it.length?'TOTAL : '+fmt(it.reduce((s,x)=>s+x.p.price*x.qty,0))+' F':'';
+}
+function commander(){
+ const it=cartItems();
+ if(!it.length){alert('Panier vide');return}
+ const tot=it.reduce((s,x)=>s+x.p.price*x.qty,0);
+ const id='o'+Date.now();
+ write('orders/'+id,{id:id,date:Date.now(),
+  client:me?{name:me.name,phone:me.phone,city:me.city}:null,
+  items:it.map(x=>({name:x.p.name,price:x.p.price,qty:x.qty})),total:tot});
+ let msg='🛍️ NOUVELLE COMMANDE\n';
+ it.forEach(x=>{msg+='• '+x.p.name+' x'+x.qty+' = '+fmt(x.p.price*x.qty)+' F\n'});
+ msg+='\nTOTAL : '+fmt(tot)+' F';
+ if(me)msg+='\n👤 '+me.name+'\n📞 '+me.phone+'\n📍 '+me.city;
+ cart=[];SV('b_cart',cart);renderCart();closeMini();
+ const wa=((S.info||{}).whatsapp||DEFAULT_WA).replace(/\D/g,'');
+ if(!navigator.onLine)alert('Hors ligne : commande enregistrée. Elle sera envoyée automatiquement dès le retour du réseau.');
+ window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg),'_blank');
+}
+
+/* ---------- compte client ---------- */
+function handleGatePhoto(e){compress(e.target.files[0],300,d=>{tmpGate=d;$('gatePreview').src=d})}
+function checkGate(){
+ if(me){$('gate').style.display='none';showUserHeader();loadProfile()}
+ else $('gate').style.display='flex';
+}
+function showUserHeader(){const p=$('headerUserPic');if(me&&me.photo){p.src=me.photo;p.style.display='block'}else p.style.display='none'}
+async function register(){
+ const n=$('uName').value.trim(),ph=$('uPhone').value.trim(),city=$('uCity').value.trim(),pass=$('uPass').value;
+ if(!n||!ph||!city||!pass){alert('Remplis tout BOSS !');return}
+ const key=ph.replace(/\D/g,'');
+ if(key.length<8){alert('Numéro WhatsApp invalide');return}
+ const h=await hash(pass);
+ let ex=S.users[key];
+ if(!ex&&fb&&online){try{const s=await fb.D.get(fb.D.ref(fb.db,'users/'+key));ex=s.val()}catch(e){}}
+ if(ex){
+  if(ex.h!==h){alert('Mot de passe incorrect');return}
+  me=ex;
+ }else{
+  if(!tmpGate){alert('Ajoute ta photo BOSS ! 📷');return}
+  me={name:n,phone:ph,city:city,photo:tmpGate,h:h,date:Date.now()};
+  write('users/'+key,me);
+ }
+ SV('b_me',me);checkGate();
+}
+function loadProfile(){
+ if(!me)return;
+ $('profileName').textContent=me.name;$('profilePhone').textContent=me.phone;$('profileCity').textContent=me.city;
+ $('profilePicBig').src=me.photo||'';
+ $('editName').value=me.name;$('editPhone').value=me.phone;$('editCity').value=me.city;
+}
+function saveProfile(){
+ const n=$('editName').value.trim(),ph=$('editPhone').value.trim(),c=$('editCity').value.trim();
+ if(!n||!ph||!c){alert('Remplis tout');return}
+ const oldKey=me.phone.replace(/\D/g,''),newKey=ph.replace(/\D/g,'');
+ me=Object.assign({},me,{name:n,phone:ph,city:c});
+ if(oldKey!==newKey)write('users/'+oldKey,null);
+ write('users/'+newKey,me);
+ SV('b_me',me);loadProfile();showUserHeader();alert('Compte modifié ✅');
+}
+function handleProfilePhoto(e){
+ compress(e.target.files[0],300,d=>{
+  me.photo=d;write('users/'+me.phone.replace(/\D/g,''),me);
+  SV('b_me',me);loadProfile();showUserHeader();
+ });
+}
+function logout(){
+ if(confirm('Déconnexion BOSS ?')){localStorage.removeItem('b_me');me=null;closeAll();checkGate()}
+}
+
+/* ---------- admin : clients & commandes ---------- */
+function renderClients(){
+ const l=Object.values(S.users||{}).sort((a,b)=>(b.date||0)-(a.date||0));
+ $('clientsList').innerHTML=l.length?l.map(u=>
+  '<div class="row"><img src="'+safeImg(u.photo)+'"><div style="flex:1"><b>'+esc(u.name)+'</b><br>📞 '+esc(u.phone)+' • 📍 '+esc(u.city)+'</div></div>').join('')
+  :'<span style="color:#aaa">Aucun client</span>';
+}
+function renderOrders(){
+ const l=Object.values(S.orders||{}).sort((a,b)=>(b.date||0)-(a.date||0));
+ $('ordersList').innerHTML=l.length?l.map(o=>
+  '<div class="row" style="display:block"><b>'+esc(o.client?o.client.name:'?')+'</b> • '+esc(o.client?o.client.phone:'')+
+  '<br>'+(o.items||[]).map(i=>esc(i.name)+' x'+esc(i.qty)).join(', ')+
+  '<br><span style="color:gold">'+fmt(o.total)+' F</span> • '+new Date(o.date).toLocaleString('fr-FR')+'</div>').join('')
+  :'<span style="color:#aaa">Aucune commande</span>';
+}
+
+/* ---------- partage ---------- */
+const shareText=()=>'👑 Découvre '+((S.info||{}).name||'BOUBA STORE')+' : '+location.href;
+function copy(t){
+ if(navigator.clipboard)navigator.clipboard.writeText(t).then(()=>alert('Lien copié ✅'),()=>prompt('Copie ce lien :',t));
+ else prompt('Copie ce lien :',t);
+}
+function shareNetwork(n){
+ const u=encodeURIComponent(location.href),t=encodeURIComponent(shareText());
+ if(n==='whatsapp')window.open('https://wa.me/?text='+t,'_blank');
+ else if(n==='facebook')window.open('https://www.facebook.com/sharer/sharer.php?u='+u,'_blank');
+ else{copy(location.href);alert('Lien copié, colle-le dans '+(n==='instagram'?'Instagram':'TikTok'))}
+}
+function copyCatalog(){copy(location.href)}
+function shareNative(){
+ if(navigator.share)navigator.share({title:'BOUBA STORE',text:shareText(),url:location.href}).catch(()=>{});
+ else copy(location.href);
+}
+function shareProd(id){
+ const p=S.products[id];if(!p)return;
+ window.open('https://wa.me/?text='+encodeURIComponent('🛍️ '+p.name+' — '+fmt(p.price)+' F\n'+location.href),'_blank');
+}
+
+/* ---------- affichage global & démarrage ---------- */
+function renderAll(){
+ applyInfo();render();renderCart();
+ if(isAdmin){renderClients();renderOrders()}
+}
+renderAll();checkGate();setNet();initFB();
+</script>
+</body>
+</html>
