@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#000000">
 <title>BOUBA STORE</title>
 <style>
 *{margin:0;box-sizing:border-box}
@@ -43,6 +44,7 @@ body{background:#000;color:#fff;font-family:Arial;padding-bottom:90px}
 .btn4{padding:18px 8px;border-radius:14px;border:0;font-weight:900;font-size:14px;min-height:70px;color:#fff;display:flex;flex-direction:column;align-items:center;gap:6px}
 .row{display:flex;gap:8px;align-items:center;background:#111;padding:6px;border-radius:8px;margin-bottom:5px}
 .row img{width:36px;height:36px;border-radius:50%;object-fit:cover}
+body:not(.adm) .adminBtn,body:not(.adm) .nav div:nth-child(2){display:none}
 </style>
 </head>
 <body>
@@ -58,7 +60,7 @@ body{background:#000;color:#fff;font-family:Arial;padding-bottom:90px}
 <button onclick="document.getElementById('uPhoto').click()" style="width:100%;padding:10px;background:#222;border:1px dashed gold;color:gold;border-radius:8px;margin-bottom:10px">📷 Photo de Profil *</button>
 <input type="file" id="uPhoto" accept="image/*" style="display:none" onchange="handleGatePhoto(event)">
 <input type="password" id="uPass" class="input" placeholder="Mot de passe *">
-<button onclick="register()" style="width:100%;padding:14px;background:gold;border:0;border-radius:10px;font-weight:900;color:#000;margin-top:8px">✅ CRÉER MON COMPTE / ME CONNECTER</button>
+<button onclick="register()" style="width:100%;padding:14px;background:gold;border:0;border-radius:10px;font-weight:900;color:#000;margin-top:8px">✅ CRÉER MON COMPTE</button>
 </div>
 </div>
 
@@ -143,7 +145,8 @@ body{background:#000;color:#fff;font-family:Arial;padding-bottom:90px}
 <div class="ctrl"><h4>🏆 LOGO</h4><img id="logoAdmin" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" style="width:100px;height:100px;border-radius:50%;border:2px solid gold;display:block;margin:8px auto;object-fit:cover"><div style="display:flex;gap:6px"><button onclick="document.getElementById('logoInput').click()" style="flex:1;padding:10px;background:#222;border:1px solid gold;color:gold;border-radius:8px">📷 Changer le logo</button></div><input type="file" id="logoInput" accept="image/*" style="display:none" onchange="setLogo(event)"></div>
 <div class="ctrl"><h4>🏪 NOM, BANNIERE, WHATSAPP</h4><input id="ctrlName" class="input" placeholder="Nom boutique"><input id="ctrlBanner" class="input" placeholder="Bannière"><input id="ctrlWa" class="input" type="tel" placeholder="N° WhatsApp commandes (ex: 2250700000000)"><button onclick="saveStoreInfo()" style="width:100%;padding:10px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">✅ Sauver</button></div>
 <div class="ctrl"><h4>➕ PRODUIT</h4><input id="pName" class="input" placeholder="Nom"><input id="pPrice" class="input" type="number" placeholder="Prix"><select id="pCat" class="input"><option>Femme</option><option>Homme</option><option>Ensembles</option></select><input id="pImg" class="input" placeholder="Lien image (ou prends une photo)"><button onclick="document.getElementById('fileInput').click()" style="width:100%;padding:10px;background:#222;border:1px solid #555;color:#fff;border-radius:8px">📷 Photo</button><input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(event)"><div id="preview"></div><button onclick="addProduct()" style="width:100%;padding:12px;background:gold;border:0;border-radius:10px;font-weight:900;color:#000;margin-top:6px">✅ AJOUTER</button></div>
-<button onclick="closePage('adminPage')" style="width:100%;margin-top:10px;padding:12px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Fermer</button>
+<button onclick="adminLogout()" style="width:100%;margin-top:10px;padding:12px;background:#300;border:1px solid #f44;color:#f44;border-radius:8px">🔒 Déconnexion admin</button>
+<button onclick="closePage('adminPage')" style="width:100%;margin-top:8px;padding:12px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Fermer</button>
 </div>
 
 <div id="panierPage" class="page">
@@ -162,8 +165,8 @@ body{background:#000;color:#fff;font-family:Arial;padding-bottom:90px}
 <div onclick="openPage('profilePage')">👤<br>Compte</div>
 </div><script>
 /* ====== À CHANGER ====== */
-const ADMIN_PIN="1234";            // ton code secret admin
-const DEFAULT_WA="2250700000000";  // ton numéro WhatsApp (modifiable aussi dans Controle)
+const ADMIN_UID="Yhv7spnIt6OE1aBn2AjyYQ47wxn2";
+const DEFAULT_WA="2250700000000";  // mets ton vrai numéro WhatsApp (modifiable aussi dans Controle)
 const FB_CFG={
  apiKey:"AIzaSyDRD5Log6Nd5pEB7jctQQt-IDwC88culCk",
  authDomain:"bouba-51a6f.firebaseapp.com",
@@ -184,6 +187,7 @@ const fmt=n=>Number(n||0).toLocaleString('fr-FR');
 const okId=x=>/^[\w-]+$/.test(x||'');
 
 let S=LS('b_state',null)||{info:{},products:{},users:{},orders:{}};
+S.info=S.info||{};S.products=S.products||{};S.users=S.users||{};S.orders=S.orders||{};
 let outbox=LS('b_out',[]);
 let cart=LS('b_cart',[]);
 let me=LS('b_me',null);
@@ -211,8 +215,13 @@ async function flush(){
  try{
   while(outbox.length){
    const o=outbox[0];
-   const r=fb.D.ref(fb.db,o.path);
-   if(o.val===null)await fb.D.remove(r);else await fb.D.set(r,o.val);
+   try{
+    const r=fb.D.ref(fb.db,o.path);
+    if(o.val===null)await fb.D.remove(r);else await fb.D.set(r,o.val);
+   }catch(e){
+    if(!/permission/i.test(String(e.code)+String(e.message)))throw e;
+    /* action refusée par les règles : on l'abandonne sans bloquer les autres */
+   }
    outbox.shift();save();setNet();
   }
  }catch(e){console.log('flush',e)}
@@ -222,15 +231,21 @@ async function flush(){
 /* ---------- Firebase (chargé sans bloquer le site) ---------- */
 async function initFB(){
  try{
-  const V="12.19.0";
-  const A=await import("https://www.gstatic.com/firebasejs/"+V+"/firebase-app.js");
-  const D=await import("https://www.gstatic.com/firebasejs/"+V+"/firebase-database.js");
+  const V="12.19.0",B="https://www.gstatic.com/firebasejs/"+V+"/";
+  const A=await import(B+"firebase-app.js");
+  const D=await import(B+"firebase-database.js");
+  const AU=await import(B+"firebase-auth.js");
   const app=A.initializeApp(FB_CFG);
-  const db=D.getDatabase(app);
-  fb={db:db,D:D};
+  const db=D.getDatabase(app),auth=AU.getAuth(app);
+  fb={db:db,D:D,AU:AU,auth:auth};
   D.onValue(D.ref(db,'.info/connected'),s=>{online=!!s.val();setNet();if(online)flush()});
   sub('info');sub('products');
-  if(isAdmin)subAdmin();
+  AU.onAuthStateChanged(auth,u=>{
+   isAdmin=!!u&&u.uid===ADMIN_UID;
+   document.body.classList.toggle('adm',isAdmin);
+   if(isAdmin)subAdmin();
+   renderAll();
+  });
  }catch(e){console.log('Mode local (Firebase indisponible)',e);setNet()}
 }
 function sub(root){
@@ -238,7 +253,7 @@ function sub(root){
   S[root]=s.val()||{};
   outbox.filter(o=>o.path.split('/')[0]===root).forEach(o=>setLocal(o.path,o.val));
   save();renderAll();
- });
+ },err=>console.log('sub',root,err));
 }
 function subAdmin(){
  if(!fb||adminSub)return;adminSub=true;sub('users');sub('orders');
@@ -269,15 +284,25 @@ async function hash(p){
  catch(e){return btoa(unescape(encodeURIComponent('bouba'+p)))}
 }
 
-/* ---------- navigation ---------- */
+/* ---------- navigation & connexion admin ---------- */
 function closeAll(){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))}
 function closePage(id){$(id).classList.remove('active')}
+async function adminLogin(){
+ if(!fb){alert('Connecte-toi à internet pour la première connexion admin');return}
+ const m=prompt('Email admin :');if(!m)return;
+ const p=prompt('Mot de passe :');if(!p)return;
+ try{
+  const c=await fb.AU.signInWithEmailAndPassword(fb.auth,m,p);
+  if(c.user.uid!==ADMIN_UID){await fb.AU.signOut(fb.auth);alert("Ce compte n'est pas admin");return}
+  isAdmin=true;document.body.classList.add('adm');subAdmin();renderAll();openPage('adminPage');
+ }catch(e){alert('Connexion refusée')}
+}
+async function adminLogout(){
+ try{await fb.AU.signOut(fb.auth)}catch(e){}
+ isAdmin=false;document.body.classList.remove('adm');closeAll();renderAll();
+}
 function openPage(id){
- if(id==='adminPage'&&!isAdmin){
-  const c=prompt('Code admin :');
-  if(c!==ADMIN_PIN){if(c!==null)alert('Code incorrect');return}
-  isAdmin=true;subAdmin();renderAll();
- }
+ if(id==='adminPage'&&!isAdmin){adminLogin();return}
  closeAll();$(id).classList.add('active');
  if(id==='panierPage')renderCart();
 }
@@ -321,6 +346,7 @@ function handleFile(e){
  compress(e.target.files[0],700,d=>{tmpProd=d;$('preview').innerHTML='<img src="'+d+'" style="width:100%;border-radius:8px;margin:8px 0">'});
 }
 function addProduct(){
+ if(!isAdmin){alert("Réservé à l'administrateur");return}
  const name=$('pName').value.trim(),price=Number($('pPrice').value),c=$('pCat').value;
  const img=tmpProd||$('pImg').value.trim();
  if(!name||!price||!img){alert('Nom, prix et image obligatoires');return}
@@ -329,7 +355,7 @@ function addProduct(){
  $('pName').value='';$('pPrice').value='';$('pImg').value='';$('preview').innerHTML='';tmpProd='';
  alert('Produit ajouté ✅');
 }
-function delProduct(id){if(confirm('Supprimer ce produit ?'))write('products/'+id,null)}
+function delProduct(id){if(isAdmin&&confirm('Supprimer ce produit ?'))write('products/'+id,null)}
 
 /* ---------- panier & commande ---------- */
 function cartItems(){return cart.map(c=>({p:(S.products||{})[c.id],qty:c.qty})).filter(x=>x.p)}
@@ -388,7 +414,7 @@ async function register(){
  const key=ph.replace(/\D/g,'');
  if(key.length<8){alert('Numéro WhatsApp invalide');return}
  const h=await hash(pass);
- let ex=S.users[key];
+ let ex=(S.users||{})[key];
  if(!ex&&fb&&online){try{const s=await fb.D.get(fb.D.ref(fb.db,'users/'+key));ex=s.val()}catch(e){}}
  if(ex){
   if(ex.h!==h){alert('Mot de passe incorrect');return}
@@ -441,7 +467,7 @@ function renderOrders(){
   :'<span style="color:#aaa">Aucune commande</span>';
 }
 
-/* ---------- partage ---------- */
+/* ---------- partage (ouvert à tous les clients) ---------- */
 const shareText=()=>'👑 Découvre '+((S.info||{}).name||'BOUBA STORE')+' : '+location.href;
 function copy(t){
  if(navigator.clipboard)navigator.clipboard.writeText(t).then(()=>alert('Lien copié ✅'),()=>prompt('Copie ce lien :',t));
@@ -468,6 +494,10 @@ function renderAll(){
  applyInfo();render();renderCart();
  if(isAdmin){renderClients();renderOrders()}
 }
+/* accès admin secret : touche 5 fois le logo */
+let _t=0;
+$('logoHeader').onclick=()=>{_t++;clearTimeout(window._tt);window._tt=setTimeout(()=>_t=0,2000);if(_t>=5){_t=0;openPage('adminPage')}};
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 renderAll();checkGate();setNet();initFB();
 </script>
 </body>
