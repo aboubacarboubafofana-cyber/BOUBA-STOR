@@ -419,6 +419,199 @@ function sendIA(){
  }else r='Je peux chercher un article, ou te donner les infos livraison, paiement et contact.';
  setTimeout(()=>iaSay(r),300);
 }
+/* ===== ASSISTANTE V2 ===== */
+const IA_INFO={
+ livraison:'🚚 Livraison en 24H à Abidjan. Indique ton quartier en commandant, on te confirme le tarif sur WhatsApp.',
+ paiement:'💳 Paiement par Wave ou Orange Money.',
+ retour:'🔄 Pour un échange ou un souci avec ta commande, écris-nous sur WhatsApp avec ta photo et ton numéro de commande.',
+ horaires:'🕘 Écris-nous quand tu veux sur WhatsApp, on te répond dès qu\'on est disponible.'
+};
+const iaMem={last:[],offer:null,miss:0};
+(function(){const s=document.createElement('style');s.textContent='.chip{display:inline-block;background:#222;border:1px solid gold;color:gold;border-radius:14px;padding:5px 10px;margin:4px 4px 0 0;font-size:12px;font-weight:700;cursor:pointer}#iaChat{height:460px}';document.head.appendChild(s)})();
+
+const iaN=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim();
+const iaFirst=()=>((me&&me.name)||'').trim().split(' ')[0];
+const iaHi=()=>{const h=new Date().getHours();return h<12?'Bonjour':h<18?'Bon après-midi':'Bonsoir'};
+const iaWa=()=>((S.info||{}).whatsapp||DEFAULT_WA).replace(/\D/g,'');
+const iaLink=(txt,label)=>'<a href="https://wa.me/'+iaWa()+'?text='+encodeURIComponent(txt)+'" target="_blank" style="color:gold;font-weight:700">'+label+'</a>';
+const iaChips=a=>'<div>'+a.map(x=>'<span class="chip" onclick="iaQuick(\''+x+'\')">'+x+'</span>').join('')+'</div>';
+const IA_SYN=[
+ ['jogging','survet','survetement','jog','training'],
+ ['ensemble','tenue','set','piece'],
+ ['pull','sweat','pullover','hoodie'],
+ ['chemise','chemisette'],
+ ['pantalon','jean','pant'],
+ ['tshirt','tee','polo','maillot'],
+ ['basket','sneaker','chaussure','soulier'],
+ ['short','bermuda'],
+ ['casquette','bonnet','chapeau'],
+ ['sac','sacoche','pochette']
+];
+const IA_STOP=new Set('je tu il on nous vous de du des le la les un une et ou a au aux en pour par sur avec sans dans moi toi mon ma mes ton ta tes ce cet cette ces qui que quoi est es suis cherche chercher veux voudrais voir montre montrer donne donner avez avoir as ai ya y faut svp stp please sil plait quel quels quelle quelles prix coute combien fait faire article articles produit produits moins plus max maximum budget entre pas cher vendez vendre ajoute ajouter mets mettre prends prendre panier commander taille tailles disponible dispo stock reste encore aussi bien tres trop comme ca cela ici celui celle ceux celles premier deuxieme troisieme dernier numero besoin quelque chose genre type modele salam salut bonjour bonsoir hello hey coucou slt bjr cc yo assalam wesh frere boss patron grand monsieur madame merci oui non ok'.split(' '));
+
+function iaLev(a,b){
+ if(a===b)return 0;if(Math.abs(a.length-b.length)>2)return 9;
+ const d=[];for(let i=0;i<=a.length;i++)d[i]=[i];for(let j=1;j<=b.length;j++)d[0][j]=j;
+ for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+ return d[a.length][b.length];
+}
+function iaSim(w,t){
+ if(w===t)return 1;
+ if(w.length>=3&&t.startsWith(w))return .9;
+ if(t.length>=4&&w.startsWith(t))return .85;
+ if(w.length>=4){const l=iaLev(w,t);if(l<=1)return .8;if(l<=2&&w.length>=7)return .7}
+ return 0;
+}
+const iaTok=p=>iaN((p.name||'')+' '+(p.cat||'')).split(' ').filter(Boolean).map(x=>x.length>3?x.replace(/s$/,''):x);
+function iaScore(p,kws,sizes){
+ const tk=iaTok(p);let m=0,s=0;
+ kws.forEach(alts=>{let b=0;alts.forEach(a=>tk.forEach(x=>{const v=iaSim(a,x);if(v>b)b=v}));if(b>0){m++;s+=b}});
+ sizes.forEach(z=>{if(tk.includes(z))s+=.5});
+ return {m,s};
+}
+function iaPrice(raw){
+ let t=raw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+ t=t.replace(/(\d)[ .,](?=\d{3}(?!\d))/g,'$1').replace(/(\d+)\s*(?:k|mille)\b/g,(m,a)=>a*1000);
+ const r={};let m;
+ if(m=t.match(/entre\s*(\d+)\s*(?:et|a|-)\s*(\d+)/)){r.min=+m[1];r.max=+m[2];return r}
+ if(m=t.match(/(?:moins\s*de|max(?:imum)?|budget(?:\s*de)?|jusqu\s*a|pas\s*plus\s*de|en dessous de|<)\s*(\d+)/))r.max=+m[1];
+ if(m=t.match(/(?:plus\s*de|min(?:imum)?|a\s*partir\s*de|au\s*dessus\s*de|>)\s*(\d+)/))r.min=+m[1];
+ return r;
+}
+
+/* affichage */
+function iaBot(h){
+ const box=$('iaMsgs'),t=document.createElement('div');
+ t.className='msg bot';t.textContent='✍️ …';box.appendChild(t);box.scrollTop=1e6;
+ setTimeout(()=>{t.innerHTML=h;box.scrollTop=1e6},Math.min(900,350+h.length*2));
+}
+function iaCards(l){
+ return l.slice(0,5).map((p,i)=>'<div class="iaCard"><img src="'+safeImg(p.img)+'"><div style="flex:1"><b>'+(i+1)+'. '+esc(p.name)+'</b><br><span style="color:gold">'+fmt(p.price)+' F</span>'+(p.stock===false?' <span style="color:#f66">• épuisé</span>':' <span style="color:#25D366">• disponible</span>')+'<br>'+(p.stock===false?'':'<span class="chip" onclick="iaAdd(\''+esc(p.id)+'\')">🛒 Ajouter</span>')+'<span class="chip" onclick="iaAsk(\''+esc(p.id)+'\')">📲 WhatsApp</span></div></div>').join('');
+}
+function iaShow(list,intro,outro){
+ iaMem.last=list.slice(0,5);iaMem.offer=list.length===1&&list[0].stock!==false?list[0].id:null;iaMem.miss=0;
+ iaBot(intro+iaCards(list)+(list.length>5?'<br><small>+ '+(list.length-5)+' autres, précise ta recherche pour les voir.</small>':'')+(outro||''));
+}
+function iaAsk(id){const p=(S.products||{})[id];if(!p)return;window.open('https://wa.me/'+iaWa()+'?text='+encodeURIComponent('Bonjour, je suis intéressé par : '+p.name+' ('+fmt(p.price)+' F)'),'_blank')}
+function iaAdd(id){
+ const p=(S.products||{})[id];if(!p)return;
+ if(p.stock===false){iaBot('😕 Cet article est épuisé pour le moment. Je peux te proposer autre chose ?'+iaChips(['Nouveautés']));return}
+ addCart(id);iaMem.last=[p];iaMem.offer=null;
+ iaBot('✅ <b>'+esc(p.name)+'</b> ajouté au panier. Total : <b>'+fmt(cartSum())+' F</b>.'+iaChips(['Mon panier','Commander','Nouveautés']));
+}
+function iaCartMsg(){
+ const l=cartItems();
+ if(!l.length)return '🛒 Ton panier est vide pour le moment. Dis-moi ce que tu cherches 😉'+iaChips(['Nouveautés']);
+ return '🛒 <b>Ton panier</b><br>'+l.map(x=>'• '+esc(x.p.name)+' x'+x.qty+' = '+fmt(x.p.price*x.qty)+' F').join('<br>')+'<br><b>Total : '+fmt(cartSum())+' F</b><br><span class="chip" onclick="commander()">📲 Commander sur WhatsApp</span>';
+}
+
+function toggleIA(){
+ const c=$('iaChat');c.classList.toggle('open');
+ if(c.classList.contains('open')&&!$('iaMsgs').children.length){
+  const f=iaFirst();
+  iaSay(iaHi()+(f?' '+esc(f):'')+` ! 👋 Je suis l'assistante de <b>${esc(shopN())}</b>. Écris-moi comme tu parles : un article, une taille, un budget, ou une question sur la livraison et le paiement.`+iaChips(['Nouveautés','Livraison','Paiement','Mon panier']));
+ }
+}
+function sendIA(){const raw=$('iaInput').value.trim();if(!raw)return;$('iaInput').value='';iaSay(esc(raw),true);iaHandle(raw)}
+function iaQuick(x){iaSay(esc(x),true);iaHandle(x)}
+
+/* cerveau */
+function iaHandle(raw){
+ const t=iaN(raw),all=prods(),f=iaFirst(),nm=f?' '+esc(f):'',say=iaBot,has=r=>r.test(t),wc=t.split(' ').length;
+ const pr=iaPrice(raw);
+ const cheap=has(/(pas cher|moins cher|bon marche|economique|petit prix|abordable)/),dear=has(/(plus cher|luxe|haut de gamme|premium)/);
+ const sizes=(t.match(/\b(xxxl|xxl|xl|xs|2xl|3xl|4xl)\b/g)||[]);
+ const tm=t.match(/\btaille (s|m|l|\d{2})\b/);if(tm)sizes.push(tm[1]);
+
+ /* conversation */
+ if(has(/\b(merci|thanks|barka)\b/))return say(`Avec plaisir${nm} ! 👑 Je reste là si tu as besoin d'autre chose.`+iaChips(['Nouveautés','Mon panier']));
+ if(has(/\b(au revoir|a plus|a bientot|bye|bonne nuit|a demain|bonne soiree)\b/))return say(`À très bientôt${nm} ! 👋 Merci de ta visite chez ${esc(shopN())}.`);
+ if(wc<=3&&has(/^(salam|salut|bonjour|bonsoir|hello|hey|coucou|slt|bjr|cc|yo|assalam)/))return say(iaHi()+nm+` ! 👋 Bienvenue chez <b>${esc(shopN())}</b>. Qu'est-ce que je peux faire pour toi ?`+iaChips(['Nouveautés','Livraison','Paiement']));
+ if(has(/(ca va|comment vas|comment tu vas|tu vas bien|la forme)/))return say(`Ça va très bien, merci 🙏 Et toi${nm} ? Dis-moi ce que tu cherches aujourd'hui.`);
+ if(has(/(qui es tu|tu es qui|ton nom|t es qui|tu es un robot|es tu un robot|tu es humain)/))return say(`Je suis l'assistante virtuelle de ${esc(shopN())} 🤖. Je t'aide à trouver un article, à connaître les prix et à passer commande. Pour parler à l'équipe : `+iaLink('Bonjour','WhatsApp'));
+ if(wc<=5&&has(/(bravo|super|genial|j adore|belle boutique|bon travail|excellent)/))return say('Merci beaucoup, ça fait plaisir ! 🙏👑 Je suis là pour t\'aider.');
+ if(has(/\b(idiot|stupide|debile|merde|nul)\b/))return say('Je suis désolée si je t\'ai déçu 🙏 Dis-moi ce que tu cherches, ou écris à l\'équipe : '+iaLink('Bonjour','WhatsApp'));
+
+ /* infos boutique */
+ if(has(/\b(livraison|livrer|livrez|delai|expedition|frais)\b/))return say(IA_INFO.livraison+iaChips(['Paiement','Contact']));
+ if(has(/(paiement|payer|payement|wave|orange money|mobile money|cash)/))return say(IA_INFO.paiement+iaChips(['Livraison']));
+ if(has(/(ma commande|suivi|colis|statut)/))return say('📦 Pour le suivi, envoie ton numéro de commande (#...) à l\'équipe : '+iaLink('Bonjour, je voudrais le suivi de ma commande','📲 WhatsApp'));
+ if(has(/(retour|echange|rembours|defectueux|garantie)/))return say(IA_INFO.retour+'<br>'+iaLink('Bonjour, j\'ai une question sur ma commande','📲 Écrire sur WhatsApp'));
+ if(has(/(horaire|heure d ouverture|ouvert|vous repondez)/))return say(IA_INFO.horaires);
+ if(has(/(adresse|ou etes vous|ou se trouve|localisation|magasin)/))return say('📍 Pour l\'adresse exacte et les retraits, écris-nous : '+iaLink('Bonjour, quelle est votre adresse ?','📲 WhatsApp')+'. Livraison à Abidjan en 24H.');
+ if(has(/(contact|whatsapp|appeler|numero|joindre|telephone|parler a|conseiller|responsable)/))return say('📞 Tu peux écrire directement à l\'équipe : '+iaLink('Bonjour','📲 WhatsApp'));
+ if(has(/(reduction|remise|promo|dernier prix|negoci|solde|rabais)/))return say('💬 Les prix affichés sont nos prix. Pour une remise (par exemple si tu prends plusieurs articles), demande directement à l\'équipe : '+iaLink('Bonjour, je voudrais une remise','📲 WhatsApp'));
+
+ /* mots-clés produit */
+ const kws=[];
+ t.split(' ').forEach(w=>{
+  if(!w||/^\d+$/.test(w)||IA_STOP.has(w)||sizes.includes(w)||w.length<2)return;
+  const k=w.length>3?w.replace(/s$/,''):w;if(IA_STOP.has(k))return;
+  const alts=[k];IA_SYN.forEach(g=>{if(g.some(x=>iaSim(k,x)>=.8))g.forEach(x=>{if(!alts.includes(x))alts.push(x)})});
+  kws.push(alts);
+ });
+ const add=has(/(ajoute|ajouter|mets|mettre|je prends|prends|je le prends|je le veux|je veux ce|je veux celui|ok pour)/);
+
+ /* panier / commande */
+ if(has(/\bpanier\b/)&&!add)return say(iaCartMsg());
+ if(has(/(commander|valider|finaliser|passer commande)/)&&!kws.length)return say(iaCartMsg());
+
+ /* réponse courte "oui" */
+ if(has(/^(oui|ok|d accord|dac|yes|vas y|go|volontiers)$/)&&iaMem.offer){const id=iaMem.offer;return iaAdd(id)}
+
+ /* référence au résultat précédent */
+ const hasRef=has(/(premier|1er|deuxieme|second|troisieme|dernier|\ble [1-5]\b|\bn [1-5]\b)/);
+ if(!kws.length&&!sizes.length&&iaMem.last.length&&(add||hasRef||has(/(celui|ce modele)/))){
+  if(iaMem.last.length>1&&!hasRef)return say('Lequel ? Dis-moi « le 1 », « le 2 »… 😉');
+  const i=has(/(deuxieme|second|\b2\b)/)?1:has(/(troisieme|\b3\b)/)?2:has(/\b4\b/)?3:has(/\b5\b/)?4:has(/dernier/)?iaMem.last.length-1:0;
+  const p=iaMem.last[i];
+  if(p)return add?iaAdd(p.id):iaShow([p],'Voici cet article 👇','<br>Je l\'ajoute au panier ?');
+ }
+
+ /* catalogue complet */
+ if(!kws.length&&has(/(nouveaute|nouveau|catalogue|tout voir|tous les|montre moi tout|liste|qu avez vous|vous vendez|quoi comme|derniere)/)){
+  if(!all.length)return say('Le catalogue est vide pour le moment, repasse bientôt ! 🙏');
+  return iaShow(all,'✨ Nos dernières nouveautés :');
+ }
+
+ /* recherche produit */
+ const priced=pr.min!=null||pr.max!=null;
+ if(kws.length||sizes.length||priced||cheap||dear){
+  let base=all;
+  if(!kws.length&&!sizes.length&&!priced&&iaMem.last.length>1&&(cheap||dear))base=iaMem.last;
+  let list=base.slice(),partial=false;
+  if(kws.length){
+   const sc=list.map(p=>Object.assign({p},iaScore(p,kws,sizes)));
+   const best=Math.max(0,...sc.map(x=>x.m));
+   partial=best>0&&best<kws.length;
+   list=best>0?sc.filter(x=>x.m===best).sort((a,b)=>b.s-a.s).map(x=>x.p):[];
+  }
+  const before=list.slice();let sizeMiss=false;
+  if(sizes.length&&list.length){const sz=list.filter(p=>sizes.some(z=>iaTok(p).includes(z)));if(sz.length)list=sz;else sizeMiss=true}
+  if(pr.min!=null)list=list.filter(p=>p.price>=pr.min);
+  if(pr.max!=null)list=list.filter(p=>p.price<=pr.max);
+  if(cheap)list.sort((a,b)=>a.price-b.price);else if(dear)list.sort((a,b)=>b.price-a.price);
+
+  if(list.length){
+   let intro=list.length===1?'Voilà ce qu\'il te faut 👇':'J\'ai trouvé <b>'+list.length+'</b> articles 👇';
+   if(partial)intro='Je n\'ai pas exactement ça, mais voici ce qui s\'en approche 👇';
+   if(sizeMiss)intro+='<br><small>Je ne vois pas cette taille dans le nom, demande à l\'équipe pour confirmer.</small>';
+   if(cheap&&!kws.length)intro='💰 Nos articles les moins chers :';
+   if(dear&&!kws.length)intro='💎 Nos articles les plus chers :';
+   return iaShow(list,intro,list.length===1?'<br>Je l\'ajoute au panier ?':'<br><small>Dis « le 2 » pour choisir, ou précise (taille, budget).</small>');
+  }
+  if(before.length&&priced){
+   const c=before.slice().sort((a,b)=>a.price-b.price);
+   return iaShow(c,'Je n\'ai rien dans ce budget pour ça 😕 Voici le moins cher que j\'ai :');
+  }
+ }
+
+ /* pas compris */
+ iaMem.miss++;
+ let r=wc<=2?`Peux-tu préciser${nm} ? Par exemple : « jogging homme », « ensemble moins de 10000 » ou « livraison ».`:'Je n\'ai pas trouvé exactement ça 😕 Voici nos nouveautés, ou précise ta recherche.';
+ if(iaMem.miss>=2)r+='<br>'+iaLink('Bonjour, je cherche : '+raw,'📲 Demander à l\'équipe sur WhatsApp');
+ say(r+(all.length&&wc>2?iaCards(all.slice(0,3)):'')+iaChips(['Nouveautés','Contact']));
+}
 /* ----- démarrage ----- */
 function renderAll(){
  renderStore();renderCart();
