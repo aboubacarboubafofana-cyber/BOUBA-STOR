@@ -348,7 +348,77 @@ function saveInfo(){
  write('info',{name:$('sName').value.trim(),whatsapp:$('sWa').value.trim(),banner:$('sBan').value.trim(),logo:tmpImg||i.logo||''});
  tmpImg='';toast('✅ Réglages sauvés');
 }
+/* ----- PARTAGE ----- */
+const siteUrl=()=>location.href.split('?')[0].split('#')[0];
+const shopN=()=>(S.info||{}).name||'BOUBA STORE';
+function copyLink(txt){
+ const t=typeof txt==='string'?txt:siteUrl();
+ try{navigator.clipboard.writeText(t)}catch(e){}
+ toast('🔗 Lien copié');
+}
+function shareNet(n){
+ const url=siteUrl(),msg='Découvre '+shopN()+' 👑 '+url;
+ if(n==='whatsapp')window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+ else if(n==='facebook')window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(url),'_blank');
+ else{copyLink(msg);toast('🔗 Lien copié, colle-le dans '+(n==='instagram'?'Instagram':'TikTok'));
+  setTimeout(()=>window.open(n==='instagram'?'https://www.instagram.com/':'https://www.tiktok.com/','_blank'),1200)}
+}
+function shareNative(){
+ if(navigator.share)navigator.share({title:shopN(),text:'Découvre '+shopN()+' 👑',url:siteUrl()}).catch(()=>{});
+ else copyLink();
+}
+function shareProd(id){
+ const p=(S.products||{})[id];if(!p)return;
+ const msg=p.name+' — '+fmt(p.price)+' F 👑 '+shopN()+'\n'+siteUrl();
+ if(navigator.share)navigator.share({title:p.name,text:msg}).catch(()=>{});
+ else window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+function addShare(){
+ document.querySelectorAll('#grid .card').forEach(c=>{
+  if(c.querySelector('.shb'))return;
+  const b=c.querySelector('.btn');if(!b)return;
+  const m=(b.getAttribute('onclick')||'').match(/'(.+?)'/);if(!m)return;
+  const s=document.createElement('button');
+  s.className='shb';s.textContent='📤 Partager';
+  s.onclick=()=>shareProd(m[1]);
+  c.querySelector('.info').appendChild(s);
+ });
+}
+const _rs=renderStore;
+renderStore=function(){_rs();addShare()};
 
+/* ----- ASSISTANTE ----- */
+function toggleIA(){
+ const c=$('iaChat');c.classList.toggle('open');
+ if(c.classList.contains('open')&&!$('iaMsgs').children.length)
+  iaSay('Salam ! 👋 Bienvenue chez '+esc(shopN())+'. Dis-moi ce que tu cherches (ex: "ensemble", "jogging") ou tape "nouveautés".');
+}
+function iaSay(h,u){const d=document.createElement('div');d.className='msg '+(u?'user':'bot');d.innerHTML=h;$('iaMsgs').appendChild(d);$('iaMsgs').scrollTop=1e6}
+function iaCards(l){return l.slice(0,5).map(p=>'<div class="iaCard" onclick="addCart(\''+p.id+'\')"><img src="'+safeImg(p.img)+'"><div><b>'+esc(p.name)+'</b><br><span style="color:gold">'+fmt(p.price)+' F</span><br><small>👆 Touche pour ajouter</small></div></div>').join('')}
+function sendIA(){
+ const raw=$('iaInput').value.trim();if(!raw)return;$('iaInput').value='';
+ iaSay(esc(raw),true);
+ const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+ const t=norm(raw),all=prods();
+ const wa=((S.info||{}).whatsapp||DEFAULT_WA).replace(/\D/g,'');
+ const stop=['je','cherche','veux','voir','un','une','des','les','pour','moi','avec','svp','stp','vous','avez','est','quel','prix','moins','plus','que'];
+ const words=t.split(/[^a-z0-9]+/).filter(w=>w.length>2&&!/^\d+$/.test(w)&&!stop.includes(w)).map(w=>w.replace(/s$/,''));
+ const pm=t.replace(/\s/g,'').match(/(?:moinsde|max|budget)(\d+)/);
+ let r;
+ if(/livraison|livrer/.test(t))r='🚚 Livraison en 24H à Abidjan.';
+ else if(/paiement|payer|wave|orange|money/.test(t))r='💳 Paiement par Wave ou Orange Money.';
+ else if(/panier|commander|commande/.test(t))r='🛒 Ajoute tes articles, ouvre 👜 Panier puis touche "Commander sur WhatsApp".';
+ else if(/contact|whatsapp|appeler|numero/.test(t))r='📞 Écris-nous sur <a href="https://wa.me/'+wa+'" target="_blank" style="color:gold">WhatsApp</a>.';
+ else if(/merci/.test(t))r='Avec plaisir ! 👑';
+ else if(/nouveau|nouveaute|catalogue|tout|derniere/.test(t))r=all.length?'✨ Nos dernières nouveautés :'+iaCards(all):'Aucun produit pour le moment.';
+ else if(/^(salam|bonjour|bonsoir|salut|hello|coucou)/.test(t))r='Salam ! 👋 Que cherches-tu aujourd\'hui ?';
+ else if(words.length||pm){
+  let h=all.filter(p=>(!pm||p.price<=+pm[1])&&words.every(w=>norm(p.name+' '+p.cat).includes(w)));
+  if(!h.length&&words.length)h=all.filter(p=>(!pm||p.price<=+pm[1])&&words.some(w=>norm(p.name+' '+p.cat).includes(w)));
+  r=h.length?'Voici ce que j\'ai trouvé 👇'+iaCards(h):'Je n\'ai pas trouvé 😕. Voici nos nouveautés :'+iaCards(all);
+ }else r='Je peux chercher un article, ou te donner les infos livraison, paiement et contact.';
+ setTimeout(()=>iaSay(r),300);
+}
 /* ----- démarrage ----- */
 function renderAll(){
  renderStore();renderCart();
