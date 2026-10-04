@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr"><head>
+<html lang="fr"><head> 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#000000">
@@ -107,7 +107,7 @@ body{background:#000;color:#fff;font-family:Arial;padding-bottom:70px}
 <div class="nav">
 <div onclick="closeAll()">🏠<br>Accueil</div>
 <div onclick="openPage('cartPage')">👜<br>Panier <b id="cartN" style="color:gold"></b></div>
-<div onclick="openPage('adminPage');renderAdmin()">⚙️<br>Contrôle</div>
+<div id="navAdmin" style="display:none" onclick="openPage('adminPage');renderAdmin()">⚙️<br>Contrôle</div>
 </div>
 
 <div id="cartPage" class="page">
@@ -619,5 +619,17 @@ function renderAll(){
 }
 checkGate();renderAll();setNet();initFB();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+<script>
+setInterval(function(){
+  var n=document.getElementById('navAdmin');
+  if(n)n.style.display=(typeof isAdmin!=='undefined'&&isAdmin)?'':'none';
+},1000);
+var tapN=0,tapT;
+document.getElementById('shopName').addEventListener('click',function(){
+  tapN++;clearTimeout(tapT);
+  tapT=setTimeout(function(){tapN=0},2000);
+  if(tapN>=5){tapN=0;openPage('adminPage');renderAdmin();}
+});
 </script>
 </body></html>
