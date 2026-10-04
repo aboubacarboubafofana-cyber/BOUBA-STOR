@@ -45,6 +45,23 @@ body{background:#000;color:#fff;font-family:Arial;padding-bottom:90px}
 .row{display:flex;gap:8px;align-items:center;background:#111;padding:6px;border-radius:8px;margin-bottom:5px}
 .row img{width:36px;height:36px;border-radius:50%;object-fit:cover}
 body:not(.adm) .adminBtn,body:not(.adm) .nav div:nth-child(2){display:none}
+.backBtn{position:sticky;top:-15px;z-index:5;background:#000;padding:8px 0 10px}
+.backBtn button{background:#222;border:1px solid gold;color:gold;border-radius:20px;padding:9px 16px;font-weight:700}
+#bell{font-size:20px;margin-right:6px}
+#iaBtn{position:fixed;bottom:135px;right:15px;background:linear-gradient(135deg,#d4af37,#8a6d00);width:55px;height:55px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;z-index:90}
+#iaChat{position:fixed;bottom:200px;right:10px;width:92%;max-width:360px;height:420px;background:#111;border:2px solid gold;border-radius:15px;z-index:400;display:none;flex-direction:column;overflow:hidden}
+#iaChat.open{display:flex}
+.iaHead{background:linear-gradient(gold,#8a6d00);color:#000;padding:10px;font-weight:900;display:flex;justify-content:space-between}
+.iaMsgs{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
+.msg{padding:8px 12px;border-radius:12px;max-width:88%;font-size:13px}
+.msg.bot{background:#222;border:1px solid #333;align-self:flex-start}
+.msg.user{background:gold;color:#000;align-self:flex-end;font-weight:700}
+.iaInput{display:flex;gap:6px;padding:8px;border-top:1px solid #333}
+.iaInput input{flex:1;padding:10px;border-radius:20px;border:1px solid gold;background:#000;color:#fff}
+.iaInput button{background:gold;border:0;border-radius:50%;width:38px;height:38px}
+.iaCard{background:#000;border:1px solid gold;border-radius:10px;display:flex;gap:8px;padding:6px;margin-top:6px}
+.iaCard img{width:55px;height:55px;border-radius:8px;object-fit:cover}
+#toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:gold;color:#000;padding:10px 16px;border-radius:20px;font-weight:700;z-index:2000;display:none;max-width:90%;text-align:center}
 </style>
 </head>
 <body>
@@ -71,6 +88,7 @@ body:not(.adm) .adminBtn,body:not(.adm) .nav div:nth-child(2){display:none}
 <b style="color:gold" id="storeName">BOUBA STORE</b>
 </div>
 <div style="display:flex;gap:6px;align-items:center">
+<span id="bell" onclick="askNotif()">🔕</span>
 <img id="headerUserPic" class="userBadge" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" style="display:none" onclick="openPage('profilePage')">
 <span onclick="openPage('panierPage')">👜(<span id="cartC">0</span>)</span>
 </div>
@@ -96,8 +114,17 @@ body:not(.adm) .adminBtn,body:not(.adm) .nav div:nth-child(2){display:none}
 </div>
 <div class="adminBtn" onclick="openPage('adminPage')">⚙️</div>
 <div class="shareFloat" onclick="openPage('sharePage')">📤</div>
+<div id="iaBtn" onclick="toggleIA()">🤖</div>
+
+<div id="iaChat">
+<div class="iaHead"><span>🤖 Assistante BOUBA</span><span onclick="toggleIA()">✕</span></div>
+<div class="iaMsgs" id="iaMsgs"></div>
+<div class="iaInput"><input id="iaInput" placeholder="Ex: ensemble homme" onkeypress="if(event.key==='Enter')sendIA()"><button onclick="sendIA()">➤</button></div>
+</div>
+<div id="toast"></div>
 
 <div id="sharePage" class="page">
+<div class="backBtn"><button onclick="closeAll()">← Retour à l'accueil</button></div>
 <h2 style="color:gold">📤 PARTAGER</h2>
 <div class="ctrl" style="border-color:gold">
 <div class="onglet4">
@@ -115,6 +142,7 @@ body:not(.adm) .adminBtn,body:not(.adm) .nav div:nth-child(2){display:none}
 </div>
 
 <div id="profilePage" class="page">
+<div class="backBtn"><button onclick="closeAll()">← Retour à l'accueil</button></div>
 <h2 style="color:gold">👤 MON COMPTE</h2>
 <div class="ctrl" style="text-align:center;border-color:gold">
 <img id="profilePicBig" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="profilePic" style="width:120px;height:120px">
@@ -139,9 +167,13 @@ body:not(.adm) .adminBtn,body:not(.adm) .nav div:nth-child(2){display:none}
 </div>
 
 <div id="adminPage" class="page">
+<div class="backBtn"><button onclick="closeAll()">← Retour à l'accueil</button></div>
 <h2 style="color:gold">⚙️ CONTROLE + CLIENTS</h2>
 <div class="ctrl"><h4 style="color:gold">🧾 COMMANDES</h4><div id="ordersList" style="font-size:11px"></div></div>
-<div class="ctrl"><h4 style="color:gold">👥 CLIENTS INSCRITS</h4><div id="clientsList" style="font-size:11px"></div></div>
+<div class="ctrl"><h4 style="color:gold">👥 CLIENTS INSCRITS</h4>
+<div id="clientCount" style="color:gold;font-weight:900;margin:6px 0"></div>
+<input id="clientQ" class="input" placeholder="🔍 Chercher un client..." oninput="renderClients()">
+<div id="clientsList" style="font-size:11px"></div></div>
 <div class="ctrl"><h4>🏆 LOGO</h4><img id="logoAdmin" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" style="width:100px;height:100px;border-radius:50%;border:2px solid gold;display:block;margin:8px auto;object-fit:cover"><div style="display:flex;gap:6px"><button onclick="document.getElementById('logoInput').click()" style="flex:1;padding:10px;background:#222;border:1px solid gold;color:gold;border-radius:8px">📷 Changer le logo</button></div><input type="file" id="logoInput" accept="image/*" style="display:none" onchange="setLogo(event)"></div>
 <div class="ctrl"><h4>🏪 NOM, BANNIERE, WHATSAPP</h4><input id="ctrlName" class="input" placeholder="Nom boutique"><input id="ctrlBanner" class="input" placeholder="Bannière"><input id="ctrlWa" class="input" type="tel" placeholder="N° WhatsApp commandes (ex: 2250700000000)"><button onclick="saveStoreInfo()" style="width:100%;padding:10px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">✅ Sauver</button></div>
 <div class="ctrl"><h4>➕ PRODUIT</h4><input id="pName" class="input" placeholder="Nom"><input id="pPrice" class="input" type="number" placeholder="Prix"><select id="pCat" class="input"><option>Femme</option><option>Homme</option><option>Ensembles</option></select><input id="pImg" class="input" placeholder="Lien image (ou prends une photo)"><button onclick="document.getElementById('fileInput').click()" style="width:100%;padding:10px;background:#222;border:1px solid #555;color:#fff;border-radius:8px">📷 Photo</button><input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(event)"><div id="preview"></div><button onclick="addProduct()" style="width:100%;padding:12px;background:gold;border:0;border-radius:10px;font-weight:900;color:#000;margin-top:6px">✅ AJOUTER</button></div>
@@ -150,6 +182,7 @@ body:not(.adm) .adminBtn,body:not(.adm) .nav div:nth-child(2){display:none}
 </div>
 
 <div id="panierPage" class="page">
+<div class="backBtn"><button onclick="closeAll()">← Retour à l'accueil</button></div>
 <h2 style="color:gold">👜 MON PANIER</h2>
 <div id="panierList"></div>
 <div id="total" style="color:gold;font-weight:900;margin-top:12px;font-size:16px"></div>
@@ -166,7 +199,7 @@ body:not(.adm) .adminBtn,body:not(.adm) .nav div:nth-child(2){display:none}
 </div><script>
 /* ====== À CHANGER ====== */
 const ADMIN_UID="Yhv7spnIt6OE1aBn2AjyYQ47wxn2";
-const DEFAULT_WA="2250700000000";  // mets ton vrai numéro WhatsApp (modifiable aussi dans Controle)
+const DEFAULT_WA="2250787619717";
 const FB_CFG={
  apiKey:"AIzaSyDRD5Log6Nd5pEB7jctQQt-IDwC88culCk",
  authDomain:"bouba-51a6f.firebaseapp.com",
@@ -220,7 +253,6 @@ async function flush(){
     if(o.val===null)await fb.D.remove(r);else await fb.D.set(r,o.val);
    }catch(e){
     if(!/permission/i.test(String(e.code)+String(e.message)))throw e;
-    /* action refusée par les règles : on l'abandonne sans bloquer les autres */
    }
    outbox.shift();save();setNet();
   }
@@ -228,7 +260,7 @@ async function flush(){
  flushing=false;setNet();
 }
 
-/* ---------- Firebase (chargé sans bloquer le site) ---------- */
+/* ---------- Firebase ---------- */
 async function initFB(){
  try{
   const V="12.19.0",B="https://www.gstatic.com/firebasejs/"+V+"/";
@@ -253,6 +285,13 @@ function sub(root){
   S[root]=s.val()||{};
   outbox.filter(o=>o.path.split('/')[0]===root).forEach(o=>setLocal(o.path,o.val));
   save();renderAll();
+  if(root==='products'&&!isAdmin)checkNew('products','b_seenP',p=>{
+   const t='🛍️ Nouveau chez '+((S.info||{}).name||'BOUBA STORE');
+   notify(t,p.name+' — '+fmt(p.price)+' F');toast(t+' : '+p.name);
+  });
+  if(root==='users')checkNew('users','b_seenU',u=>{
+   notify('👤 Nouveau client',u.name+' • '+u.city+' • '+u.phone);toast('👤 Nouveau client : '+u.name);
+  });
  },err=>console.log('sub',root,err));
 }
 function subAdmin(){
@@ -399,6 +438,62 @@ function commander(){
  const wa=((S.info||{}).whatsapp||DEFAULT_WA).replace(/\D/g,'');
  if(!navigator.onLine)alert('Hors ligne : commande enregistrée. Elle sera envoyée automatiquement dès le retour du réseau.');
  window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg),'_blank');
+}/* ---------- notifications ---------- */
+function toast(m){const e=$('toast');e.textContent=m;e.style.display='block';clearTimeout(window._tz);window._tz=setTimeout(()=>e.style.display='none',5000)}
+function updateBell(){$('bell').textContent=('Notification' in window&&Notification.permission==='granted')?'🔔':'🔕'}
+async function notify(title,body){
+ try{
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  const reg=await navigator.serviceWorker.getRegistration();
+  if(reg)reg.showNotification(title,{body:body,vibrate:[200,100,200]});else new Notification(title,{body:body});
+ }catch(e){}
+}
+async function askNotif(){
+ if(!('Notification' in window)){alert('Notifications non supportées sur ce navigateur');return}
+ const p=await Notification.requestPermission();
+ updateBell();
+ if(p==='granted'){toast('✅ Notifications activées');notify('🔔 BOUBA STORE','Tu seras prévenu des nouveautés')}
+}
+function checkNew(root,key,fn){
+ const seen=LS(key,null),ids=Object.keys(S[root]||{});
+ if(seen===null){SV(key,ids);return}
+ const nw=ids.filter(i=>!seen.includes(i));
+ SV(key,ids);
+ nw.forEach(i=>S[root][i]&&fn(S[root][i]));
+}
+
+/* ---------- assistante ---------- */
+function toggleIA(){
+ const c=$('iaChat');c.classList.toggle('open');
+ if(c.classList.contains('open')&&!$('iaMsgs').children.length)
+  iaSay('Salam ! 👋 Bienvenue chez '+esc((S.info||{}).name||'BOUBA STORE')+'. Dis-moi ce que tu cherches (ex: "jogging", "ensemble homme", "moins de 10000") ou tape "nouveautés".');
+}
+function iaSay(h,u){const d=document.createElement('div');d.className='msg '+(u?'user':'bot');d.innerHTML=h;$('iaMsgs').appendChild(d);$('iaMsgs').scrollTop=1e6}
+function iaCards(l){return l.slice(0,5).map(p=>'<div class="iaCard" onclick="addCart(\''+p.id+'\')"><img src="'+safeImg(p.img)+'"><div><b>'+esc(p.name)+'</b><br><span style="color:gold">'+fmt(p.price)+' F</span><br><small>👆 Touche pour ajouter au panier</small></div></div>').join('')}
+function sendIA(){
+ const raw=$('iaInput').value.trim();if(!raw)return;$('iaInput').value='';
+ iaSay(esc(raw),true);
+ const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+ const t=norm(raw);
+ const all=Object.values(S.products||{}).filter(p=>p&&okId(p.id)).sort((a,b)=>(b.date||0)-(a.date||0));
+ const wa=((S.info||{}).whatsapp||DEFAULT_WA).replace(/\D/g,'');
+ const stop=['je','cherche','veux','voir','un','une','des','les','pour','moi','avec','svp','stp','vous','avez','est','quel','quels','prix','moins','plus','que','aux','vendez','article','articles'];
+ const words=t.split(/[^a-z0-9]+/).filter(w=>w.length>2&&!/^\d+$/.test(w)&&!stop.includes(w)).map(w=>w.replace(/s$/,''));
+ const pm=t.replace(/\s/g,'').match(/(?:moinsde|max|budget)(\d+)/);
+ let r;
+ if(/livraison|livrer/.test(t))r='🚚 Livraison en 24H à Abidjan. Indique ta ville en commandant.';
+ else if(/paiement|payer|wave|orange|money/.test(t))r='💳 Paiement par Wave ou Orange Money.';
+ else if(/panier|commander|commande/.test(t))r='🛒 Ajoute tes articles, ouvre 👜 puis touche "Commander WhatsApp".';
+ else if(/contact|whatsapp|appeler|numero/.test(t))r='📞 Écris-nous sur <a href="https://wa.me/'+wa+'" target="_blank" style="color:gold">WhatsApp</a>.';
+ else if(/merci/.test(t))r='Avec plaisir ! 👑 À ton service.';
+ else if(/nouveau|nouveaute|catalogue|tout|derniere/.test(t))r=all.length?'✨ Nos dernières nouveautés :'+iaCards(all):'Aucun produit pour le moment.';
+ else if(/^(salam|bonjour|bonsoir|salut|hello|coucou)/.test(t)&&t.split(' ').length<=2)r='Salam ! 👋 Que cherches-tu aujourd\'hui ?';
+ else if(words.length||pm){
+  let h=all.filter(p=>(!pm||p.price<=+pm[1])&&words.every(w=>norm(p.name+' '+p.cat).includes(w)));
+  if(!h.length&&words.length)h=all.filter(p=>(!pm||p.price<=+pm[1])&&words.some(w=>norm(p.name+' '+p.cat).includes(w)));
+  r=h.length?'Voici ce que j\'ai trouvé 👇'+iaCards(h):'Je n\'ai pas trouvé cet article 😕. Voici nos nouveautés :'+iaCards(all)+'<br>Ou écris-nous sur <a href="https://wa.me/'+wa+'" target="_blank" style="color:gold">WhatsApp</a>.';
+ }else r='Je peux chercher un article (ex: "jogging homme"), te donner les infos livraison, paiement ou contact.';
+ setTimeout(()=>iaSay(r),300);
 }
 
 /* ---------- compte client ---------- */
@@ -453,10 +548,15 @@ function logout(){
 
 /* ---------- admin : clients & commandes ---------- */
 function renderClients(){
- const l=Object.values(S.users||{}).sort((a,b)=>(b.date||0)-(a.date||0));
- $('clientsList').innerHTML=l.length?l.map(u=>
-  '<div class="row"><img src="'+safeImg(u.photo)+'"><div style="flex:1"><b>'+esc(u.name)+'</b><br>📞 '+esc(u.phone)+' • 📍 '+esc(u.city)+'</div></div>').join('')
-  :'<span style="color:#aaa">Aucun client</span>';
+ const k=(($('clientQ')||{}).value||'').toLowerCase();
+ const all=Object.values(S.users||{}).sort((a,b)=>(b.date||0)-(a.date||0));
+ const l=all.filter(u=>!k||((u.name||'')+(u.phone||'')+(u.city||'')).toLowerCase().includes(k));
+ $('clientCount').textContent='👥 '+all.length+' client(s) inscrit(s)';
+ $('clientsList').innerHTML=l.length?l.map(u=>{
+  const n=String(u.phone||'').replace(/\D/g,'');
+  return '<div class="row"><img src="'+safeImg(u.photo)+'"><div style="flex:1"><b>'+esc(u.name)+'</b><br>📞 '+esc(u.phone)+'<br>📍 '+esc(u.city)+'<br><span style="color:#888">'+(u.date?new Date(u.date).toLocaleString('fr-FR'):'')+'</span></div>'+
+  '<a href="tel:+'+n+'" style="font-size:22px;text-decoration:none">📞</a> <a href="https://wa.me/'+n+'" target="_blank" style="font-size:22px;text-decoration:none">💬</a></div>';
+ }).join(''):'<span style="color:#aaa">Aucun client</span>';
 }
 function renderOrders(){
  const l=Object.values(S.orders||{}).sort((a,b)=>(b.date||0)-(a.date||0));
@@ -498,7 +598,7 @@ function renderAll(){
 let _t=0;
 $('logoHeader').onclick=()=>{_t++;clearTimeout(window._tt);window._tt=setTimeout(()=>_t=0,2000);if(_t>=5){_t=0;openPage('adminPage')}};
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-renderAll();checkGate();setNet();initFB();
+updateBell();renderAll();checkGate();setNet();initFB();
 </script>
 </body>
 </html>
