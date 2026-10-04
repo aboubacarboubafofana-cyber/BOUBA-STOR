@@ -82,6 +82,27 @@ body{background:#000;color:#fff;font-family:Arial;padding-bottom:70px}
 <div id="net">⏳ Connexion...</div>
 <div class="grid" id="grid"></div>
 <div id="toast"></div>
+<button class="fab" id="shBtn" onclick="openPage('sharePage')">📤</button>
+<button class="fab" id="iaBtn" onclick="toggleIA()">🤖</button>
+
+<div id="iaChat">
+<div class="iaHead"><span>🤖 Assistante BOUBA</span><span onclick="toggleIA()">✕</span></div>
+<div id="iaMsgs"></div>
+<div class="iaIn"><input id="iaInput" placeholder="Ex: ensemble homme" onkeypress="if(event.key==='Enter')sendIA()"><button onclick="sendIA()">➤</button></div>
+</div>
+
+<div id="sharePage" class="page">
+<button class="mini" onclick="closeAll()">← Retour</button>
+<h2 style="color:gold;margin:10px 0">📤 PARTAGER LE CATALOGUE</h2>
+<div class="net4">
+<button style="background:#25D366" onclick="shareNet('whatsapp')">💬 WhatsApp</button>
+<button style="background:#1877F2" onclick="shareNet('facebook')">📘 Facebook</button>
+<button style="background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)" onclick="shareNet('instagram')">📸 Instagram</button>
+<button style="background:#222;border:1px solid #555" onclick="shareNet('tiktok')">🎵 TikTok</button>
+</div>
+<button class="gold" onclick="copyLink()">🔗 Copier le lien</button>
+<button class="ghost" onclick="shareNative()">📲 Autres applications</button>
+</div>
 
 <div class="nav">
 <div onclick="closeAll()">🏠<br>Accueil</div>
