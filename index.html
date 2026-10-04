@@ -2,503 +2,3024 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#000000">
+
 <title>BOUBA STORE</title>
+
 <style>
-*{margin:0;box-sizing:border-box}
-body{background:#000;color:#fff;font-family:Arial;padding-bottom:90px}
-.header{border:2px solid #d4af37;padding:10px;position:sticky;top:0;background:#000;z-index:100}
-.b{width:42px;height:42px;border-radius:50%;border:2px solid gold;object-fit:cover;background:#0a331a}
-.search{margin-top:10px;border:1px solid #d4af37;border-radius:30px;padding:10px 15px;display:flex}
-.search input{background:transparent;border:0;outline:0;color:#fff;width:100%}
-.cats{display:flex;gap:6px;margin-top:10px;overflow-x:auto}
-.cat{padding:8px 16px;border-radius:20px;border:1px solid #d4af37;background:transparent;color:#d4af37;font-size:13px}
-.cat.active{background:#d4af37;color:#000;font-weight:700}
-.banner{background:linear-gradient(90deg,#8B5A2B,#D4AF37);color:#000;text-align:center;padding:8px;font-size:11px;font-weight:900}
-#net{text-align:center;font-size:11px;padding:4px;font-weight:700;background:#111}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px}
-.card{background:#111;border:1px solid #d4af37;color:#fff;border-radius:12px;overflow:hidden}
-.card img{width:100%;height:170px;object-fit:cover;background:#222}
-.info{padding:7px}
-.btn{width:100%;background:linear-gradient(gold,#b8860b);border:0;padding:9px;border-radius:7px;font-weight:800;font-size:12px}
-.shareBtn{width:100%;background:#25D366;border:0;padding:6px;border-radius:6px;color:#fff;font-size:10px;font-weight:700;margin-top:4px}
-.nav{position:fixed;bottom:0;width:100%;background:#000;border-top:1px solid #d4af37;display:flex;justify-content:space-around;padding:6px 0;font-size:9px;text-align:center;z-index:100}
-.page{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:200;overflow-y:auto;padding:15px;padding-bottom:90px}
-.page.active{display:block}
-.input{width:100%;padding:12px;border-radius:8px;border:1px solid #d4af37;background:#111;color:#fff;margin-bottom:10px}
-#miniCart{position:fixed;bottom:-400px;left:0;width:100%;background:#111;border-top:2px solid gold;border-radius:20px 20px 0 0;padding:15px;z-index:300;transition:0.4s}
-#miniCart.show{bottom:55px}
-.adminBtn{position:fixed;bottom:70px;right:15px;background:gold;width:55px;height:55px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;z-index:90;color:#000;font-weight:900}
-.shareFloat{position:fixed;bottom:70px;left:15px;background:#25D366;width:55px;height:55px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;z-index:90}
-#gate{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(#111,#000);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
-.gateBox{background:#0f0f0f;border:2px solid gold;border-radius:20px;padding:20px;width:100%;max-width:380px;text-align:center}
-.profilePic{width:90px;height:90px;border-radius:50%;border:3px solid gold;object-fit:cover;margin:0 auto 10px;display:block;background:#111}
-.userBadge{width:32px;height:32px;border-radius:50%;border:2px solid gold;object-fit:cover}
-.panierItem{background:#111;border:1px solid #333;border-radius:12px;display:flex;gap:10px;padding:10px;margin-bottom:8px;align-items:center}
-.panierItem img{width:65px;height:65px;border-radius:8px;object-fit:cover}
-.qtyBtn{width:32px;height:32px;border-radius:50%;border:1px solid gold;background:#000;color:gold;font-weight:900}
-.qtyNum{margin:0 8px;font-weight:900;color:gold}
-.ctrl{border:1px solid #333;border-radius:10px;padding:10px;margin-bottom:10px;background:#0f0f0f}
-.onglet4{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.btn4{padding:18px 8px;border-radius:14px;border:0;font-weight:900;font-size:14px;min-height:70px;color:#fff;display:flex;flex-direction:column;align-items:center;gap:6px}
-.row{display:flex;gap:8px;align-items:center;background:#111;padding:6px;border-radius:8px;margin-bottom:5px}
-.row img{width:36px;height:36px;border-radius:50%;object-fit:cover}
-body:not(.adm) .adminBtn,body:not(.adm) .nav div:nth-child(2){display:none}
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#000;
+    color:#fff;
+    font-family:Arial,sans-serif;
+    padding-bottom:80px;
+}
+
+/* ===== HEADER ===== */
+
+.header{
+    position:sticky;
+    top:0;
+    z-index:100;
+    background:#000;
+    border:2px solid #d4af37;
+    padding:10px;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.logo img{
+    width:45px;
+    height:45px;
+    border-radius:50%;
+    border:2px solid gold;
+    object-fit:cover;
+    background:#111;
+}
+
+.logo h1{
+    color:#d4af37;
+    font-size:20px;
+}
+
+/* ===== RECHERCHE ===== */
+
+.search{
+    margin-top:10px;
+    border:1px solid #d4af37;
+    border-radius:30px;
+    padding:10px 15px;
+    display:flex;
+}
+
+.search input{
+    width:100%;
+    background:transparent;
+    border:0;
+    outline:0;
+    color:#fff;
+    font-size:14px;
+}
+
+/* ===== CATEGORIES ===== */
+
+.cats{
+    display:flex;
+    gap:6px;
+    margin-top:10px;
+    overflow-x:auto;
+}
+
+.cat{
+    white-space:nowrap;
+    padding:8px 16px;
+    border-radius:20px;
+    border:1px solid #d4af37;
+    background:transparent;
+    color:#d4af37;
+    font-size:13px;
+}
+
+.cat.active{
+    background:#d4af37;
+    color:#000;
+    font-weight:bold;
+}
+
+/* ===== BANNIERE ===== */
+
+.banner{
+    background:linear-gradient(90deg,#8b5a2b,#d4af37);
+    color:#000;
+    text-align:center;
+    padding:8px;
+    font-size:11px;
+    font-weight:bold;
+}
+
+#net{
+    text-align:center;
+    background:#111;
+    padding:5px;
+    font-size:11px;
+}
+
+/* ===== PRODUITS ===== */
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    padding:10px;
+}
+
+.card{
+    background:#111;
+    border:1px solid #d4af37;
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.card img{
+    width:100%;
+    height:170px;
+    object-fit:cover;
+    background:#222;
+}
+
+.info{
+    padding:8px;
+}
+
+.info h3{
+    font-size:14px;
+    margin-bottom:5px;
+}
+
+.price{
+    color:#d4af37;
+    font-weight:bold;
+    margin-bottom:8px;
+}
+
+.btn{
+    width:100%;
+    padding:9px;
+    border:0;
+    border-radius:7px;
+    background:linear-gradient(gold,#b8860b);
+    color:#000;
+    font-weight:bold;
+}
+
+.shareBtn{
+    width:100%;
+    margin-top:5px;
+    padding:7px;
+    border:0;
+    border-radius:7px;
+    background:#25d366;
+    color:#fff;
+    font-weight:bold;
+    font-size:11px;
+}
+
+/* ===== NAVIGATION ===== */
+
+.nav{
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    z-index:100;
+    background:#000;
+    border-top:1px solid #d4af37;
+    display:flex;
+    justify-content:space-around;
+    padding:8px 0;
+}
+
+.nav button{
+    background:none;
+    border:0;
+    color:#fff;
+    font-size:11px;
+}
+
+.nav button span{
+    display:block;
+    font-size:20px;
+}
+
+/* ===== PAGES ===== */
+
+.page{
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:#000;
+    z-index:200;
+    overflow-y:auto;
+    padding:15px;
+    padding-bottom:100px;
+}
+
+.page.active{
+    display:block;
+}
+
+.backBtn{
+    margin-bottom:15px;
+}
+
+.backBtn button{
+    background:#222;
+    border:1px solid gold;
+    color:gold;
+    border-radius:20px;
+    padding:9px 16px;
+}
+
+/* ===== FORMULAIRES ===== */
+
+.input{
+    width:100%;
+    padding:12px;
+    margin-bottom:10px;
+    border-radius:8px;
+    border:1px solid #d4af37;
+    background:#111;
+    color:#fff;
+    outline:none;
+}
+
+/* ===== PANIER ===== */
+
+#miniCart{
+    position:fixed;
+    left:0;
+    bottom:-500px;
+    width:100%;
+    background:#111;
+    border-top:2px solid gold;
+    border-radius:20px 20px 0 0;
+    padding:15px;
+    z-index:300;
+    transition:.4s;
+}
+
+#miniCart.show{
+    bottom:60px;
+}
+
+/* ===== BOUTONS FLOTTANTS ===== */
+
+.adminBtn{
+    position:fixed;
+    right:15px;
+    bottom:130px;
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    background:gold;
+    color:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    z-index:90;
+}
+
+.shareFloat{
+    position:fixed;
+    left:15px;
+    bottom:130px;
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    background:#25d366;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    z-index:90;
+}
+
+/* ===== ASSISTANTE IA ===== */
+
+#iaBtn{
+    position:fixed;
+    right:15px;
+    bottom:195px;
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#d4af37,#8a6d00);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    z-index:90;
+}
+
+#iaChat{
+    position:fixed;
+    right:10px;
+    bottom:260px;
+    width:92%;
+    max-width:360px;
+    height:420px;
+    background:#111;
+    border:2px solid gold;
+    border-radius:15px;
+    z-index:400;
+    display:none;
+    flex-direction:column;
+    overflow:hidden;
+}
+
+#iaChat.open{
+    display:flex;
+}
+
+.iaHead{
+    display:flex;
+    justify-content:space-between;
+    padding:12px;
+    background:linear-gradient(#d4af37,#8a6d00);
+    color:#000;
+    font-weight:bold;
+}
+
+.iaMsgs{
+    flex:1;
+    overflow-y:auto;
+    padding:10px;
+}
+
+.msg{
+    padding:9px;
+    margin-bottom:8px;
+    border-radius:10px;
+    font-size:13px;
+}
+
+.msg.bot{
+    background:#222;
+}
+
+.msg.user{
+    background:#d4af37;
+    color:#000;
+    text-align:right;
+}
+
+.iaInput{
+    display:flex;
+    padding:8px;
+    gap:5px;
+}
+
+.iaInput input{
+    flex:1;
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #555;
+    background:#000;
+    color:#fff;
+}
+
+.iaInput button{
+    width:45px;
+    border:0;
+    border-radius:8px;
+    background:gold;
+}
+
+/* ===== ADMIN ===== */
+
+.ctrl{
+    background:#0f0f0f;
+    border:1px solid #333;
+    border-radius:10px;
+    padding:12px;
+    margin-bottom:12px;
+}
+
+.ctrl h3,
+.ctrl h4{
+    color:#d4af37;
+    margin-bottom:10px;
+}
+
+.adminGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+}
+
+.adminCard{
+    background:#111;
+    border:1px solid #d4af37;
+    border-radius:12px;
+    padding:15px;
+    text-align:center;
+}
+
+.adminCard strong{
+    display:block;
+    color:gold;
+    font-size:24px;
+}
+
+/* ===== TOAST ===== */
+
+#toast{
+    display:none;
+    position:fixed;
+    left:10px;
+    right:10px;
+    bottom:90px;
+    z-index:9999;
+    background:#222;
+    border:1px solid gold;
+    border-radius:10px;
+    padding:12px;
+    text-align:center;
+    color:#fff;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media(min-width:700px){
+    .grid{
+        grid-template-columns:repeat(4,1fr);
+    }
+
+    .nav{
+        max-width:700px;
+        left:50%;
+        transform:translateX(-50%);
+    }
+}
 </style>
 </head>
+
 <body>
 
-<div id="gate">
-<div class="gateBox">
-<img id="gatePreview" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="profilePic">
-<h1 style="color:gold">BOUBA STORE</h1>
-<p style="font-size:11px;color:#aaa;margin-bottom:10px">PRINCIPESSA ROMANA • ABIDJAN</p>
-<input id="uName" class="input" placeholder="Nom complet *">
-<input id="uPhone" class="input" placeholder="WhatsApp *" type="tel">
-<input id="uCity" class="input" placeholder="Ville *">
-<button onclick="document.getElementById('uPhoto').click()" style="width:100%;padding:10px;background:#222;border:1px dashed gold;color:gold;border-radius:8px;margin-bottom:10px">📷 Photo de Profil *</button>
-<input type="file" id="uPhoto" accept="image/*" style="display:none" onchange="handleGatePhoto(event)">
-<input type="password" id="uPass" class="input" placeholder="Mot de passe *">
-<button onclick="register()" style="width:100%;padding:14px;background:gold;border:0;border-radius:10px;font-weight:900;color:#000;margin-top:8px">✅ CRÉER MON COMPTE</button>
-</div>
+<!-- ================= HEADER ================= -->
+
+<header class="header">
+
+    <div class="logo">
+        <img id="logoMain"
+             src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+
+        <h1>BOUBA STORE</h1>
+    </div>
+
+    <div class="search">
+        🔍
+        <input
+            id="searchInput"
+            type="text"
+            placeholder="Rechercher un article..."
+            oninput="searchProducts()">
+    </div>
+
+    <div class="cats">
+
+        <button class="cat active"
+                onclick="filterCat('all',this)">
+            Tous
+        </button>
+
+        <button class="cat"
+                onclick="filterCat('homme',this)">
+            Homme
+        </button>
+
+        <button class="cat"
+                onclick="filterCat('femme',this)">
+            Femme
+        </button>
+
+        <button class="cat"
+                onclick="filterCat('chaussures',this)">
+            Chaussures
+        </button>
+
+        <button class="cat"
+                onclick="filterCat('accessoires',this)">
+            Accessoires
+        </button>
+
+    </div>
+
+</header>
+
+<!-- ================= BANNIERE ================= -->
+
+<div class="banner" id="bannerText">
+    SPQR • IMPERIUM • LIVRAISON 24H ABIDJAN • WAVE • ORANGE MONEY
 </div>
 
-<div class="header">
-<div style="display:flex;justify-content:space-between;align-items:center">
-<div style="display:flex;gap:8px;align-items:center">
-<img id="logoHeader" class="b" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Logo">
-<b style="color:gold" id="storeName">BOUBA STORE</b>
+<div id="net">
+    ⏳ Connexion...
 </div>
-<div style="display:flex;gap:6px;align-items:center">
-<img id="headerUserPic" class="userBadge" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" style="display:none" onclick="openPage('profilePage')">
-<span onclick="openPage('panierPage')">👜(<span id="cartC">0</span>)</span>
-</div>
-</div>
-<div class="search">🔍<input id="s" placeholder="Rechercher..." oninput="doSearch()"></div>
-<div class="cats">
-<button class="cat active" onclick="filterCat(this,'all')">Tous</button>
-<button class="cat" onclick="filterCat(this,'Femme')">Femme</button>
-<button class="cat" onclick="filterCat(this,'Homme')">Homme</button>
-<button class="cat" onclick="filterCat(this,'Ensembles')">Ensembles</button>
-</div>
-</div><div class="banner" id="bannerText">SPQR • IMPERIUM • LIVRAISON 24H ABIDJAN • WAVE • ORANGE MONEY</div>
-<div id="net">⏳ Connexion...</div>
-<div class="grid" id="grid"></div>
+
+<!-- ================= PRODUITS ================= -->
+
+<main>
+
+    <div
+        class="grid"
+        id="grid">
+    </div>
+
+</main>
+
+<!-- ================= MINI PANIER ================= -->
 
 <div id="miniCart">
-<h3 style="color:gold">✅ Article ajouté</h3>
-<div id="miniContent" style="margin:10px 0"></div>
-<div style="display:flex;gap:8px">
-<button onclick="openPage('panierPage');closeMini()" style="flex:1;padding:12px;background:transparent;border:1px solid gold;color:gold;border-radius:8px">Voir Panier</button>
-<button onclick="commander()" style="flex:1;padding:12px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">Commander</button>
-</div>
-</div>
-<div class="adminBtn" onclick="openPage('adminPage')">⚙️</div>
-<div class="shareFloat" onclick="openPage('sharePage')">📤</div>
 
-<div id="sharePage" class="page">
-<h2 style="color:gold">📤 PARTAGER</h2>
-<div class="ctrl" style="border-color:gold">
-<div class="onglet4">
-<button class="btn4" style="background:#25D366" onclick="shareNetwork('whatsapp')"><span>💬</span>WhatsApp</button>
-<button class="btn4" style="background:#1877F2" onclick="shareNetwork('facebook')"><span>📘</span>Facebook</button>
-<button class="btn4" style="background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)" onclick="shareNetwork('instagram')"><span>📸</span>Instagram</button>
-<button class="btn4" style="background:#000;border:1px solid #444" onclick="shareNetwork('tiktok')"><span>🎵</span>TikTok</button>
-</div>
-<div style="display:flex;gap:6px;margin-top:12px">
-<button onclick="copyCatalog()" style="flex:1;padding:12px;background:#333;color:#fff;border-radius:8px;border:1px solid #555">🔗 Copier Lien</button>
-<button onclick="shareNative()" style="flex:1;padding:12px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">📲 Partager</button>
-</div>
-</div>
-<button onclick="closePage('sharePage')" style="width:100%;margin-top:12px;padding:14px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Fermer</button>
-</div>
+    <h3 style="color:gold">
+        ✅ Article ajouté
+    </h3>
 
-<div id="profilePage" class="page">
-<h2 style="color:gold">👤 MON COMPTE</h2>
-<div class="ctrl" style="text-align:center;border-color:gold">
-<img id="profilePicBig" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="profilePic" style="width:120px;height:120px">
-<h3 id="profileName" style="color:gold">Nom Client</h3>
-<p id="profilePhone" style="font-size:12px;color:#aaa">WhatsApp</p>
-<p id="profileCity" style="font-size:12px;color:#aaa">Ville</p>
-<div style="display:flex;gap:6px;margin-top:10px">
-<button onclick="document.getElementById('profilePhotoInput').click()" style="flex:1;padding:10px;background:#222;border:1px solid gold;color:gold;border-radius:8px">📷 Changer Photo</button>
-<button onclick="document.getElementById('editName').focus()" style="flex:1;padding:10px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">✏️ Modifier</button>
-</div>
-<input type="file" id="profilePhotoInput" accept="image/*" style="display:none" onchange="handleProfilePhoto(event)">
-</div>
-<div class="ctrl">
-<h4 style="color:gold">📝 MODIFIER INFOS</h4>
-<input id="editName" class="input" placeholder="Nom complet">
-<input id="editPhone" class="input" placeholder="WhatsApp">
-<input id="editCity" class="input" placeholder="Ville">
-<button onclick="saveProfile()" style="width:100%;padding:12px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">✅ Sauver</button>
-</div>
-<button onclick="logout()" style="width:100%;padding:12px;background:#300;border:1px solid #f44;color:#f44;border-radius:8px">🚪 Déconnexion</button>
-<button onclick="closePage('profilePage')" style="width:100%;margin-top:8px;padding:12px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Fermer</button>
+    <div
+        id="miniContent"
+        style="margin:10px 0">
+    </div>
+
+    <div style="display:flex;gap:8px">
+
+        <button
+            onclick="openPage('panierPage');closeMini()"
+            style="flex:1;padding:12px;background:transparent;border:1px solid gold;color:gold;border-radius:8px">
+            👜 Voir Panier
+        </button>
+
+        <button
+            onclick="commander()"
+            style="flex:1;padding:12px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">
+            Commander
+        </button>
+
+    </div>
+
 </div>
 
-<div id="adminPage" class="page">
-<h2 style="color:gold">⚙️ CONTROLE + CLIENTS</h2>
-<div class="ctrl"><h4 style="color:gold">🧾 COMMANDES</h4><div id="ordersList" style="font-size:11px"></div></div>
-<div class="ctrl"><h4 style="color:gold">👥 CLIENTS INSCRITS</h4><div id="clientsList" style="font-size:11px"></div></div>
-<div class="ctrl"><h4>🏆 LOGO</h4><img id="logoAdmin" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" style="width:100px;height:100px;border-radius:50%;border:2px solid gold;display:block;margin:8px auto;object-fit:cover"><div style="display:flex;gap:6px"><button onclick="document.getElementById('logoInput').click()" style="flex:1;padding:10px;background:#222;border:1px solid gold;color:gold;border-radius:8px">📷 Changer le logo</button></div><input type="file" id="logoInput" accept="image/*" style="display:none" onchange="setLogo(event)"></div>
-<div class="ctrl"><h4>🏪 NOM, BANNIERE, WHATSAPP</h4><input id="ctrlName" class="input" placeholder="Nom boutique"><input id="ctrlBanner" class="input" placeholder="Bannière"><input id="ctrlWa" class="input" type="tel" placeholder="N° WhatsApp commandes (ex: 2250700000000)"><button onclick="saveStoreInfo()" style="width:100%;padding:10px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000">✅ Sauver</button></div>
-<div class="ctrl"><h4>➕ PRODUIT</h4><input id="pName" class="input" placeholder="Nom"><input id="pPrice" class="input" type="number" placeholder="Prix"><select id="pCat" class="input"><option>Femme</option><option>Homme</option><option>Ensembles</option></select><input id="pImg" class="input" placeholder="Lien image (ou prends une photo)"><button onclick="document.getElementById('fileInput').click()" style="width:100%;padding:10px;background:#222;border:1px solid #555;color:#fff;border-radius:8px">📷 Photo</button><input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(event)"><div id="preview"></div><button onclick="addProduct()" style="width:100%;padding:12px;background:gold;border:0;border-radius:10px;font-weight:900;color:#000;margin-top:6px">✅ AJOUTER</button></div>
-<button onclick="adminLogout()" style="width:100%;margin-top:10px;padding:12px;background:#300;border:1px solid #f44;color:#f44;border-radius:8px">🔒 Déconnexion admin</button>
-<button onclick="closePage('adminPage')" style="width:100%;margin-top:8px;padding:12px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Fermer</button>
+<!-- ================= BOUTONS FLOTTANTS ================= -->
+
+<div
+    class="adminBtn"
+    onclick="openPage('adminPage')">
+    ⚙️
 </div>
 
-<div id="panierPage" class="page">
-<h2 style="color:gold">👜 MON PANIER</h2>
-<div id="panierList"></div>
-<div id="total" style="color:gold;font-weight:900;margin-top:12px;font-size:16px"></div>
-<div style="display:flex;gap:6px;margin-top:10px"><button onclick="viderPanier()" style="flex:1;padding:12px;background:#222;border:1px solid #555;color:#fff;border-radius:8px">🗑️ Vider</button><button onclick="closePage('panierPage')" style="flex:1;padding:12px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px">Continuer</button></div>
-<button onclick="commander()" style="width:100%;padding:14px;background:#25D366;border:0;border-radius:10px;font-weight:900;color:#fff;margin-top:10px">✅ COMMANDER WHATSAPP</button>
+<div
+    class="shareFloat"
+    onclick="openPage('sharePage')">
+    📤
 </div>
 
-<div class="nav">
-<div onclick="closeAll()">🏠<br>Accueil</div>
-<div onclick="openPage('adminPage')">⚙️<br>Controle</div>
-<div onclick="openPage('sharePage')" style="color:gold">📤<br>Partager</div>
-<div onclick="openPage('panierPage')">👜<br>Panier</div>
-<div onclick="openPage('profilePage')">👤<br>Compte</div>
-</div><script>
-/* ====== À CHANGER ====== */
-const ADMIN_UID="Yhv7spnIt6OE1aBn2AjyYQ47wxn2";
-const DEFAULT_WA="2250700000000";  // mets ton vrai numéro WhatsApp (modifiable aussi dans Controle)
-const FB_CFG={
- apiKey:"AIzaSyDRD5Log6Nd5pEB7jctQQt-IDwC88culCk",
- authDomain:"bouba-51a6f.firebaseapp.com",
- databaseURL:"https://bouba-51a6f-default-rtdb.europe-west1.firebasedatabase.app",
- projectId:"bouba-51a6f",
- storageBucket:"bouba-51a6f.firebasestorage.app",
- messagingSenderId:"267309248026",
- appId:"1:267309248026:web:8a43e3dfc934c45adeeba3"
+<div
+    id="iaBtn"
+    onclick="toggleIA()">
+    🤖
+</div>
+
+<!-- ================= ASSISTANTE ================= -->
+
+<div id="iaChat">
+
+    <div class="iaHead">
+
+        <span>
+            🤖 Assistante BOUBA
+        </span>
+
+        <span onclick="toggleIA()">
+            ✕
+        </span>
+
+    </div>
+
+    <div
+        class="iaMsgs"
+        id="iaMsgs">
+    </div>
+
+    <div class="iaInput">
+
+        <input
+            id="iaInput"
+            placeholder="Ex : ensemble homme"
+            onkeypress="if(event.key==='Enter')sendIA()">
+
+        <button onclick="sendIA()">
+            ➤
+        </button>
+
+    </div>
+
+</div>
+
+<!-- ================= PARTAGE ================= -->
+
+<div
+    id="sharePage"
+    class="page">
+
+    <div class="backBtn">
+        <button onclick="closeAll()">
+            ← Retour
+        </button>
+    </div>
+
+    <h2 style="color:gold">
+        📤 PARTAGER BOUBA STORE
+    </h2>
+
+    <div
+        class="ctrl"
+        style="margin-top:15px">
+
+        <button
+            onclick="shareNetwork('whatsapp')"
+            style="width:100%;padding:14px;margin-bottom:8px;background:#25d366;border:0;border-radius:8px;color:#fff;font-weight:bold">
+            💬 WhatsApp
+        </button>
+
+        <button
+            onclick="shareNetwork('facebook')"
+            style="width:100%;padding:14px;margin-bottom:8px;background:#1877f2;border:0;border-radius:8px;color:#fff;font-weight:bold">
+            📘 Facebook
+        </button>
+
+        <button
+            onclick="shareNetwork('instagram')"
+            style="width:100%;padding:14px;margin-bottom:8px;background:#c13584;border:0;border-radius:8px;color:#fff;font-weight:bold">
+            📸 Instagram
+        </button>
+
+        <button
+            onclick="shareNetwork('tiktok')"
+            style="width:100%;padding:14px;background:#111;border:1px solid #555;border-radius:8px;color:#fff;font-weight:bold">
+            🎵 TikTok
+        </button>
+
+    </div>
+
+    <button
+        onclick="closeAll()"
+        style="width:100%;padding:14px;background:#222;border:1px solid #555;color:#fff;border-radius:8px">
+        Fermer
+    </button>
+
+</div>
+
+<!-- ================= PANIER ================= -->
+
+<div
+    id="panierPage"
+    class="page">
+
+    <div class="backBtn">
+        <button onclick="closeAll()">
+            ← Retour
+        </button>
+    </div>
+
+    <h2 style="color:gold">
+        👜 MON PANIER
+    </h2>
+
+    <div
+        id="cartList"
+        style="margin-top:15px">
+    </div>
+
+    <div
+        class="ctrl"
+        style="margin-top:15px">
+
+        <h3>
+            Total
+        </h3>
+
+        <div
+            id="cartTotal"
+            style="font-size:22px;color:gold;font-weight:bold">
+            0 F
+        </div>
+
+        <button
+            onclick="commander()"
+            style="width:100%;margin-top:12px;padding:14px;background:#25d366;border:0;border-radius:8px;color:#fff;font-weight:bold">
+            💬 Commander sur WhatsApp
+        </button>
+
+    </div>
+
+</div>
+
+<!-- ================= PROFIL ================= -->
+
+<div
+    id="profilePage"
+    class="page">
+
+    <div class="backBtn">
+        <button onclick="closeAll()">
+            ← Retour
+        </button>
+    </div>
+
+    <h2 style="color:gold">
+        👤 MON COMPTE
+    </h2>
+
+    <div
+        class="ctrl"
+        style="text-align:center;margin-top:15px">
+
+        <div
+            id="profileAvatar"
+            style="width:100px;height:100px;border-radius:50%;border:3px solid gold;margin:auto;display:flex;align-items:center;justify-content:center;font-size:45px">
+            👤
+        </div>
+
+        <h3
+            id="profileName"
+            style="color:gold;margin-top:10px">
+            Client
+        </h3>
+
+        <p
+            id="profilePhone"
+            style="color:#aaa">
+            WhatsApp
+        </p>
+
+    </div>
+
+    <div class="ctrl">
+
+        <h4>
+            📝 MES INFORMATIONS
+        </h4>
+
+        <input
+            id="editName"
+            class="input"
+            placeholder="Nom complet">
+
+        <input
+            id="editPhone"
+            class="input"
+            placeholder="WhatsApp">
+
+        <input
+            id="editCity"
+            class="input"
+            placeholder="Ville">
+
+        <button
+            onclick="saveProfile()"
+            style="width:100%;padding:12px;background:gold;border:0;border-radius:8px;font-weight:bold">
+            ✅ Sauvegarder
+        </button>
+
+    </div>
+
+    <button
+        onclick="logout()"
+        style="width:100%;padding:12px;background:#300;border:1px solid #f44;color:#f44;border-radius:8px">
+        🚪 Déconnexion
+    </button>
+
+</div>
+
+<!-- ================= ADMIN ================= -->
+
+<div
+    id="adminPage"
+    class="page">
+
+    <div class="backBtn">
+        <button onclick="closeAll()">
+            ← Retour à l'accueil
+        </button>
+    </div>
+
+    <h2 style="color:gold">
+        ⚙️ CONTRÔLE BOUBA STORE
+    </h2>
+
+    <div
+        class="ctrl"
+        style="margin-top:15px">
+
+        <h3>
+            📊 TABLEAU DE BORD
+        </h3>
+
+        <div class="adminGrid">
+
+            <div class="adminCard">
+                👥
+                <strong id="statClients">
+                    0
+                </strong>
+                Clients
+            </div>
+
+            <div class="adminCard">
+                🛍️
+                <strong id="statProducts">
+                    0
+                </strong>
+                Produits
+            </div>
+
+            <div class="adminCard">
+                📦
+                <strong id="statOrders">
+                    0
+                </strong>
+                Commandes
+            </div>
+
+            <div class="adminCard">
+                💰
+                <strong id="statSales">
+                    0
+                </strong>
+                FCFA
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="ctrl">
+
+        <h3>
+            🛍️ GESTION DES PRODUITS
+        </h3>
+
+        <input
+            id="productName"
+            class="input"
+            placeholder="Nom du produit">
+
+        <input
+            id="productPrice"
+            class="input"
+            type="number"
+            placeholder="Prix en FCFA">
+
+        <select
+            id="productCat"
+            class="input">
+
+            <option value="homme">
+                Homme
+            </option>
+
+            <option value="femme">
+                Femme
+            </option>
+
+            <option value="chaussures">
+                Chaussures
+            </option>
+
+            <option value="accessoires">
+                Accessoires
+            </option>
+
+        </select>
+
+        <input
+            id="productImage"
+            class="input"
+            placeholder="Lien de l'image">
+
+        <button
+            onclick="addProduct()"
+            style="width:100%;padding:13px;background:gold;border:0;border-radius:8px;font-weight:bold">
+            ➕ Ajouter le produit
+        </button>
+
+    </div>
+
+    <div class="ctrl">
+
+        <h3>
+            👥 CLIENTS
+        </h3>
+
+        <input
+            id="clientQ"
+            class="input"
+            placeholder="🔍 Rechercher un client..."
+            oninput="renderClients()">
+
+        <div id="clientsList">
+        </div>
+
+    </div>
+
+    <div class="ctrl">
+
+        <h3>
+            📦 COMMANDES
+        </h3>
+
+        <div id="ordersList">
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ================= NAVIGATION BAS ================= -->
+
+<nav class="nav">
+
+    <button onclick="closeAll()">
+        <span>🏠</span>
+        Accueil
+    </button>
+
+    <button onclick="openPage('panierPage')">
+        <span>👜</span>
+        Panier
+    </button>
+
+    <button onclick="openPage('profilePage')">
+        <span>👤</span>
+        Compte
+    </button>
+
+    <button onclick="openPage('sharePage')">
+        <span>📤</span>
+        Partager
+    </button>
+
+</nav>
+
+<div id="toast"></div>
+
+<!-- La PARTIE 2 viendra ici --><!-- =========================================================
+     BOUBA STORE — PARTIE 2/3
+     MOTEUR DU SITE
+     ========================================================= -->
+
+<script type="module">
+
+/* =========================================================
+   1. CONFIGURATION FIREBASE
+   ========================================================= */
+
+const FIREBASE_CONFIG = {
+    apiKey: "AIzaSYDR5DLog6Nd5pEB7jctQQt-IDwC88culCk",
+    authDomain: "bouba-51a6f.firebaseapp.com",
+    databaseURL: "https://bouba-51a6f-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "bouba-51a6f",
+    storageBucket: "bouba-51a6f.firebasestorage.app",
+    messagingSenderId: "267309248026",
+    appId: "1:267309248026:web:8a43e3dfc934c45adeeba3"
 };
-/* ======================= */
 
-const $=id=>document.getElementById(id);
-const LS=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}};
-const SV=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){alert('Mémoire du téléphone pleine')}};
-const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const safeImg=u=>/^(https?:|data:image\/)/.test(u||'')?esc(u):'';
-const fmt=n=>Number(n||0).toLocaleString('fr-FR');
-const okId=x=>/^[\w-]+$/.test(x||'');
+/*
+   IMPORTANT :
+   Cet UID sera utilisé pour reconnaître ton compte
+   administrateur.
 
-let S=LS('b_state',null)||{info:{},products:{},users:{},orders:{}};
-S.info=S.info||{};S.products=S.products||{};S.users=S.users||{};S.orders=S.orders||{};
-let outbox=LS('b_out',[]);
-let cart=LS('b_cart',[]);
-let me=LS('b_me',null);
-let isAdmin=false,cat='all',q='',online=false;
-let tmpGate='',tmpProd='',adminSub=false;
-let fb=null,flushing=false;
+   Nous garderons la sécurité Firebase pour la PARTIE 3.
+*/
+const ADMIN_UID = "Yhv7spnIt6OE1aBn2AjyYQ47wxn2";
 
-function save(){SV('b_state',S);SV('b_out',outbox)}
 
-/* ---------- écriture locale + file d'attente ---------- */
-function setLocal(path,val){
- const p=path.split('/');let o=S;
- for(let i=0;i<p.length-1;i++){o=o[p[i]]=o[p[i]]||{}}
- const k=p[p.length-1];
- if(val===null)delete o[k];else o[k]=val;
-}
-function write(path,val){
- setLocal(path,val);
- outbox.push({path:path,val:val});
- save();renderAll();flush();
-}
-async function flush(){
- if(!fb||!online||flushing)return;
- flushing=true;
- try{
-  while(outbox.length){
-   const o=outbox[0];
-   try{
-    const r=fb.D.ref(fb.db,o.path);
-    if(o.val===null)await fb.D.remove(r);else await fb.D.set(r,o.val);
-   }catch(e){
-    if(!/permission/i.test(String(e.code)+String(e.message)))throw e;
-    /* action refusée par les règles : on l'abandonne sans bloquer les autres */
-   }
-   outbox.shift();save();setNet();
-  }
- }catch(e){console.log('flush',e)}
- flushing=false;setNet();
+/* =========================================================
+   2. VARIABLES
+   ========================================================= */
+
+let produits = {};
+let clients = {};
+let commandes = {};
+
+let panier = [];
+
+let categorieActuelle = "all";
+let rechercheActuelle = "";
+
+let utilisateurConnecte = null;
+let administrateur = false;
+
+let firebaseDB = null;
+let firebaseAuth = null;
+
+
+/* =========================================================
+   3. OUTILS
+   ========================================================= */
+
+function $id(id){
+    return document.getElementById(id);
 }
 
-/* ---------- Firebase (chargé sans bloquer le site) ---------- */
-async function initFB(){
- try{
-  const V="12.19.0",B="https://www.gstatic.com/firebasejs/"+V+"/";
-  const A=await import(B+"firebase-app.js");
-  const D=await import(B+"firebase-database.js");
-  const AU=await import(B+"firebase-auth.js");
-  const app=A.initializeApp(FB_CFG);
-  const db=D.getDatabase(app),auth=AU.getAuth(app);
-  fb={db:db,D:D,AU:AU,auth:auth};
-  D.onValue(D.ref(db,'.info/connected'),s=>{online=!!s.val();setNet();if(online)flush()});
-  sub('info');sub('products');
-  AU.onAuthStateChanged(auth,u=>{
-   isAdmin=!!u&&u.uid===ADMIN_UID;
-   document.body.classList.toggle('adm',isAdmin);
-   if(isAdmin)subAdmin();
-   renderAll();
-  });
- }catch(e){console.log('Mode local (Firebase indisponible)',e);setNet()}
-}
-function sub(root){
- fb.D.onValue(fb.D.ref(fb.db,root),s=>{
-  S[root]=s.val()||{};
-  outbox.filter(o=>o.path.split('/')[0]===root).forEach(o=>setLocal(o.path,o.val));
-  save();renderAll();
- },err=>console.log('sub',root,err));
-}
-function subAdmin(){
- if(!fb||adminSub)return;adminSub=true;sub('users');sub('orders');
-}
-function setNet(){
- const n=outbox.length;
- $('net').innerHTML=online
-  ?'<span style="color:#25D366">🟢 EN DIRECT</span>'+(n?' • envoi de '+n+'…':'')
-  :'<span style="color:orange">🟠 HORS LIGNE</span>'+(n?' • '+n+' action(s) en attente (envoi auto)':' • tout est sauvegardé');
-}
-window.addEventListener('online',()=>{setTimeout(flush,1500)});
-window.addEventListener('offline',()=>{online=false;setNet()});
-
-/* ---------- utilitaires ---------- */
-function compress(file,max,cb){
- if(!file)return;
- const r=new FileReader();
- r.onload=e=>{const i=new Image();i.onload=()=>{
-  const k=Math.min(1,max/Math.max(i.width,i.height));
-  const c=document.createElement('canvas');c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);
-  c.getContext('2d').drawImage(i,0,0,c.width,c.height);
-  cb(c.toDataURL('image/jpeg',0.6));
- };i.src=e.target.result};
- r.readAsDataURL(file);
-}
-async function hash(p){
- try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('bouba'+p));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
- catch(e){return btoa(unescape(encodeURIComponent('bouba'+p)))}
+function formatPrix(prix){
+    return Number(prix || 0).toLocaleString("fr-FR") + " F";
 }
 
-/* ---------- navigation & connexion admin ---------- */
-function closeAll(){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))}
-function closePage(id){$(id).classList.remove('active')}
-async function adminLogin(){
- if(!fb){alert('Connecte-toi à internet pour la première connexion admin');return}
- const m=prompt('Email admin :');if(!m)return;
- const p=prompt('Mot de passe :');if(!p)return;
- try{
-  const c=await fb.AU.signInWithEmailAndPassword(fb.auth,m,p);
-  if(c.user.uid!==ADMIN_UID){await fb.AU.signOut(fb.auth);alert("Ce compte n'est pas admin");return}
-  isAdmin=true;document.body.classList.add('adm');subAdmin();renderAll();openPage('adminPage');
- }catch(e){alert('Connexion refusée')}
-}
-async function adminLogout(){
- try{await fb.AU.signOut(fb.auth)}catch(e){}
- isAdmin=false;document.body.classList.remove('adm');closeAll();renderAll();
-}
-function openPage(id){
- if(id==='adminPage'&&!isAdmin){adminLogin();return}
- closeAll();$(id).classList.add('active');
- if(id==='panierPage')renderCart();
-}
-function closeMini(){$('miniCart').classList.remove('show')}
+function afficherToast(message){
 
-/* ---------- boutique ---------- */
-function applyInfo(){
- const i=S.info||{};
- if(i.name){$('storeName').textContent=i.name;document.title=i.name}
- if(i.banner)$('bannerText').textContent=i.banner;
- if(i.logo){document.querySelectorAll('img.b').forEach(x=>x.src=i.logo);$('logoAdmin').src=i.logo}
-}
-function saveStoreInfo(){
- const n=$('ctrlName').value.trim(),b=$('ctrlBanner').value.trim(),w=$('ctrlWa').value.replace(/\D/g,'');
- const info=Object.assign({},S.info||{});
- if(n)info.name=n;if(b)info.banner=b;if(w)info.whatsapp=w;
- write('info',info);alert('Sauvé ✅');
-}
-function setLogo(e){compress(e.target.files[0],200,d=>write('info/logo',d))}
+    const toast = $id("toast");
 
-function doSearch(){q=$('s').value.toLowerCase();render()}
-function filterCat(btn,c){
- cat=c;document.querySelectorAll('.cat').forEach(x=>x.classList.remove('active'));
- btn.classList.add('active');render();
-}
-function render(){
- const l=Object.values(S.products||{})
-  .filter(p=>p&&okId(p.id)&&(cat==='all'||p.cat===cat)&&(!q||(p.name||'').toLowerCase().includes(q)))
-  .sort((a,b)=>(b.date||0)-(a.date||0));
- $('grid').innerHTML=l.length?l.map(p=>
-  '<div class="card"><img loading="lazy" src="'+safeImg(p.img)+'" alt=""><div class="info">'+
-  '<div style="font-size:13px">'+esc(p.name)+'</div>'+
-  '<div style="color:gold;font-weight:900;margin:4px 0">'+fmt(p.price)+' F</div>'+
-  '<button class="btn" onclick="addCart(\''+p.id+'\')">🛒 Ajouter</button>'+
-  '<button class="shareBtn" onclick="shareProd(\''+p.id+'\')">💬 Partager</button>'+
-  (isAdmin?'<button class="shareBtn" style="background:#a00" onclick="delProduct(\''+p.id+'\')">🗑️ Supprimer</button>':'')+
-  '</div></div>').join('')
-  :'<p style="grid-column:1/3;text-align:center;color:#aaa;padding:30px">Aucun produit pour le moment</p>';
-}
-function handleFile(e){
- compress(e.target.files[0],700,d=>{tmpProd=d;$('preview').innerHTML='<img src="'+d+'" style="width:100%;border-radius:8px;margin:8px 0">'});
-}
-function addProduct(){
- if(!isAdmin){alert("Réservé à l'administrateur");return}
- const name=$('pName').value.trim(),price=Number($('pPrice').value),c=$('pCat').value;
- const img=tmpProd||$('pImg').value.trim();
- if(!name||!price||!img){alert('Nom, prix et image obligatoires');return}
- const id='p'+Date.now();
- write('products/'+id,{id:id,name:name,price:price,cat:c,img:img,date:Date.now()});
- $('pName').value='';$('pPrice').value='';$('pImg').value='';$('preview').innerHTML='';tmpProd='';
- alert('Produit ajouté ✅');
-}
-function delProduct(id){if(isAdmin&&confirm('Supprimer ce produit ?'))write('products/'+id,null)}
+    if(!toast) return;
 
-/* ---------- panier & commande ---------- */
-function cartItems(){return cart.map(c=>({p:(S.products||{})[c.id],qty:c.qty})).filter(x=>x.p)}
-function addCart(id){
- const p=S.products[id];if(!p)return;
- const f=cart.find(c=>c.id===id);
- if(f)f.qty++;else cart.push({id:id,qty:1});
- SV('b_cart',cart);renderCart();
- $('miniContent').textContent=p.name+' — '+fmt(p.price)+' F';
- $('miniCart').classList.add('show');
- clearTimeout(window._mt);window._mt=setTimeout(closeMini,4000);
-}
-function qty(id,d){
- const f=cart.find(c=>c.id===id);if(!f)return;
- f.qty+=d;if(f.qty<=0)cart=cart.filter(c=>c.id!==id);
- SV('b_cart',cart);renderCart();
-}
-function viderPanier(){cart=[];SV('b_cart',cart);renderCart()}
-function renderCart(){
- const it=cartItems();
- $('cartC').textContent=it.reduce((s,x)=>s+x.qty,0);
- $('panierList').innerHTML=it.length?it.map(x=>
-  '<div class="panierItem"><img src="'+safeImg(x.p.img)+'"><div style="flex:1"><div>'+esc(x.p.name)+'</div><div style="color:gold">'+fmt(x.p.price)+' F</div></div>'+
-  '<div><button class="qtyBtn" onclick="qty(\''+x.p.id+'\',-1)">−</button><span class="qtyNum">'+x.qty+'</span><button class="qtyBtn" onclick="qty(\''+x.p.id+'\',1)">+</button></div></div>').join('')
-  :'<p style="color:#aaa;text-align:center;padding:20px">Panier vide</p>';
- $('total').textContent=it.length?'TOTAL : '+fmt(it.reduce((s,x)=>s+x.p.price*x.qty,0))+' F':'';
-}
-function commander(){
- const it=cartItems();
- if(!it.length){alert('Panier vide');return}
- const tot=it.reduce((s,x)=>s+x.p.price*x.qty,0);
- const id='o'+Date.now();
- write('orders/'+id,{id:id,date:Date.now(),
-  client:me?{name:me.name,phone:me.phone,city:me.city}:null,
-  items:it.map(x=>({name:x.p.name,price:x.p.price,qty:x.qty})),total:tot});
- let msg='🛍️ NOUVELLE COMMANDE\n';
- it.forEach(x=>{msg+='• '+x.p.name+' x'+x.qty+' = '+fmt(x.p.price*x.qty)+' F\n'});
- msg+='\nTOTAL : '+fmt(tot)+' F';
- if(me)msg+='\n👤 '+me.name+'\n📞 '+me.phone+'\n📍 '+me.city;
- cart=[];SV('b_cart',cart);renderCart();closeMini();
- const wa=((S.info||{}).whatsapp||DEFAULT_WA).replace(/\D/g,'');
- if(!navigator.onLine)alert('Hors ligne : commande enregistrée. Elle sera envoyée automatiquement dès le retour du réseau.');
- window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg),'_blank');
+    toast.textContent = message;
+    toast.style.display = "block";
+
+    clearTimeout(window.toastTimer);
+
+    window.toastTimer = setTimeout(function(){
+
+        toast.style.display = "none";
+
+    },4000);
 }
 
-/* ---------- compte client ---------- */
-function handleGatePhoto(e){compress(e.target.files[0],300,d=>{tmpGate=d;$('gatePreview').src=d})}
-function checkGate(){
- if(me){$('gate').style.display='none';showUserHeader();loadProfile()}
- else $('gate').style.display='flex';
-}
-function showUserHeader(){const p=$('headerUserPic');if(me&&me.photo){p.src=me.photo;p.style.display='block'}else p.style.display='none'}
-async function register(){
- const n=$('uName').value.trim(),ph=$('uPhone').value.trim(),city=$('uCity').value.trim(),pass=$('uPass').value;
- if(!n||!ph||!city||!pass){alert('Remplis tout BOSS !');return}
- const key=ph.replace(/\D/g,'');
- if(key.length<8){alert('Numéro WhatsApp invalide');return}
- const h=await hash(pass);
- let ex=(S.users||{})[key];
- if(!ex&&fb&&online){try{const s=await fb.D.get(fb.D.ref(fb.db,'users/'+key));ex=s.val()}catch(e){}}
- if(ex){
-  if(ex.h!==h){alert('Mot de passe incorrect');return}
-  me=ex;
- }else{
-  if(!tmpGate){alert('Ajoute ta photo BOSS ! 📷');return}
-  me={name:n,phone:ph,city:city,photo:tmpGate,h:h,date:Date.now()};
-  write('users/'+key,me);
- }
- SV('b_me',me);checkGate();
-}
-function loadProfile(){
- if(!me)return;
- $('profileName').textContent=me.name;$('profilePhone').textContent=me.phone;$('profileCity').textContent=me.city;
- $('profilePicBig').src=me.photo||'';
- $('editName').value=me.name;$('editPhone').value=me.phone;$('editCity').value=me.city;
-}
-function saveProfile(){
- const n=$('editName').value.trim(),ph=$('editPhone').value.trim(),c=$('editCity').value.trim();
- if(!n||!ph||!c){alert('Remplis tout');return}
- const oldKey=me.phone.replace(/\D/g,''),newKey=ph.replace(/\D/g,'');
- me=Object.assign({},me,{name:n,phone:ph,city:c});
- if(oldKey!==newKey)write('users/'+oldKey,null);
- write('users/'+newKey,me);
- SV('b_me',me);loadProfile();showUserHeader();alert('Compte modifié ✅');
-}
-function handleProfilePhoto(e){
- compress(e.target.files[0],300,d=>{
-  me.photo=d;write('users/'+me.phone.replace(/\D/g,''),me);
-  SV('b_me',me);loadProfile();showUserHeader();
- });
-}
-function logout(){
- if(confirm('Déconnexion BOSS ?')){localStorage.removeItem('b_me');me=null;closeAll();checkGate()}
+
+/* =========================================================
+   4. NAVIGATION
+   ========================================================= */
+
+window.openPage = function(pageId){
+
+    document.querySelectorAll(".page").forEach(function(page){
+
+        page.classList.remove("active");
+
+    });
+
+    const page = $id(pageId);
+
+    if(page){
+
+        page.classList.add("active");
+
+    }
+
+    if(pageId === "panierPage"){
+
+        afficherPanier();
+
+    }
+
+    if(pageId === "profilePage"){
+
+        afficherProfil();
+
+    }
+
+    if(pageId === "adminPage"){
+
+        if(!administrateur){
+
+            afficherToast("🔒 Accès administrateur uniquement");
+
+            closeAll();
+
+            return;
+
+        }
+
+        afficherAdmin();
+
+    }
+
+};
+
+
+window.closeAll = function(){
+
+    document.querySelectorAll(".page").forEach(function(page){
+
+        page.classList.remove("active");
+
+    });
+
+};
+
+
+/* =========================================================
+   5. CATÉGORIES
+   ========================================================= */
+
+window.filterCat = function(cat, bouton){
+
+    categorieActuelle = cat;
+
+    document.querySelectorAll(".cat").forEach(function(b){
+
+        b.classList.remove("active");
+
+    });
+
+    if(bouton){
+
+        bouton.classList.add("active");
+
+    }
+
+    afficherProduits();
+
+};
+
+
+/* =========================================================
+   6. RECHERCHE
+   ========================================================= */
+
+window.searchProducts = function(){
+
+    const input = $id("searchInput");
+
+    rechercheActuelle = input
+        ? input.value.toLowerCase().trim()
+        : "";
+
+    afficherProduits();
+
+};
+
+
+/* =========================================================
+   7. AFFICHER LES PRODUITS
+   ========================================================= */
+
+function afficherProduits(){
+
+    const grid = $id("grid");
+
+    if(!grid) return;
+
+    let liste = Object.values(produits || {});
+
+
+    /* FILTRE CATÉGORIE */
+
+    if(categorieActuelle !== "all"){
+
+        liste = liste.filter(function(p){
+
+            return String(p.categorie || p.cat || "")
+                .toLowerCase()
+                === categorieActuelle.toLowerCase();
+
+        });
+
+    }
+
+
+    /* RECHERCHE */
+
+    if(rechercheActuelle){
+
+        liste = liste.filter(function(p){
+
+            const texte = (
+
+                String(p.nom || "") + " " +
+                String(p.name || "") + " " +
+                String(p.categorie || "") + " " +
+                String(p.cat || "")
+
+            ).toLowerCase();
+
+            return texte.includes(rechercheActuelle);
+
+        });
+
+    }
+
+
+    /* AUCUN PRODUIT */
+
+    if(liste.length === 0){
+
+        grid.innerHTML = `
+            <div style="
+                grid-column:1/-1;
+                text-align:center;
+                padding:50px 10px;
+                color:#aaa;
+            ">
+                🛍️<br><br>
+                Aucun produit disponible pour le moment.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    /* CARTES */
+
+    grid.innerHTML = liste.map(function(p){
+
+        const id = String(p.id || "");
+
+        const nom = p.nom || p.name || "Produit";
+
+        const prix = p.prix || p.price || 0;
+
+        const image = p.image || p.img || "";
+
+        const cat = p.categorie || p.cat || "";
+
+        return `
+
+        <div class="card">
+
+            ${
+                image
+                ?
+                `<img src="${image}" alt="${nom}">`
+                :
+                `
+                <div style="
+                    height:170px;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-size:45px;
+                ">
+                    🛍️
+                </div>
+                `
+            }
+
+            <div class="info">
+
+                <h3>
+                    ${nom}
+                </h3>
+
+                <div class="price">
+                    ${formatPrix(prix)}
+                </div>
+
+                <div style="
+                    color:#999;
+                    font-size:10px;
+                    margin-bottom:7px;
+                ">
+                    ${cat}
+                </div>
+
+                <button
+                    class="btn"
+                    onclick="ajouterPanier('${id}')">
+
+                    🛒 Ajouter
+
+                </button>
+
+                <button
+                    class="shareBtn"
+                    onclick="partagerProduit('${id}')">
+
+                    📤 Partager
+
+                </button>
+
+            </div>
+
+        </div>
+
+        `;
+
+    }).join("");
+
 }
 
-/* ---------- admin : clients & commandes ---------- */
-function renderClients(){
- const l=Object.values(S.users||{}).sort((a,b)=>(b.date||0)-(a.date||0));
- $('clientsList').innerHTML=l.length?l.map(u=>
-  '<div class="row"><img src="'+safeImg(u.photo)+'"><div style="flex:1"><b>'+esc(u.name)+'</b><br>📞 '+esc(u.phone)+' • 📍 '+esc(u.city)+'</div></div>').join('')
-  :'<span style="color:#aaa">Aucun client</span>';
-}
-function renderOrders(){
- const l=Object.values(S.orders||{}).sort((a,b)=>(b.date||0)-(a.date||0));
- $('ordersList').innerHTML=l.length?l.map(o=>
-  '<div class="row" style="display:block"><b>'+esc(o.client?o.client.name:'?')+'</b> • '+esc(o.client?o.client.phone:'')+
-  '<br>'+(o.items||[]).map(i=>esc(i.name)+' x'+esc(i.qty)).join(', ')+
-  '<br><span style="color:gold">'+fmt(o.total)+' F</span> • '+new Date(o.date).toLocaleString('fr-FR')+'</div>').join('')
-  :'<span style="color:#aaa">Aucune commande</span>';
+
+/* =========================================================
+   8. AJOUTER AU PANIER
+   ========================================================= */
+
+window.ajouterPanier = function(id){
+
+    const produit = produits[id];
+
+    if(!produit){
+
+        afficherToast("❌ Produit introuvable");
+
+        return;
+
+    }
+
+
+    const existant = panier.find(function(item){
+
+        return item.id === id;
+
+    });
+
+
+    if(existant){
+
+        existant.quantite++;
+
+    }else{
+
+        panier.push({
+
+            id:id,
+
+            nom:produit.nom || produit.name || "Produit",
+
+            prix:Number(produit.prix || produit.price || 0),
+
+            image:produit.image || produit.img || "",
+
+            quantite:1
+
+        });
+
+    }
+
+
+    sauvegarderPanier();
+
+    afficherMiniPanier(produit);
+
+    afficherToast("✅ Article ajouté au panier");
+
+};
+
+
+/* =========================================================
+   9. MINI PANIER
+   ========================================================= */
+
+function afficherMiniPanier(produit){
+
+    const mini = $id("miniCart");
+
+    const contenu = $id("miniContent");
+
+    if(!mini || !contenu) return;
+
+
+    contenu.innerHTML = `
+
+        <div style="
+            display:flex;
+            gap:10px;
+            align-items:center;
+        ">
+
+            ${
+                produit.image || produit.img
+                ?
+                `<img
+                    src="${produit.image || produit.img}"
+                    style="
+                        width:60px;
+                        height:60px;
+                        object-fit:cover;
+                        border-radius:8px;
+                    "
+                >`
+                :
+                "🛍️"
+            }
+
+            <div>
+
+                <b>
+                    ${produit.nom || produit.name || "Produit"}
+                </b>
+
+                <br>
+
+                <span style="color:gold">
+
+                    ${formatPrix(
+                        produit.prix || produit.price
+                    )}
+
+                </span>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    mini.classList.add("show");
+
+
+    clearTimeout(window.miniTimer);
+
+    window.miniTimer = setTimeout(function(){
+
+        mini.classList.remove("show");
+
+    },6000);
+
 }
 
-/* ---------- partage (ouvert à tous les clients) ---------- */
-const shareText=()=>'👑 Découvre '+((S.info||{}).name||'BOUBA STORE')+' : '+location.href;
-function copy(t){
- if(navigator.clipboard)navigator.clipboard.writeText(t).then(()=>alert('Lien copié ✅'),()=>prompt('Copie ce lien :',t));
- else prompt('Copie ce lien :',t);
-}
-function shareNetwork(n){
- const u=encodeURIComponent(location.href),t=encodeURIComponent(shareText());
- if(n==='whatsapp')window.open('https://wa.me/?text='+t,'_blank');
- else if(n==='facebook')window.open('https://www.facebook.com/sharer/sharer.php?u='+u,'_blank');
- else{copy(location.href);alert('Lien copié, colle-le dans '+(n==='instagram'?'Instagram':'TikTok'))}
-}
-function copyCatalog(){copy(location.href)}
-function shareNative(){
- if(navigator.share)navigator.share({title:'BOUBA STORE',text:shareText(),url:location.href}).catch(()=>{});
- else copy(location.href);
-}
-function shareProd(id){
- const p=S.products[id];if(!p)return;
- window.open('https://wa.me/?text='+encodeURIComponent('🛍️ '+p.name+' — '+fmt(p.price)+' F\n'+location.href),'_blank');
+
+window.closeMini = function(){
+
+    const mini = $id("miniCart");
+
+    if(mini){
+
+        mini.classList.remove("show");
+
+    }
+
+};
+
+
+/* =========================================================
+   10. PANIER COMPLET
+   ========================================================= */
+
+function afficherPanier(){
+
+    const liste = $id("cartList");
+
+    const totalElement = $id("cartTotal");
+
+    if(!liste || !totalElement) return;
+
+
+    if(panier.length === 0){
+
+        liste.innerHTML = `
+
+            <div style="
+                text-align:center;
+                padding:50px 10px;
+                color:#aaa;
+            ">
+
+                👜<br><br>
+
+                Ton panier est vide.
+
+            </div>
+
+        `;
+
+        totalElement.textContent = "0 F";
+
+        return;
+
+    }
+
+
+    let total = 0;
+
+
+    liste.innerHTML = panier.map(function(item,index){
+
+        const sousTotal =
+            item.prix * item.quantite;
+
+        total += sousTotal;
+
+
+        return `
+
+        <div style="
+            background:#111;
+            border:1px solid #333;
+            border-radius:12px;
+            padding:10px;
+            margin-bottom:8px;
+            display:flex;
+            gap:10px;
+            align-items:center;
+        ">
+
+            ${
+                item.image
+                ?
+                `<img
+                    src="${item.image}"
+                    style="
+                        width:65px;
+                        height:65px;
+                        object-fit:cover;
+                        border-radius:8px;
+                    "
+                >`
+                :
+                `<div style="
+                    width:65px;
+                    height:65px;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-size:30px;
+                ">🛍️</div>`
+            }
+
+            <div style="flex:1">
+
+                <b>
+                    ${item.nom}
+                </b>
+
+                <br>
+
+                <span style="color:gold">
+
+                    ${formatPrix(item.prix)}
+
+                </span>
+
+                <br>
+
+                <button
+                    onclick="changerQuantite(${index},-1)"
+                    style="
+                        width:30px;
+                        height:30px;
+                        border-radius:50%;
+                        border:1px solid gold;
+                        background:#000;
+                        color:gold;
+                    ">
+                    −
+                </button>
+
+                <b style="
+                    margin:0 8px;
+                    color:gold;
+                ">
+                    ${item.quantite}
+                </b>
+
+                <button
+                    onclick="changerQuantite(${index},1)"
+                    style="
+                        width:30px;
+                        height:30px;
+                        border-radius:50%;
+                        border:1px solid gold;
+                        background:#000;
+                        color:gold;
+                    ">
+                    +
+                </button>
+
+            </div>
+
+            <button
+                onclick="supprimerPanier(${index})"
+                style="
+                    background:#300;
+                    color:#f44;
+                    border:1px solid #f44;
+                    border-radius:6px;
+                    padding:7px;
+                ">
+                🗑️
+            </button>
+
+        </div>
+
+        `;
+
+    }).join("");
+
+
+    totalElement.textContent =
+        formatPrix(total);
+
 }
 
-/* ---------- affichage global & démarrage ---------- */
-function renderAll(){
- applyInfo();render();renderCart();
- if(isAdmin){renderClients();renderOrders()}
+
+window.changerQuantite = function(index,variation){
+
+    if(!panier[index]) return;
+
+    panier[index].quantite += variation;
+
+
+    if(panier[index].quantite <= 0){
+
+        panier.splice(index,1);
+
+    }
+
+
+    sauvegarderPanier();
+
+    afficherPanier();
+
+};
+
+
+window.supprimerPanier = function(index){
+
+    panier.splice(index,1);
+
+    sauvegarderPanier();
+
+    afficherPanier();
+
+};
+
+
+function sauvegarderPanier(){
+
+    localStorage.setItem(
+        "bouba_panier",
+        JSON.stringify(panier)
+    );
+
 }
-/* accès admin secret : touche 5 fois le logo */
-let _t=0;
-$('logoHeader').onclick=()=>{_t++;clearTimeout(window._tt);window._tt=setTimeout(()=>_t=0,2000);if(_t>=5){_t=0;openPage('adminPage')}};
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-renderAll();checkGate();setNet();initFB();
+
+
+/* =========================================================
+   11. COMMANDER WHATSAPP
+   ========================================================= */
+
+window.commander = function(){
+
+    if(panier.length === 0){
+
+        afficherToast("👜 Ton panier est vide");
+
+        return;
+
+    }
+
+
+    const numero =
+        "2250787619717";
+
+
+    let message =
+        "Bonjour BOUBA STORE 👋%0A%0A";
+
+    message +=
+        "Je souhaite commander :%0A%0A";
+
+
+    let total = 0;
+
+
+    panier.forEach(function(item){
+
+        const sousTotal =
+            item.prix * item.quantite;
+
+        total += sousTotal;
+
+
+        message +=
+            "🛍️ " +
+            item.nom +
+            " × " +
+            item.quantite +
+            " = " +
+            formatPrix(sousTotal) +
+            "%0A";
+
+    });
+
+
+    message +=
+        "%0A💰 Total : " +
+        formatPrix(total);
+
+
+    window.open(
+        "https://wa.me/" +
+        numero +
+        "?text=" +
+        message,
+        "_blank"
+    );
+
+
+    enregistrerCommande(total);
+
+};
+
+
+/* =========================================================
+   12. ENREGISTRER COMMANDE
+   ========================================================= */
+
+function enregistrerCommande(total){
+
+    const id =
+        "CMD-" +
+        Date.now();
+
+
+    commandes[id] = {
+
+        id:id,
+
+        client:
+            utilisateurConnecte
+            ?
+            utilisateurConnecte.nom
+            :
+            "Client",
+
+        telephone:
+            utilisateurConnecte
+            ?
+            utilisateurConnecte.telephone
+            :
+            "",
+
+        articles:
+            JSON.parse(
+                JSON.stringify(panier)
+            ),
+
+        total:total,
+
+        date:Date.now(),
+
+        statut:"Nouvelle"
+
+    };
+
+
+    sauvegarderCommandes();
+
+}
+
+
+function sauvegarderCommandes(){
+
+    localStorage.setItem(
+        "bouba_commandes",
+        JSON.stringify(commandes)
+    );
+
+}
+
+
+/* =========================================================
+   13. PROFIL CLIENT
+   ========================================================= */
+
+function afficherProfil(){
+
+    if(!utilisateurConnecte){
+
+        $id("profileName").textContent =
+            "Visiteur";
+
+        $id("profilePhone").textContent =
+            "Connecte-toi pour utiliser ton compte";
+
+        return;
+
+    }
+
+
+    $id("profileName").textContent =
+        utilisateurConnecte.nom || "Client";
+
+
+    $id("profilePhone").textContent =
+        utilisateurConnecte.telephone || "";
+
+
+    if($id("editName"))
+        $id("editName").value =
+            utilisateurConnecte.nom || "";
+
+
+    if($id("editPhone"))
+        $id("editPhone").value =
+            utilisateurConnecte.telephone || "";
+
+
+    if($id("editCity"))
+        $id("editCity").value =
+            utilisateurConnecte.ville || "";
+
+}
+
+
+window.saveProfile = function(){
+
+    if(!utilisateurConnecte){
+
+        afficherToast("🔐 Aucun compte connecté");
+
+        return;
+
+    }
+
+
+    utilisateurConnecte.nom =
+        $id("editName").value.trim();
+
+
+    utilisateurConnecte.telephone =
+        $id("editPhone").value.trim();
+
+
+    utilisateurConnecte.ville =
+        $id("editCity").value.trim();
+
+
+    localStorage.setItem(
+        "bouba_client",
+        JSON.stringify(utilisateurConnecte)
+    );
+
+
+    if(utilisateurConnecte.id){
+
+        clients[utilisateurConnecte.id] =
+            utilisateurConnecte;
+
+    }
+
+
+    afficherProfil();
+
+    afficherToast(
+        "✅ Profil sauvegardé"
+    );
+
+};
+
+
+/* =========================================================
+   14. DÉCONNEXION
+   ========================================================= */
+
+window.logout = function(){
+
+    utilisateurConnecte = null;
+
+    localStorage.removeItem(
+        "bouba_client"
+    );
+
+
+    afficherToast(
+        "👋 Déconnexion réussie"
+    );
+
+
+    closeAll();
+
+};
+
+
+/* =========================================================
+   15. PARTAGE
+   ========================================================= */
+
+window.shareNetwork = function(network){
+
+    const url =
+        window.location.href;
+
+
+    const texte =
+        "Découvrez BOUBA STORE 🛍️";
+
+
+    if(network === "whatsapp"){
+
+        window.open(
+            "https://wa.me/?text=" +
+            encodeURIComponent(
+                texte + " " + url
+            ),
+            "_blank"
+        );
+
+    }
+
+    else if(network === "facebook"){
+
+        window.open(
+            "https://www.facebook.com/sharer/sharer.php?u=" +
+            encodeURIComponent(url),
+            "_blank"
+        );
+
+    }
+
+    else if(network === "instagram"){
+
+        navigator.clipboard.writeText(
+            url
+        );
+
+        afficherToast(
+            "🔗 Lien copié pour Instagram"
+        );
+
+    }
+
+    else if(network === "tiktok"){
+
+        navigator.clipboard.writeText(
+            url
+        );
+
+        afficherToast(
+            "🔗 Lien copié pour TikTok"
+        );
+
+    }
+
+};
+
+
+window.partagerProduit = function(id){
+
+    const produit = produits[id];
+
+    if(!produit) return;
+
+
+    const texte =
+        "🛍️ " +
+        (produit.nom || produit.name) +
+        " — " +
+        formatPrix(
+            produit.prix || produit.price
+        ) +
+        "%0A" +
+        window.location.href;
+
+
+    window.open(
+        "https://wa.me/?text=" +
+        encodeURIComponent(
+            texte
+        ),
+        "_blank"
+    );
+
+};
+
+
+/* =========================================================
+   16. ASSISTANTE BOUBA
+   ========================================================= */
+
+window.toggleIA = function(){
+
+    const chat = $id("iaChat");
+
+    if(!chat) return;
+
+    chat.classList.toggle("open");
+
+
+    if(
+        chat.classList.contains("open") &&
+        $id("iaMsgs").children.length === 0
+    ){
+
+        iaMessage(
+            "bot",
+            "Salam 👋 Bienvenue chez BOUBA STORE. " +
+            "Que cherches-tu aujourd'hui ?"
+        );
+
+    }
+
+};
+
+
+function iaMessage(type,message){
+
+    const zone = $id("iaMsgs");
+
+    if(!zone) return;
+
+
+    const div =
+        document.createElement("div");
+
+
+    div.className =
+        "msg " + type;
+
+
+    div.textContent =
+        message;
+
+
+    zone.appendChild(div);
+
+
+    zone.scrollTop =
+        zone.scrollHeight;
+
+}
+
+
+window.sendIA = function(){
+
+    const input =
+        $id("iaInput");
+
+
+    if(!input) return;
+
+
+    const question =
+        input.value.trim();
+
+
+    if(!question) return;
+
+
+    input.value = "";
+
+
+    iaMessage(
+        "user",
+        question
+    );
+
+
+    const q =
+        question.toLowerCase();
+
+
+    let resultat = "";
+
+
+    if(
+        q.includes("bonjour") ||
+        q.includes("salut") ||
+        q.includes("salam")
+    ){
+
+        resultat =
+            "Salam 👋 Bienvenue chez BOUBA STORE !";
+
+    }
+
+    else if(
+        q.includes("livraison") ||
+        q.includes("livrer")
+    ){
+
+        resultat =
+            "🚚 Livraison rapide à Abidjan. " +
+            "Pour les autres villes, contacte-nous sur WhatsApp.";
+
+    }
+
+    else i<!-- =========================================================
+     BOUBA STORE — PARTIE 3/3
+     CENTRE DE CONTRÔLE ADMINISTRATEUR
+     ========================================================= -->
+
+<script>
+
+/* =========================================================
+   1. VÉRIFICATION ADMINISTRATEUR
+   ========================================================= */
+
+function verifierAdmin(){
+
+    if(!administrateur){
+
+        afficherToast(
+            "🔒 Accès réservé au propriétaire"
+        );
+
+        closeAll();
+
+        return false;
+    }
+
+    return true;
+}
+
+
+/* =========================================================
+   2. OUVERTURE ADMIN
+   ========================================================= */
+
+const ancienOpenPage = window.openPage;
+
+window.openPage = function(pageId){
+
+    if(pageId === "adminPage"){
+
+        if(!verifierAdmin()){
+
+            return;
+        }
+
+        afficherAdmin();
+    }
+
+    ancienOpenPage(pageId);
+
+};
+
+
+/* =========================================================
+   3. SUPPRIMER UN PRODUIT
+   ========================================================= */
+
+window.supprimerProduit = async function(id){
+
+    if(!verifierAdmin()) return;
+
+
+    const produit =
+        produits[id];
+
+
+    if(!produit){
+
+        afficherToast(
+            "❌ Produit introuvable"
+        );
+
+        return;
+    }
+
+
+    const confirmation =
+        confirm(
+            "Supprimer définitivement ce produit ?"
+        );
+
+
+    if(!confirmation) return;
+
+
+    delete produits[id];
+
+
+    sauvegarderProduits();
+
+
+    /* Firebase */
+
+    if(firebaseDB){
+
+        try{
+
+            const module =
+                await import(
+                    "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js"
+                );
+
+
+            await module.remove(
+                module.ref(
+                    firebaseDB,
+                    "products/" + id
+                )
+            );
+
+        }catch(e){
+
+            console.log(e);
+
+        }
+
+    }
+
+
+    afficherProduits();
+
+    afficherAdmin();
+
+
+    afficherToast(
+        "🗑️ Produit supprimé"
+    );
+
+};
+
+
+/* =========================================================
+   4. MODIFIER UN PRODUIT
+   ========================================================= */
+
+window.modifierProduit = function(id){
+
+    if(!verifierAdmin()) return;
+
+
+    const produit =
+        produits[id];
+
+
+    if(!produit) return;
+
+
+    const nouveauNom =
+        prompt(
+            "Nom du produit :",
+            produit.nom || produit.name || ""
+        );
+
+
+    if(nouveauNom === null) return;
+
+
+    const nouveauPrix =
+        prompt(
+            "Prix en FCFA :",
+            produit.prix || produit.price || 0
+        );
+
+
+    if(nouveauPrix === null) return;
+
+
+    produit.nom =
+        nouveauNom.trim();
+
+
+    produit.prix =
+        Number(nouveauPrix);
+
+
+    sauvegarderProduits();
+
+
+    afficherProduits();
+
+    afficherAdmin();
+
+
+    afficherToast(
+        "✅ Produit modifié"
+    );
+
+};
+
+
+/* =========================================================
+   5. ADMIN — LISTE DES PRODUITS
+   ========================================================= */
+
+function afficherProduitsAdmin(){
+
+    const page =
+        $id("adminPage");
+
+
+    if(!page) return;
+
+
+    let ancienneZone =
+        $id("adminProducts");
+
+
+    if(!ancienneZone){
+
+        ancienneZone =
+            document.createElement("div");
+
+        ancienneZone.id =
+            "adminProducts";
+
+        ancienneZone.className =
+            "ctrl";
+
+
+        page.appendChild(
+            ancienneZone
+        );
+
+    }
+
+
+    const liste =
+        Object.values(produits);
+
+
+    ancienneZone.innerHTML = `
+
+        <h3>
+            🛍️ TOUS LES PRODUITS
+        </h3>
+
+        ${
+            liste.length
+            ?
+            liste.map(function(p){
+
+                const id =
+                    p.id;
+
+                return `
+
+                <div style="
+                    background:#111;
+                    border:1px solid #333;
+                    border-radius:10px;
+                    padding:10px;
+                    margin-bottom:8px;
+                ">
+
+                    <div style="
+                        display:flex;
+                        gap:10px;
+                        align-items:center;
+                    ">
+
+                        ${
+                            p.image
+                            ?
+                            `<img
+                                src="${p.image}"
+                                style="
+                                    width:55px;
+                                    height:55px;
+                                    border-radius:8px;
+                                    object-fit:cover;
+                                "
+                            >`
+                            :
+                            `<div style="
+                                width:55px;
+                                height:55px;
+                                display:flex;
+                                align-items:center;
+                                justify-content:center;
+                                font-size:28px;
+                            ">
+                                🛍️
+                            </div>`
+                        }
+
+                        <div style="flex:1">
+
+                            <b style="color:gold">
+                                ${p.nom || p.name}
+                            </b>
+
+                            <br>
+
+                            ${formatPrix(
+                                p.prix || p.price
+                            )}
+
+                            <br>
+
+                            <small style="color:#999">
+                                ${p.categorie || p.cat || ""}
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div style="
+                        display:flex;
+                        gap:6px;
+                        margin-top:8px;
+                    ">
+
+                        <button
+                            onclick="modifierProduit('${id}')"
+                            style="
+                                flex:1;
+                                padding:9px;
+                                background:#222;
+                                border:1px solid gold;
+                                color:gold;
+                                border-radius:7px;
+                            ">
+                            ✏️ Modifier
+                        </button>
+
+
+                        <button
+                            onclick="supprimerProduit('${id}')"
+                            style="
+                                flex:1;
+                                padding:9px;
+                                background:#300;
+                                border:1px solid #f44;
+                                color:#f44;
+                                border-radius:7px;
+                            ">
+                            🗑️ Supprimer
+                        </button>
+
+                    </div>
+
+                </div>
+
+                `;
+
+            }).join("")
+            :
+            `
+            <p style="color:#aaa">
+                Aucun produit.
+            </p>
+            `
+        }
+
+    `;
+
+}
+
+
+/* =========================================================
+   6. MODIFICATION DU NOM DU STORE
+   ========================================================= */
+
+window.modifierNomStore = function(){
+
+    if(!verifierAdmin()) return;
+
+
+    const ancien =
+        localStorage.getItem(
+            "bouba_store_name"
+        ) ||
+        "BOUBA STORE";
+
+
+    const nouveau =
+        prompt(
+            "Nom de ton magasin :",
+            ancien
+        );
+
+
+    if(nouveau === null) return;
+
+
+    const nom =
+        nouveau.trim();
+
+
+    if(!nom) return;
+
+
+    localStorage.setItem(
+        "bouba_store_name",
+        nom
+    );
+
+
+    document.title =
+        nom;
+
+
+    const titre =
+        document.querySelector(
+            ".logo h1"
+        );
+
+
+    if(titre){
+
+        titre.textContent =
+            nom;
+
+    }
+
+
+    afficherToast(
+        "✅ Nom du magasin modifié"
+    );
+
+};
+
+
+/* =========================================================
+   7. MODIFICATION DU NUMÉRO WHATSAPP
+   ========================================================= */
+
+window.modifierWhatsApp = function(){
+
+    if(!verifierAdmin()) return;
+
+
+    const ancien =
+        localStorage.getItem(
+            "bouba_whatsapp"
+        ) ||
+        "2250787619717";
+
+
+    const nouveau =
+        prompt(
+            "Numéro WhatsApp avec indicatif :",
+            ancien
+        );
+
+
+    if(nouveau === null) return;
+
+
+    const numero =
+        nouveau.replace(
+            /\D/g,
+            ""
+        );
+
+
+    if(numero.length < 8){
+
+        afficherToast(
+            "❌ Numéro invalide"
+        );
+
+        return;
+    }
+
+
+    localStorage.setItem(
+        "bouba_whatsapp",
+        numero
+    );
+
+
+    afficherToast(
+        "✅ WhatsApp modifié"
+    );
+
+};
+
+
+/* =========================================================
+   8. MODIFICATION DE LA BANNIÈRE
+   ========================================================= */
+
+window.modifierBanniere = function(){
+
+    if(!verifierAdmin()) return;
+
+
+    const banner =
+        $id("bannerText");
+
+
+    if(!banner) return;
+
+
+    const nouveau =
+        prompt(
+            "Texte de la bannière :",
+            banner.textContent.trim()
+        );
+
+
+    if(nouveau === null) return;
+
+
+    banner.textContent =
+        nouveau;
+
+
+    localStorage.setItem(
+        "bouba_banner",
+        nouveau
+    );
+
+
+    afficherToast(
+        "✅ Bannière modifiée"
+    );
+
+};
+
+
+/* =========================================================
+   9. EFFACER LES COMMANDES
+   ========================================================= */
+
+window.effacerCommandes = function(){
+
+    if(!verifierAdmin()) return;
+
+
+    const ok =
+        confirm(
+            "Supprimer toutes les commandes de ce téléphone ?"
+        );
+
+
+    if(!ok) return;
+
+
+    commandes = {};
+
+
+    sauvegarderCommandes();
+
+
+    afficherAdmin();
+
+
+    afficherToast(
+        "🗑️ Commandes supprimées"
+    );
+
+};
+
+
+/* =========================================================
+   10. DÉCONNEXION ADMIN
+   ========================================================= */
+
+window.deconnexionAdmin = async function(){
+
+    if(!verifierAdmin()) return;
+
+
+    if(firebaseAuth){
+
+        try{
+
+            const module =
+                await import(
+                    "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"
+                );
+
+
+            await module.signOut(
+                firebaseAuth
+            );
+
+        }catch(e){
+
+            console.log(e);
+
+        }
+
+    }
+
+
+    administrateur =
+        false;
+
+
+    closeAll();
+
+
+    afficherToast(
+        "👋 Session administrateur fermée"
+    );
+
+};
+
+
+/* =========================================================
+   11. PANNEAU DE CONTRÔLE AVANCÉ
+   ========================================================= */
+
+function creerControleAvance(){
+
+    if(!administrateur) return;
+
+
+    const page =
+        $id("adminPage");
+
+
+    if(!page) return;
+
+
+    let zone =
+        $id("advancedAdmin");
+
+
+    if(zone) return;
+
+
+    zone =
+        document.createElement("div");
+
+
+    zone.id =
+        "advancedAdmin";
+
+
+    zone.className =
+        "ctrl";
+
+
+    zone.innerHTML = `
+
+        <h3>
+            👑 CONTRÔLE TOTAL
+        </h3>
+
+
+        <button
+            onclick="modifierNomStore()"
+            style="
+                width:100%;
+                padding:12px;
+                margin-bottom:7px;
+                background:#111;
+                border:1px solid gold;
+                color:gold;
+                border-radius:8px;
+            ">
+            🏪 Modifier le nom du magasin
+        </button>
+
+
+        <button
+            onclick="modifierWhatsApp()"
+            style="
+                width:100%;
+                padding:12px;
+                margin-bottom:7px;
+                background:#111;
+                border:1px solid gold;
+                color:gold;
+                border-radius:8px;
+            ">
+            📱 Modifier WhatsApp
+        </button>
+
+
+        <button
+            onclick="modifierBanniere()"
+            style="
+                width:100%;
+                padding:12px;
+                margin-bottom:7px;
+                background:#111;
+                border:1px solid gold;
+                color:gold;
+                border-radius:8px;
+            ">
+            📢 Modifier la bannière
+        </button>
+
+
+        <button
+            onclick="afficherProduitsAdmin()"
+            style="
+                width:100%;
+                padding:12px;
+                margin-bottom:7px;
+                background:gold;
+                border:0;
+                color:#000;
+                border-radius:8px;
+                font-weight:bold;
+            ">
+            🛍️ Gérer tous les produits
+        </button>
+
+
+        <button
+            onclick="effacerCommandes()"
+            style="
+                width:100%;
+                padding:12px;
+                margin-bottom:7px;
+                background:#300;
+                border:1px solid #f44;
+                color:#f44;
+                border-radius:8px;
+            ">
+            🗑️ Effacer les commandes locales
+        </button>
+
+
+        <button
+            onclick="deconnexionAdmin()"
+            style="
+                width:100%;
+                padding:12px;
+                background:#222;
+                border:1px solid #555;
+                color:#fff;
+                border-radius:8px;
+            ">
+            🚪 Fermer la session admin
+        </button>
+
+    `;
+
+
+    page.appendChild(
+        zone
+    );
+
+}
+
+
+/* =========================================================
+   12. CHARGER LES PARAMÈTRES DU STORE
+   ========================================================= */
+
+function chargerParametresStore(){
+
+    const nom =
+        localStorage.getItem(
+            "bouba_store_name"
+        );
+
+
+    if(nom){
+
+        document.title =
+            nom;
+
+
+        const titre =
+            document.querySelector(
+                ".logo h1"
+            );
+
+
+        if(titre){
+
+            titre.textContent =
+                nom;
+
+        }
+
+    }
+
+
+    const banner =
+        localStorage.getItem(
+            "bouba_banner"
+        );
+
+
+    if(
+        banner &&
+        $id("bannerText")
+    ){
+
+        $id("bannerText")
+            .textContent =
+            banner;
+
+    }
+
+}
+
+
+/* =========================================================
+   13. REMPLACER AFFICHER ADMIN
+   ========================================================= */
+
+const ancienAfficherAdmin =
+    afficherAdmin;
+
+
+afficherAdmin = function(){
+
+    if(!administrateur) return;
+
+
+    ancienAfficherAdmin();
+
+
+    creerControleAvance();
+
+
+    afficherProduitsAdmin();
+
+};
+
+
+/* =========================================================
+   14. PROTECTION DES ACTIONS ADMIN
+   ========================================================= */
+
+const ancienAddProduct =
+    window.addProduct;
+
+
+window.addProduct =
+    function(){
+
+        if(!verifierAdmin()) return;
+
+
+        ancienAddProduct();
+
+    };
+
+
+/* =========================================================
+   15. COMPTEUR PANIER
+   ========================================================= */
+
+function mettreAJourCompteurPanier(){
+
+    const total =
+        panier.reduce(
+            function(somme,item){
+
+                return somme +
+                    Number(
+                        item.quantite || 0
+                    );
+
+            },
+            0
+        );
+
+
+    const boutonPanier =
+        document.querySelector(
+            ".nav button:nth-child(2)"
+        );
+
+
+    if(!boutonPanier) return;
+
+
+    boutonPanier.innerHTML = `
+
+        <span>
+            👜
+        </span>
+
+        Panier
+        ${
+            total > 0
+            ?
+            `<b style="
+                color:#000;
+                background:gold;
+                border-radius:50%;
+                padding:2px 6px;
+            ">
+                ${total}
+            </b>`
+            :
+            ""
+        }
+
+    `;
+
+}
+
+
+/* =========================================================
+   16. INITIALISATION FINALE
+   ========================================================= */
+
+chargerParametresStore();
+
+mettreAJourCompteurPanier();
+
+afficherProduits();
+
+
+/* =========================================================
+   17. SURVEILLER LE PANIER
+   ========================================================= */
+
+const ancienSauvegarderPanier =
+    sauvegarderPanier;
+
+
+sauvegarderPanier =
+    function(){
+
+        ancienSauvegarderPanier();
+
+        mettreAJourCompteurPanier();
+
+    };
+
+
+/* =========================================================
+   FIN DU CENTRE DE CONTRÔLE
+   ========================================================= */
+
 </script>
-</body>
-</html>
