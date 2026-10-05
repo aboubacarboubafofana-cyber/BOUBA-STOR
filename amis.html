@@ -333,7 +333,9 @@ $("flip").onclick=async function(){
 $("q-wa").onclick=function(){$("s-wa").onclick()};
 $("q-sms").onclick=function(){$("s-sms").onclick()};
 $("q-sh").onclick=function(){$("s-sh").onclick()};
+window.busy=function(){return !!R||!!call||!!$("txt").value};
 render();
 </script>
+<script src="maj.js"></script>
 </body>
 </html>
