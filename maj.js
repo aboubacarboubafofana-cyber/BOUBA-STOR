@@ -1,6 +1,6 @@
 /* Mise à jour automatique : recharge l'app dès qu'une nouvelle version est en ligne */
 (function(){
- var F=['index.html','amis.html','amis5.js','sw.js'],
+ var F=['index.html','amis.html','amis5.js','plus.js','alertes.js','sw.js'],
   base=location.href.split('#')[0].split('?')[0].replace(/[^\/]*$/,''),sig0=null,diff=0;
  async function sig(){
   var s='';

@@ -14,3 +14,5 @@ self.addEventListener('fetch',e=>{
   return res;
  }).catch(()=>caches.match(r).then(x=>x||caches.match('./index.html'))));
 });
+self.addEventListener('push',e=>{let d={};try{const j=e.data.json();d=j.data||j.notification||j}catch(_){}e.waitUntil(self.registration.showNotification(d.title||'BOUBA STORE',{body:d.body||'',icon:'icon-192.png',badge:'icon-192.png',tag:d.tag||'bouba-new',data:{url:d.url||'./'}}))});
+self.addEventListener('notificationclick',e=>{e.notification.close();const u=(e.notification.data&&e.notification.data.url)||'./';e.waitUntil(self.clients.matchAll({type:'window'}).then(l=>{for(const c of l)if('focus' in c)return c.focus();return self.clients.openWindow(u)}))});
