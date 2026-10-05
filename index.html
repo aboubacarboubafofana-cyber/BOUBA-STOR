@@ -633,5 +633,5 @@ document.getElementById('shopName').addEventListener('click',function(){
 });
 </script>
  <script src="amis5.js"></script>
- <script>var c=document.getElementById('chats');if(c)c.addEventListener('click',function(e){e.stopImmediatePropagation();location.href='amis.html'},true);</script>
+ <script>document.addEventListener('click',function(e){var n=e.target.closest('#chats,.nav>*');if(n&&(n.id==='chats'||/Amis/.test(n.textContent))){e.stopPropagation();e.preventDefault();location.href='amis.html'}},true);</script>
 </body></html>
