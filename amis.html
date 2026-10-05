@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Amis</title>
+<style>
+:root{--bg:#000;--card:#121212;--line:#2a2a2a;--y:#ffd600;--t:#fff;--m:#9a9a9a;--bub:#1d1d1d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#fff;--card:#f6f6f6;--line:#e2e2e2;--t:#111;--m:#666;--bub:#eee}}
+:root[data-theme="light"]{--bg:#fff;--card:#f6f6f6;--line:#e2e2e2;--t:#111;--m:#666;--bub:#eee}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--t);font-family:Roboto,system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.top{display:flex;align-items:center;gap:10px;padding:14px 16px 8px}
+.top h1{font-size:26px;font-weight:800;color:var(--y);flex:1}
+.turbo{font-size:12px;font-weight:700;color:#000;background:var(--y);border-radius:20px;padding:6px 10px;display:flex;gap:6px;align-items:center}
+.turbo i{width:8px;height:8px;border-radius:50%;background:#000;animation:p 1.2s infinite}
+@keyframes p{50%{opacity:.25}}
+@media(prefers-reduced-motion:reduce){.turbo i{animation:none}}
+.tabs{display:flex;gap:8px;padding:6px 16px 10px;overflow-x:auto}
+.tab{border:1.5px solid var(--y);border-radius:22px;padding:9px 16px;font-weight:700;white-space:nowrap}
+.tab.on{background:var(--y);color:#000}
+.search{margin:0 16px 8px;padding:11px 14px;border-radius:22px;border:1px solid var(--line);background:var(--card);color:var(--t);font:inherit;width:calc(100% - 32px)}
+.list{flex:1;overflow-y:auto}
+.row{display:flex;gap:12px;align-items:center;width:100%;padding:11px 16px;text-align:left}
+.row:active{background:var(--card)}
+.av{width:48px;height:48px;border-radius:50%;background:var(--y);color:#000;font-weight:800;font-size:19px;display:grid;place-items:center;flex:none;position:relative}
+.av.on::after{content:"";position:absolute;right:0;bottom:0;width:12px;height:12px;border-radius:50%;background:#2ecc71;border:2px solid var(--bg)}
+.mid{flex:1;min-width:0}
+.mid b{display:block}
+.mid span{display:block;color:var(--m);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{text-align:right;font-size:12px;color:var(--m)}
+.badge{display:inline-block;margin-top:4px;background:var(--y);color:#000;font-weight:800;border-radius:12px;padding:1px 7px}
+.invite{margin:10px 16px 14px;background:var(--y);color:#000;font-weight:800;border-radius:14px;padding:15px}
+.empty{padding:30px 20px;color:var(--m);text-align:center}
+/* chat */
+#chat{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+#chat.open{display:flex}
+.ch{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.ch .mid b{font-size:16px}
+.ic{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--y);display:grid;place-items:center;font-size:18px}
+.msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+.b{max-width:78%;padding:9px 12px;border-radius:16px;background:var(--bub);line-height:1.35;word-wrap:break-word}
+.b.me{align-self:flex-end;background:var(--y);color:#000;border-bottom-right-radius:4px}
+.b.th{align-self:flex-start;border-bottom-left-radius:4px}
+.b small{display:block;font-size:11px;opacity:.65;margin-top:3px;text-align:right}
+.sys{align-self:center;font-size:12px;color:var(--m);background:var(--card);border-radius:12px;padding:5px 10px}
+.bar{display:flex;gap:8px;align-items:center;padding:10px 12px;border-top:1px solid var(--line)}
+.bar input[type=text]{flex:1;padding:12px 14px;border-radius:24px;border:1px solid var(--line);background:var(--card);color:var(--t);font:inherit;min-width:0}
+.send{width:46px;height:46px;border-radius:50%;background:var(--y);color:#000;font-size:19px;font-weight:800}
+.send.rec{background:#e53935;color:#fff}
+:focus-visible{outline:2px solid var(--y);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="top"><h1>💬 Amis</h1><div class="turbo"><i></i>Turbo auto</div></div>
+<div class="tabs" id="tabs">
+<button class="tab on" data-t="amis">👥 Amis</button>
+<button class="tab" data-t="rep">📒 Répertoire</button>
+<button class="tab" data-t="dem">🔔 Demandes</button>
+</div>
+<input class="search" id="q" type="search" placeholder="Rechercher un ami">
+<div class="list" id="list"></div>
+<button class="invite" id="inv">📤 Inviter des amis ou clients</button>
+
+<section id="chat" aria-label="Conversation">
+<div class="ch">
+<button class="ic" id="back" aria-label="Retour">←</button>
+<div class="av" id="cav"></div>
+<div class="mid"><b id="cn"></b><span id="cs">en ligne · Turbo</span></div>
+<button class="ic" id="cv" aria-label="Appel vocal">📞</button>
+<button class="ic" id="cvid" aria-label="Appel vidéo">🎥</button>
+</div>
+<div class="msgs" id="msgs" aria-live="polite"></div>
+<div class="bar">
+<label class="ic" for="file" style="cursor:pointer" aria-label="Photo ou fichier">📎</label>
+<input id="file" type="file" hidden>
+<input type="text" id="txt" placeholder="Message" autocomplete="off">
+<button class="send" id="send" aria-label="Envoyer">🎤</button>
+</div>
+</section>
+
+<script>
+var friends=[
+{n:"Aina Rakoto",on:1,last:"Ok, je t'envoie ça tout de suite",h:"12:41",u:2},
+{n:"Boutique Mahery",on:1,last:"Client : commande reçue ✅",h:"11:58",u:0},
+{n:"Tiana R.",on:0,last:"🎤 Message vocal (0:14)",h:"Hier",u:0},
+{n:"Fidy Andria",on:0,last:"📎 devis.pdf",h:"Hier",u:1}
+];
+var reqs=[{n:"Hery Solo",last:"Veut devenir ton ami"},{n:"Lalao Mina",last:"Veut devenir ton ami"}];
+var hist={},cur=null,tab="amis",rec=false,recT=0;
+var $=function(i){return document.getElementById(i)};
+function ini(n){return n.split(" ").map(function(w){return w[0]}).join("").slice(0,2).toUpperCase()}
+function esc(s){var d=document.createElement("div");d.textContent=s;return d.innerHTML}
+function render(){
+ var q=$("q").value.toLowerCase(),h="";
+ if(tab==="dem"){
+  reqs.forEach(function(r,i){h+='<div class="row"><div class="av">'+ini(r.n)+'</div><div class="mid"><b>'+esc(r.n)+'</b><span>'+r.last+'</span></div><button class="tab on" data-ok="'+i+'">Accepter</button></div>'});
+  if(!reqs.length)h='<div class="empty">Aucune demande en attente.</div>';
+ }else{
+  var L=friends.filter(function(f){return f.n.toLowerCase().indexOf(q)>-1});
+  if(tab==="rep")L=L.slice().sort(function(a,b){return a.n.localeCompare(b.n)});
+  L.forEach(function(f){var i=friends.indexOf(f);
+   h+='<button class="row" data-i="'+i+'"><div class="av'+(f.on?' on':'')+'">'+ini(f.n)+'</div><div class="mid"><b>'+esc(f.n)+'</b><span>'+esc(f.last)+'</span></div><div class="meta">'+f.h+(f.u?'<br><span class="badge">'+f.u+'</span>':'')+'</div></button>'});
+  if(!L.length)h='<div class="empty">Aucun ami trouvé. Invite quelqu\'un pour commencer.</div>';
+ }
+ $("list").innerHTML=h;
+}
+$("tabs").onclick=function(e){var t=e.target.closest(".tab");if(!t)return;tab=t.dataset.t;
+ [].forEach.call(document.querySelectorAll("#tabs .tab"),function(x){x.classList.toggle("on",x===t)});render()};
+$("q").oninput=render;
+$("list").onclick=function(e){
+ var ok=e.target.closest("[data-ok]");
+ if(ok){var r=reqs.splice(+ok.dataset.ok,1)[0];friends.unshift({n:r.n,on:1,last:"Vous êtes maintenant amis",h:"Maintenant",u:0});render();return}
+ var r=e.target.closest(".row[data-i]");if(r)openChat(+r.dataset.i)};
+function openChat(i){
+ cur=i;var f=friends[i];f.u=0;
+ $("cav").textContent=ini(f.n);$("cn").textContent=f.n;
+ $("chat").classList.add("open");
+ if(!hist[i])hist[i]=[{t:"th",x:f.last.indexOf("🎤")>-1||f.last.indexOf("📎")>-1?"Salut !":f.last,h:f.h==="Hier"?"Hier":f.h}];
+ draw();
+}
+function now(){var d=new Date();return d.getHours()+":"+("0"+d.getMinutes()).slice(-2)}
+function draw(){
+ $("msgs").innerHTML='<div class="sys">⚡ Turbo auto : qualité et vitesse réglées pour toi</div>'+
+  hist[cur].map(function(m){return '<div class="b '+m.t+'">'+esc(m.x)+'<small>'+m.h+(m.t==="me"?" ✓✓":"")+'</small></div>'}).join("");
+ $("msgs").scrollTop=1e9;
+}
+function push(t,x){hist[cur].push({t:t,x:x,h:now()});friends[cur].last=(t==="me"?"Toi : ":"")+x;friends[cur].h=now();draw()}
+function sys(x){hist[cur].push({t:"th",x:x,h:now()});draw()}
+$("back").onclick=function(){$("chat").classList.remove("open");render()};
+$("txt").oninput=function(){$("send").textContent=this.value.trim()?"➤":"🎤"};
+function sendTxt(){var v=$("txt").value.trim();if(!v)return false;$("txt").value="";$("send").textContent="🎤";push("me",v);
+ var c=cur;setTimeout(function(){if(cur===c)push("th","Reçu 👍")},700);return true}
+$("txt").onkeydown=function(e){if(e.key==="Enter")sendTxt()};
+$("send").onclick=function(){
+ if(sendTxt())return;
+ if(!rec){rec=true;recT=Date.now();this.classList.add("rec");this.textContent="■";$("txt").placeholder="Enregistrement… touche ■ pour envoyer"}
+ else{rec=false;this.classList.remove("rec");this.textContent="🎤";$("txt").placeholder="Message";
+  var s=Math.max(1,Math.round((Date.now()-recT)/1000));push("me","🎤 Message vocal (0:"+("0"+s).slice(-2)+")")}
+};
+$("file").onchange=function(){if(this.files[0])push("me","📎 "+this.files[0].name);this.value=""};
+$("cv").onclick=function(){push("me","📞 Appel vocal lancé — connexion automatique")};
+$("cvid").onclick=function(){push("me","🎥 Appel vidéo lancé — qualité automatique")};
+$("inv").onclick=function(){
+ var u=location.href,t="Rejoins-moi sur l'app : "+u;
+ if(navigator.share){navigator.share({title:"Invitation",text:t,url:u}).catch(function(){})}
+ else{try{navigator.clipboard.writeText(t);$("inv").textContent="✅ Lien copié"}catch(e){$("inv").textContent=u}}
+};
+render();
+</script>
+</body>
+</html>
