@@ -80,6 +80,16 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .cbtns .end{background:#e53935}
 #toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--y);color:#000;padding:10px 16px;border-radius:20px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;z-index:99;max-width:90%;text-align:center}
 #toast.on{opacity:1}
+#sx{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;z-index:60}
+#sx.open{display:flex}
+.sheet{width:100%;background:var(--bg);border-top:2px solid var(--y);border-radius:22px 22px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));max-height:92%;overflow-y:auto}
+.sheet h3{color:var(--y);margin-bottom:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.share{padding:6px 16px 0}
+.share span{display:block;font-size:13px;color:var(--m);margin-bottom:6px}
+.share div{display:flex;gap:8px;flex-wrap:wrap}
+.tab.wa{border-color:#25D366;color:#25D366}
+.hint{color:var(--m);font-size:13px;margin:6px 0 8px}
 :focus-visible{outline:2px solid var(--y);outline-offset:2px}
 </style>
 </head>
@@ -92,6 +102,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 </div>
 <input class="search" id="q" type="search" placeholder="Rechercher un ami">
 <div class="list" id="list"></div>
+<div class="share"><span>Invite tes proches à nous rejoindre :</span><div><button class="tab small wa" id="q-wa">💬 WhatsApp</button><button class="tab small" id="q-sms">✉️ SMS</button><button class="tab small" id="q-sh">↗ Partager</button></div></div>
 <button class="invite" id="inv">📤 Inviter des amis ou clients</button>
 
 <section id="chat" aria-label="Conversation">
@@ -121,6 +132,15 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 <div id="call"><video id="lv" autoplay playsinline muted></video>
 <div class="cinfo"><div class="av" id="cav2"></div><h2 id="cname"></h2><p id="cst"></p></div>
 <div class="cbtns"><button id="mute" aria-label="Micro">🎙</button><button id="flip" aria-label="Changer de caméra">🔄</button><button class="end" id="end" aria-label="Raccrocher">📵</button></div></div>
+<div id="sx"><div class="sheet" role="dialog" aria-label="Inviter">
+<h3>📤 Inviter des amis ou clients</h3>
+<div class="g2"><button class="tab" id="s-wa">💬 WhatsApp</button><button class="tab" id="s-sms">✉️ SMS</button><button class="tab" id="s-cp">🔗 Copier le lien</button><button class="tab" id="s-sh">↗ Autres apps</button></div>
+<p class="hint">Ou ajoute un ami avec son numéro. Sans indicatif, +225 est ajouté automatiquement. Pour un autre pays, tape + et l'indicatif.</p>
+<input class="search" id="snom" placeholder="Nom (facultatif)" style="width:100%;margin:0 0 8px">
+<input class="search" id="snum" type="tel" placeholder="Numéro, ex : 07 87 61 97 17" style="width:100%;margin:0 0 10px">
+<button class="invite" id="s-add" style="margin:0;width:100%">➕ Ajouter et inviter sur WhatsApp</button>
+<button class="tab" id="sclose" style="margin-top:10px;width:100%">Fermer</button>
+</div></div>
 <div id="toast" role="status"></div>
 
 <script>
@@ -173,14 +193,25 @@ async function pick(){
 $("list").onclick=function(e){
  var t;
  if(e.target.closest("#pick"))return pick();
- if(t=e.target.closest("[data-wa]")){var n=phone[+t.dataset.wa].t.replace(/\D/g,"");return void window.open("https://wa.me/"+n+"?text="+encodeURIComponent(INV+" "+base()),"_blank")}
+ if(t=e.target.closest("[data-wa]")){var n=norm(phone[+t.dataset.wa].t);return void window.open("https://wa.me/"+n+"?text="+encodeURIComponent(INV+" "+base()),"_blank")}
  if(t=e.target.closest("[data-sms]"))return void(location.href="sms:"+phone[+t.dataset.sms].t+"?body="+encodeURIComponent(INV+" "+base()));
  if(t=e.target.closest("[data-ok]")){var r=reqs.splice(+t.dataset.ok,1)[0];friends.unshift({n:r.n,on:1,last:"Vous êtes maintenant amis",h:"Maintenant",u:0});return render()}
  if(t=e.target.closest(".row[data-i]"))openChat(+t.dataset.i);
 };
-$("inv").onclick=function(){
- if(navigator.share){navigator.share({title:"BOUBA STORE",text:INV,url:base()}).catch(function(){})}
- else{try{navigator.clipboard.writeText(INV+" "+base());toast("Lien copié")}catch(e){prompt("Copie ce lien",base())}}
+function norm(t){var n=String(t).replace(/\D/g,"");if(n.indexOf("00")===0)n=n.slice(2);if(n.length===10&&n[0]==="0")n="225"+n;return n}
+function waLink(n,txt){return"https://wa.me/"+(n?norm(n):"")+"?text="+encodeURIComponent(txt)}
+$("inv").onclick=function(){$("sx").classList.add("open")};
+$("sx").onclick=function(e){if(e.target===this||e.target.id==="sclose")this.classList.remove("open")};
+$("s-wa").onclick=function(){window.open(waLink("",INV+" "+base()),"_blank")};
+$("s-sms").onclick=function(){location.href="sms:?body="+encodeURIComponent(INV+" "+base())};
+$("s-cp").onclick=function(){try{navigator.clipboard.writeText(INV+" "+base());toast("Lien copié")}catch(e){prompt("Copie ce lien",base())}};
+$("s-sh").onclick=function(){if(navigator.share)navigator.share({title:"BOUBA STORE",text:INV,url:base()}).catch(function(){});else toast("Utilise WhatsApp ou Copier le lien")};
+$("s-add").onclick=function(){
+ var v=$("snum").value.trim(),nm=$("snom").value.trim();
+ if(norm(v).length<9)return toast("Entre un numéro valide");
+ phone.unshift({n:nm||v,t:v});try{localStorage.setItem("ph",JSON.stringify(phone))}catch(e){}
+ window.open(waLink(v,INV+" "+base()),"_blank");
+ $("snum").value="";$("snom").value="";$("sx").classList.remove("open");render();toast("Ami ajouté dans Répertoire");
 };
 
 /* ---------- chat ---------- */
@@ -299,6 +330,9 @@ $("flip").onclick=async function(){
  try{call.st=await navigator.mediaDevices.getUserMedia({video:{facingMode:call.face},audio:true});$("lv").srcObject=call.st;$("lv").style.transform=call.face==="user"?"scaleX(-1)":"none"}
  catch(e){toast("Caméra indisponible")}
 };
+$("q-wa").onclick=function(){$("s-wa").onclick()};
+$("q-sms").onclick=function(){$("s-sms").onclick()};
+$("q-sh").onclick=function(){$("s-sh").onclick()};
 render();
 </script>
 </body>
