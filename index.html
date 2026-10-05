@@ -633,5 +633,5 @@ document.getElementById('shopName').addEventListener('click',function(){
 });
 </script>
  <script src="amis5.js"></script>
- <script>document.addEventListener('click',function(e){var n=e.target.closest('#chats,.nav>*');if(n&&(n.id==='chats'||/Amis/.test(n.textContent))){e.stopPropagation();e.preventDefault();location.href='amis.html'}},true);</script>
+ <script>document.addEventListener('click',function(e){var b=e.target.closest('#adminPage .row button,#adminPage .row .mini');if(!b||b.textContent.trim()!=='💬')return;var r=b.closest('.row'),m=r&&r.textContent.match(/\+?\d[\d ]{8,}/);if(!m)return;e.stopPropagation();e.preventDefault();var n=m[0].replace(/\D/g,'');if(n.indexOf('225')!==0)n='225'+n;window.open('https://wa.me/'+n+'?text='+encodeURIComponent('Bonjour, c\'est BOUBA STORE'),'_blank')},true);</script>
 </body></html>
