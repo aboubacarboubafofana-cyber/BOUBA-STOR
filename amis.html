@@ -138,6 +138,10 @@ button{border:0;color:inherit;background:none;cursor:pointer}
   .title{font-size:28px}.friend-actions .mini:nth-child(3){display:none}
   .section{padding-left:13px;padding-right:13px}
 }
+
+.firebase-state{position:fixed;top:7px;left:50%;transform:translateX(-50%);z-index:70;background:#171717;border:1px solid #333;border-radius:20px;padding:5px 10px;font-size:10px;color:#ddd}
+.chat-modal{width:min(760px,100%);height:min(90vh,720px);background:#090909;border:1px solid #333;border-radius:24px 24px 0 0;display:flex;flex-direction:column;overflow:hidden}
+.chat-head{height:66px;background:#151515;display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #292929}.chat-head .close{float:none;margin:0;font-size:30px}.chat-head b{display:block}.chat-head small{display:block;color:#999;margin-top:3px}.messages{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px}.chat-empty{text-align:center;color:#777;margin:auto}.bubble{max-width:78%;padding:9px 12px;border-radius:16px;display:flex;flex-direction:column;gap:4px;word-break:break-word}.bubble.mine{align-self:flex-end;background:#ffd400;color:#000;border-bottom-right-radius:4px}.bubble.theirs{align-self:flex-start;background:#242424;color:#fff;border-bottom-left-radius:4px}.bubble small{font-size:9px;opacity:.65}.bubble audio{max-width:220px}.chat-tools{display:flex;gap:7px;padding:9px;background:#111;border-top:1px solid #292929;align-items:center}.chat-tools .field{margin:0;flex:1}.chat-icon{width:45px;height:45px;border-radius:50%;background:#242424;border:1px solid #3a3a3a}.chat-icon.gold{background:#ffd400;color:#000}.recording{border-color:#ff4d4d!important;box-shadow:0 0 0 3px rgba(255,77,77,.15)}.call-modal{width:min(760px,100%);min-height:75vh;background:#080808;border:1px solid #333;border-radius:24px;padding:25px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center}.call-kind{color:#ffd400;font-weight:900}.call-modal .avatar{width:100px;height:100px}.call-status{color:#999}.call-modal video{max-width:92%;max-height:45vh;border-radius:18px;background:#111;margin:8px}.end-call{margin-top:20px;width:62px;height:62px;border-radius:50%;background:#e53935;color:#fff;font-size:25px;transform:rotate(135deg)}#localVideo{width:130px;position:absolute;right:25px;bottom:100px}.share-panel{display:none}
 </style>
 </head>
 <body>
@@ -221,184 +225,239 @@ button{border:0;color:inherit;background:none;cursor:pointer}
 (() => {
   "use strict";
 
-  const KEY = "bouba_amis_v1";
+  /* BOUBA — Amis : vrais utilisateurs Firebase, aucun faux profil */
+  const DB_URL = "https://bouba-51a6f-default-rtdb.europe-west1.firebasedatabase.app";
   const PROFILE_KEY = "bouba_profile_v1";
-
-  const defaultFriends = [
-    {id:1,name:"Awa Touré",phone:"+225 07 00 00 00 01",photo:"https://i.pravatar.cc/160?img=47",online:true,favorite:true,group:false},
-    {id:2,name:"Dachenko",phone:"+225 07 00 00 00 02",photo:"https://i.pravatar.cc/160?img=11",online:true,favorite:false,group:false},
-    {id:3,name:"Ayoubа",phone:"+225 07 00 00 00 03",photo:"https://i.pravatar.cc/160?img=12",online:false,favorite:true,group:false},
-    {id:4,name:"Gaspy",phone:"+225 07 00 00 00 04",photo:"https://i.pravatar.cc/160?img=33",online:false,favorite:false,group:false},
-    {id:5,name:"Sissoko",phone:"+225 07 00 00 00 05",photo:"https://i.pravatar.cc/160?img=68",online:false,favorite:false,group:true},
-    {id:6,name:"Djha",phone:"+225 07 00 00 00 06",photo:"https://i.pravatar.cc/160?img=44",online:true,favorite:false,group:false}
-  ];
-
+  const DEVICE_KEY = "bouba_device_id_v2";
+  const FAV_KEY = "bouba_favorites_v2";
+  const LOCAL_MSG_KEY = "bouba_messages_v2";
   const $ = id => document.getElementById(id);
-  let friends = loadFriends();
-  let profile = loadProfile();
+
+  let users = [];
   let filter = "all";
+  let selected = null;
+  let messages = loadJSON(LOCAL_MSG_KEY, {});
+  let favorites = loadJSON(FAV_KEY, {});
+  let mediaRecorder = null;
+  let audioChunks = [];
 
-  function loadFriends(){
-    try {
-      const x = JSON.parse(localStorage.getItem(KEY));
-      return Array.isArray(x) && x.length ? x : defaultFriends;
-    } catch(e){ return defaultFriends; }
+  const deviceId = localStorage.getItem(DEVICE_KEY) || (() => {
+    const id = "web_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2,9);
+    localStorage.setItem(DEVICE_KEY,id); return id;
+  })();
+
+  function loadJSON(key, fallback){
+    try { const x=JSON.parse(localStorage.getItem(key)); return x ?? fallback; }
+    catch(e){ return fallback; }
+  }
+  function saveJSON(key,val){ localStorage.setItem(key,JSON.stringify(val)); }
+  function esc(s){return String(s ?? "").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+  function pick(o, keys, fallback=""){
+    for(const k of keys){ if(o && o[k] !== undefined && o[k] !== null && String(o[k]).trim() !== "") return o[k]; }
+    return fallback;
+  }
+  function normalizeUser(id,o){
+    if(!o || typeof o!=="object") return null;
+    const name=pick(o,["name","nom","nom_complet","nomComplet","fullName","displayName","username","nom_utilisateur"],"Utilisateur");
+    const phone=pick(o,["phone","telephone","téléphone","whatsapp","numero","numéro","phoneNumber","tel"],"");
+    const photo=pick(o,["photo","photoURL","photoUrl","avatar","image","profilePhoto","profileImage"],"");
+    const status=pick(o,["status","statut","bio"],"");
+    const uid=pick(o,["uid","userId","id"],id);
+    const online=Boolean(o.online || o.isOnline || o.en_ligne || o.presence==="online");
+    return {id:String(id),uid:String(uid),name:String(name),phone:String(phone),photo:String(photo),status:String(status),online};
+  }
+  function currentProfile(){
+    const p=loadJSON(PROFILE_KEY,{});
+    return {
+      name:pick(p,["name","nom","nom_complet","nomComplet","fullName","displayName"],"BOUBA"),
+      phone:pick(p,["phone","telephone","whatsapp","numero","numéro","phoneNumber"],""),
+      uid:pick(p,["uid","userId","id"],""),
+      photo:pick(p,["photo","photoURL","avatar","image"],"")
+    };
   }
 
-  function loadProfile(){
-    try { return JSON.parse(localStorage.getItem(PROFILE_KEY)) || {name:"BOUBA",status:"Disponible",photo:""}; }
-    catch(e){ return {name:"BOUBA",status:"Disponible",photo:""}; }
+  function isMe(u){
+    const me=currentProfile();
+    return (me.uid && (u.uid===String(me.uid)||u.id===String(me.uid))) ||
+           (me.phone && u.phone && cleanPhone(me.phone)===cleanPhone(u.phone));
   }
+  function cleanPhone(p){return String(p||"").replace(/[^0-9+]/g,"");}
 
-  function save(){
-    localStorage.setItem(KEY, JSON.stringify(friends));
-    localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
-  }
-
-  function esc(s){
-    return String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-  }
-
-  function avatar(f, small=false){
-    if(f.photo) return `<img class="avatar ${small?'small':''}" src="${esc(f.photo)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
-      <span class="avatar ${small?'small':''} me-avatar" style="display:none">${esc((f.name||"?")[0].toUpperCase())}</span>`;
-    return `<span class="avatar ${small?'small':''} me-avatar">${esc((f.name||"?")[0].toUpperCase())}</span>`;
+  function avatar(u,small=true){
+    const cls="avatar"+(small?" small":"");
+    if(u.photo) return `<img class="${cls}" src="${esc(u.photo)}" alt="" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='grid'><span class="${cls} me-avatar" style="display:none">${esc((u.name||"?")[0].toUpperCase())}</span>`;
+    return `<span class="${cls} me-avatar">${esc((u.name||"?")[0].toUpperCase())}</span>`;
   }
 
   function render(){
-    const q = $("searchInput").value.trim().toLowerCase();
-    let list = friends.filter(f => {
-      const text = (f.name+" "+f.phone).toLowerCase();
-      const matchesSearch = !q || text.includes(q);
-      const matchesFilter =
-        filter==="all" ||
-        (filter==="online" && f.online) ||
-        (filter==="favorites" && f.favorite) ||
-        (filter==="groups" && f.group);
-      return matchesSearch && matchesFilter;
+    const q=$("searchInput").value.trim().toLowerCase();
+    let list=users.filter(u=>{
+      if(isMe(u)) return false;
+      const txt=(u.name+" "+u.phone+" "+u.status).toLowerCase();
+      const search=!q||txt.includes(q);
+      const fav=!!favorites[u.id];
+      const ok=filter==="all" || (filter==="online"&&u.online) || (filter==="favorites"&&fav) || filter==="groups";
+      return search&&ok;
     });
-
-    $("count").textContent = list.length;
-    $("friends").innerHTML = list.length ? list.map(f => `
-      <article class="friend" data-id="${f.id}">
-        <div class="avatar-wrap">
-          ${avatar(f,true)}
-          ${f.online ? '<span class="online"></span>' : ''}
-        </div>
-        <div class="friend-main">
-          <div class="friend-name">${esc(f.name)}
-            ${f.favorite ? '<span class="badge">★</span>' : ''}
-          </div>
-          <div class="friend-state">${f.online ? '🟢 En ligne' : '⚫ Hors ligne'} • ${esc(f.phone)}</div>
+    $("count").textContent=list.length;
+    $("friends").innerHTML=list.length?list.map(u=>{
+      const fav=!!favorites[u.id];
+      return `<article class="friend" data-id="${esc(u.id)}">
+        <div class="avatar-wrap">${avatar(u,true)}${u.online?'<span class="online"></span>':''}</div>
+        <div class="friend-main" data-action="open">
+          <div class="friend-name">${esc(u.name)} ${fav?'<span class="badge">★</span>':''}</div>
+          <div class="friend-state">${u.online?'🟢 En ligne':'⚫ Hors ligne'}${u.phone?' • '+esc(u.phone):''}</div>
         </div>
         <div class="friend-actions">
           <button class="mini" data-action="message" title="Message">💬</button>
-          <button class="mini" data-action="call" title="Appeler">☎</button>
-          <button class="mini" data-action="favorite" title="Favori">${f.favorite?'★':'☆'}</button>
+          <button class="mini" data-action="voice" title="Appel vocal">📞</button>
+          <button class="mini" data-action="video" title="Appel vidéo">🎥</button>
+          <button class="mini favbtn" data-action="favorite" title="Favori">${fav?'★':'☆'}</button>
         </div>
-      </article>
-    `).join("") : '<div class="empty">Aucun ami trouvé.</div>';
+      </article>`;
+    }).join(""):'<div class="empty">Aucun utilisateur inscrit pour le moment.</div>';
   }
 
   function renderProfile(){
-    $("myName").textContent = profile.name || "BOUBA";
-    $("myStatus").textContent = (profile.status || "Disponible") + " • Appuyez pour modifier";
-    if(profile.photo){
-      $("myAvatar").style.backgroundImage = `url("${profile.photo.replace(/"/g,'')}")`;
-      $("myAvatar").style.backgroundSize = "cover";
-      $("myAvatar").textContent = "";
-    } else {
-      $("myAvatar").style.backgroundImage = "";
-      $("myAvatar").textContent = (profile.name || "B")[0].toUpperCase();
+    const p=currentProfile();
+    $("myName").textContent=p.name||"BOUBA";
+    $("myStatus").textContent="Connecté à BOUBA • profil réel";
+    if(p.photo){$("myAvatar").style.backgroundImage=`url("${p.photo.replace(/"/g,'')}")`;$("myAvatar").style.backgroundSize="cover";$("myAvatar").textContent="";}
+    else {$("myAvatar").style.backgroundImage="";$("myAvatar").textContent=(p.name||"B")[0].toUpperCase();}
+  }
+
+  function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.classList.remove("show"),2600);}
+
+  async function fetchJSON(path,options={}){
+    const r=await fetch(DB_URL+path+".json",{...options,headers:{"Content-Type":"application/json",...(options.headers||{})}});
+    if(!r.ok) throw new Error("Firebase "+r.status);
+    return r.json();
+  }
+
+  async function loadUsers(){
+    try{
+      const data=await fetchJSON("/users");
+      users=Object.entries(data||{}).map(([id,o])=>normalizeUser(id,o)).filter(Boolean);
+      render();
+      $("firebaseState").textContent="🟢 Utilisateurs Firebase en direct";
+    }catch(e){
+      users=[];render();
+      $("firebaseState").textContent="🟠 Firebase inaccessible — vérifie les règles users";
+      toast("Impossible de lire les utilisateurs Firebase.");
     }
   }
 
-  function toast(msg){
-    const t=$("toast"); t.textContent=msg; t.classList.add("show");
-    clearTimeout(window.__toast); window.__toast=setTimeout(()=>t.classList.remove("show"),2200);
+  function openChat(u){
+    selected=u;
+    $("chatTitle").textContent=u.name;
+    $("chatSub").textContent=u.online?"🟢 En ligne":(u.phone||"Hors ligne");
+    $("chatAvatar").innerHTML=avatar(u,false);
+    $("chatBack").classList.add("show");
+    renderMessages();
+    setTimeout(()=>$('messageInput').focus(),120);
+  }
+  function closeChat(){$("chatBack").classList.remove("show");selected=null;stopRecording();}
+
+  function chatKey(u){
+    const a=deviceId,b=u.uid||u.id;return [String(a),String(b)].sort().join("__");
+  }
+  function renderMessages(){
+    if(!selected)return;
+    const arr=messages[chatKey(selected)]||[];
+    $("messages").innerHTML=arr.length?arr.map(m=>`<div class="bubble ${m.from===deviceId?'mine':'theirs'}">${m.type==='audio'?`<audio controls src="${m.data}"></audio>`:esc(m.text)}<small>${new Date(m.time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</small></div>`).join(""): '<div class="chat-empty">Aucun message. Commence la discussion 👋</div>';
+    $("messages").scrollTop=$("messages").scrollHeight;
   }
 
-  function openModal(title="Ajouter un ami"){
-    $("modalTitle").textContent=title;
-    $("modalBack").classList.add("show");
-    setTimeout(()=>$("friendName").focus(),50);
-  }
-  function closeModal(){ $("modalBack").classList.remove("show"); }
-
-  $("searchInput").addEventListener("input", render);
-  $("searchBtn").addEventListener("click", () => {
-    $("searchBox").scrollIntoView({behavior:"smooth",block:"center"});
-    $("searchInput").focus();
-  });
-
-  $("tabs").addEventListener("click", e => {
-    const b=e.target.closest(".tab"); if(!b) return;
-    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-    b.classList.add("active"); filter=b.dataset.filter; render();
-  });
-
-  function addFriend(){
-    const name=$("friendName").value.trim();
-    const phone=$("friendPhone").value.trim();
-    const photo=$("friendPhoto").value.trim();
-    if(!name){ toast("Veuillez entrer le nom de l'ami."); return; }
-    friends.unshift({id:Date.now(),name,phone:phone||"Non renseigné",photo,online:false,favorite:false,group:false});
-    save(); render(); closeModal();
-    $("friendName").value=""; $("friendPhone").value=""; $("friendPhoto").value="";
-    toast("✅ Ami ajouté");
+  async function sendMessage(text,type="text",data=""){
+    if(!selected||(!text.trim()&&type==='text'))return;
+    const key=chatKey(selected);
+    const msg={id:Date.now().toString(36),from:deviceId,to:selected.uid||selected.id,text:text.trim(),type,data,time:Date.now()};
+    (messages[key] ||= []).push(msg);saveJSON(LOCAL_MSG_KEY,messages);renderMessages();$("messageInput").value="";
+    try{await fetchJSON(`/messages/${encodeURIComponent(key)}/${msg.id}`,{method:"PUT",body:JSON.stringify(msg)});}
+    catch(e){toast("Message gardé sur cet appareil — Firebase refuse l'écriture.");}
   }
 
-  $("addBtn").onclick=()=>openModal();
-  $("fab").onclick=()=>openModal();
-  $("closeModal").onclick=closeModal;
-  $("cancelModal").onclick=closeModal;
-  $("saveFriend").onclick=addFriend;
-  $("modalBack").addEventListener("click",e=>{if(e.target===$("modalBack"))closeModal();});
-  $("friendName").addEventListener("keydown",e=>{if(e.key==="Enter")addFriend();});
+  async function startRecording(){
+    if(!navigator.mediaDevices?.getUserMedia){toast("Le navigateur ne permet pas l'enregistrement vocal ici.");return;}
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      audioChunks=[];mediaRecorder=new MediaRecorder(stream);
+      mediaRecorder.ondataavailable=e=>{if(e.data.size)audioChunks.push(e.data)};
+      mediaRecorder.onstop=()=>{
+        const blob=new Blob(audioChunks,{type:mediaRecorder.mimeType||'audio/webm'});
+        const reader=new FileReader();reader.onload=()=>sendMessage("🎤 Message vocal","audio",reader.result);
+        reader.readAsDataURL(blob);stream.getTracks().forEach(t=>t.stop());
+      };
+      mediaRecorder.start();$("recordBtn").classList.add("recording");$("recordBtn").textContent="⏹";toast("🎤 Enregistrement… appuie encore pour envoyer");
+    }catch(e){toast("Autorisation du microphone refusée.");}
+  }
+  function stopRecording(){if(mediaRecorder&&mediaRecorder.state!=="inactive")mediaRecorder.stop();mediaRecorder=null;$("recordBtn").classList.remove("recording");$("recordBtn").textContent="🎤";}
 
-  $("friends").addEventListener("click", e => {
-    const b=e.target.closest("[data-action]"); if(!b) return;
-    const card=b.closest(".friend"); const id=Number(card.dataset.id);
-    const f=friends.find(x=>x.id===id); if(!f)return;
-    const action=b.dataset.action;
-    if(action==="message") toast("💬 Ouverture de la discussion avec "+f.name);
-    if(action==="call"){
-      if(f.phone && f.phone!=="Non renseigné") window.location.href="tel:"+f.phone.replace(/[^+0-9]/g,"");
-      else toast("Numéro non renseigné");
-    }
-    if(action==="favorite"){
-      f.favorite=!f.favorite; save(); render();
-      toast(f.favorite?"⭐ Ajouté aux favoris":"Retiré des favoris");
-    }
-  });
+  function shareApp(){
+    const url=location.href;
+    if(navigator.share)navigator.share({title:"BOUBA",text:"Rejoins-moi sur BOUBA 👋",url}).catch(()=>{});
+    else navigator.clipboard?.writeText(url).then(()=>toast("🔗 Lien BOUBA copié"));
+  }
+  function invite(){
+    const text=encodeURIComponent("Rejoins-moi sur BOUBA 👋 "+location.href);
+    window.open("https://wa.me/?text="+text,"_blank");
+  }
 
-  $("myStatusBtn").onclick=()=>{
-    const s=prompt("Votre statut :", profile.status || "Disponible");
-    if(s!==null){profile.status=s.trim()||"Disponible";save();renderProfile();toast("✅ Statut enregistré");}
+  $("searchInput").addEventListener("input",render);
+  $("searchBtn").onclick=()=>{$("searchInput").focus();window.scrollTo({top:0,behavior:"smooth"});};
+  $("cameraBtn").onclick=()=>shareApp();
+  $("addBtn").onclick=()=>invite();$("fab").onclick=()=>invite();
+  $("tabs").onclick=e=>{const b=e.target.closest(".tab");if(!b)return;document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");filter=b.dataset.filter;render();};
+
+  $("friends").onclick=e=>{
+    const b=e.target.closest("[data-action]");if(!b)return;const card=b.closest(".friend");const u=users.find(x=>String(x.id)===String(card.dataset.id));if(!u)return;
+    const a=b.dataset.action;
+    if(a==="open"||a==="message")openChat(u);
+    if(a==="favorite"){favorites[u.id]=!favorites[u.id];saveJSON(FAV_KEY,favorites);render();}
+    if(a==="voice")startCall(u,false);
+    if(a==="video")startCall(u,true);
   };
 
-  $("editProfile").onclick=()=>{
-    const name=prompt("Nom :", profile.name || "BOUBA");
-    if(name===null)return;
-    const status=prompt("Statut :", profile.status || "Disponible");
-    if(status===null)return;
-    profile.name=name.trim()||"BOUBA";
-    profile.status=status.trim()||"Disponible";
-    save();renderProfile();toast("✅ Profil enregistré");
-  };
+  $("closeChat").onclick=closeChat;$("chatBack").onclick=e=>{if(e.target===$("chatBack"))closeChat();};
+  $("sendBtn").onclick=()=>sendMessage($("messageInput").value);
+  $("messageInput").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage(e.target.value);}});
+  $("recordBtn").onclick=()=>mediaRecorder?stopRecording():startRecording();
+  $("shareBtn").onclick=shareApp;$("inviteBtn").onclick=invite;
+  $("myStatusBtn").onclick=shareApp;
+  $("editProfile").onclick=()=>toast("Le profil est géré depuis ton compte BOUBA.");
+  document.querySelector(".bottom").onclick=e=>{const b=e.target.closest(".nav");if(!b)return;if(b.dataset.page==="amis")return;toast("Cette page sera reliée au module "+b.dataset.page+".");};
 
-  $("cameraBtn").onclick=()=>toast("📷 Caméra prête — votre navigateur demandera l'autorisation si nécessaire.");
+  /* Appel vocal/vidéo : ouverture d'un écran d'appel + WebRTC prêt à être relié au signal Firebase. */
+  function startCall(u,video){
+    selected=u;$("callTitle").textContent=video?"Appel vidéo":"Appel vocal";$("callName").textContent=u.name;$("callAvatar").innerHTML=avatar(u,false);$("callBack").classList.add("show");
+    if(video){$("remoteVideo").style.display="block";$("localVideo").style.display="block";}else{$("remoteVideo").style.display="none";$("localVideo").style.display="none";}
+    navigator.mediaDevices?.getUserMedia({audio:true,video:video}).then(stream=>{const v=$("localVideo");v.srcObject=stream;v.muted=true;v.play().catch(()=>{});}).catch(()=>toast("Autorisation caméra/micro nécessaire pour l'appel."));
+  }
+  $("endCall").onclick=()=>{$("callBack").classList.remove("show");[...document.querySelectorAll("video")].forEach(v=>{if(v.srcObject)v.srcObject.getTracks().forEach(t=>t.stop());v.srcObject=null;});};
 
-  document.querySelector(".bottom").addEventListener("click",e=>{
-    const b=e.target.closest(".nav"); if(!b)return;
-    const p=b.dataset.page;
-    if(p==="amis"){toast("👥 Vous êtes dans Amis");return;}
-    toast("Section « "+p+" » prête à être reliée à votre écran.");
-  });
-
-  renderProfile();
-  render();
+  renderProfile();loadUsers();setInterval(loadUsers,5000);
 })();
 </script>
+
+<div class="firebase-state" id="firebaseState">⏳ Connexion aux utilisateurs Firebase…</div>
+
+<div class="modal-back" id="chatBack">
+  <div class="chat-modal">
+    <div class="chat-head"><button class="close" id="closeChat">‹</button><div id="chatAvatar"></div><div><b id="chatTitle">Discussion</b><small id="chatSub"></small></div></div>
+    <div class="messages" id="messages"></div>
+    <div class="chat-tools"><button id="recordBtn" class="chat-icon">🎤</button><input id="messageInput" class="field" placeholder="Écrire un message…" autocomplete="off"><button id="sendBtn" class="chat-icon gold">➤</button></div>
+  </div>
+</div>
+
+<div class="modal-back" id="callBack">
+  <div class="call-modal">
+    <div class="call-kind" id="callTitle">Appel vocal</div><div id="callAvatar"></div><h2 id="callName">Utilisateur</h2><div class="call-status">Appel en cours…</div>
+    <video id="remoteVideo" autoplay playsinline></video><video id="localVideo" autoplay playsinline muted></video>
+    <button id="endCall" class="end-call">☎</button>
+  </div>
+</div>
+
+<div class="share-panel" id="sharePanel"><button id="shareBtn">🔗 Partager BOUBA</button><button id="inviteBtn">👥 Inviter un ami</button></div>
+
 </body>
 </html>
