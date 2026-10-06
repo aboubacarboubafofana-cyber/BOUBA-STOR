@@ -2,340 +2,413 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Amis</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<link rel="manifest" href="manifest.json">
+<title>Amis - BOUBA STORE</title>
 <style>
-:root{--bg:#000;--card:#121212;--line:#2a2a2a;--y:#ffd600;--t:#fff;--m:#9a9a9a;--bub:#1d1d1d;--r:#e5532d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#fff;--card:#f6f6f6;--line:#e2e2e2;--t:#111;--m:#666;--bub:#eee}}
-:root[data-theme="light"]{--bg:#fff;--card:#f6f6f6;--line:#e2e2e2;--t:#111;--m:#666;--bub:#eee}
+:root{--bg:#000;--card:#121212;--line:#2a2a2a;--y:#ffd600;--t:#fff;--m:#9a9a9a;--bub:#1d1d1d;--r:#e5532d;--g:#2ecc71}
 *{box-sizing:border-box;margin:0}
 html,body{height:100%}
-body{background:var(--bg);color:var(--t);font-family:Roboto,system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+body{background:var(--bg);color:var(--t);font-family:Roboto,system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden;padding-top:env(safe-area-inset-top,0)}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
-.top{display:flex;align-items:center;gap:10px;padding:14px 16px 8px}
+:focus-visible{outline:2px solid var(--y);outline-offset:2px}
+.top{display:flex;align-items:center;gap:10px;padding:12px 16px 8px}
 .top h1{font-size:26px;font-weight:800;color:var(--y);flex:1}
-.turbo{font-size:12px;font-weight:700;color:#000;background:var(--y);border-radius:20px;padding:6px 10px;display:flex;gap:6px;align-items:center}
-.turbo i{width:8px;height:8px;border-radius:50%;background:#000;animation:p 1.2s infinite}
-@keyframes p{50%{opacity:.25}}
-@media(prefers-reduced-motion:reduce){.turbo i,.dot{animation:none}}
+.ic{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--y);display:grid;place-items:center;font-size:18px;flex:none;text-decoration:none;color:var(--y)}
 .tabs{display:flex;gap:8px;padding:6px 16px 10px;overflow-x:auto}
 .tab{border:1.5px solid var(--y);border-radius:22px;padding:9px 16px;font-weight:700;white-space:nowrap}
 .tab.on{background:var(--y);color:#000}
+.tab.small{padding:7px 11px;font-size:13px}
+.tab.wa{border-color:#25D366;color:#25D366}
 .search{margin:0 16px 8px;padding:11px 14px;border-radius:22px;border:1px solid var(--line);background:var(--card);color:var(--t);font:inherit;width:calc(100% - 32px)}
 .list{flex:1;overflow-y:auto}
 .row{display:flex;gap:10px;align-items:center;width:100%;padding:11px 16px;text-align:left}
-.row:active{background:var(--card)}
+button.row:active{background:var(--card)}
 .av{width:48px;height:48px;border-radius:50%;background:var(--y);color:#000;font-weight:800;font-size:19px;display:grid;place-items:center;flex:none;position:relative}
-.av.on::after{content:"";position:absolute;right:0;bottom:0;width:12px;height:12px;border-radius:50%;background:#2ecc71;border:2px solid var(--bg)}
+.av img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+.av.on::after{content:"";position:absolute;right:0;bottom:0;width:12px;height:12px;border-radius:50%;background:var(--g);border:2px solid var(--bg)}
 .mid{flex:1;min-width:0}
 .mid b{display:block}
 .mid span{display:block;color:var(--m);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .meta{text-align:right;font-size:12px;color:var(--m)}
 .badge{display:inline-block;margin-top:4px;background:var(--y);color:#000;font-weight:800;border-radius:12px;padding:1px 7px}
 .invite{margin:10px 16px 14px;background:var(--y);color:#000;font-weight:800;border-radius:14px;padding:15px;width:calc(100% - 32px)}
-.small{padding:7px 11px;font-size:13px}
 .empty{padding:30px 20px;color:var(--m);text-align:center}
-#chat{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.share{padding:6px 16px 0}
+.share span{display:block;font-size:13px;color:var(--m);margin-bottom:6px}
+.share div{display:flex;gap:8px;flex-wrap:wrap}
+#login{position:fixed;inset:0;background:var(--bg);z-index:80;display:none;flex-direction:column;justify-content:center;padding:24px;gap:10px}
+#login h2{color:var(--y);font-size:28px}
+#login p{color:var(--m);font-size:14px;margin-bottom:6px}
+#login .search{margin:0;width:100%}
+#chat{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0)}
 #chat.open{display:flex}
 .ch{position:relative;display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
 .selbar{display:none;position:absolute;inset:0;background:var(--card);align-items:center;gap:12px;padding:0 12px;z-index:5;font-weight:700}
 .ch.selmode .selbar{display:flex}
-.ic{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--y);display:grid;place-items:center;font-size:18px;flex:none}
 .msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
 .b{max-width:80%;padding:9px 12px;border-radius:16px;background:var(--bub);line-height:1.35;word-wrap:break-word;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .b.me{align-self:flex-end;background:var(--y);color:#000;border-bottom-right-radius:4px}
 .b.th{align-self:flex-start;border-bottom-left-radius:4px}
 .b.sel{outline:3px solid var(--r);outline-offset:2px}
 .b small{display:block;font-size:11px;opacity:.65;margin-top:3px;text-align:right}
+.b img,.b video{max-width:100%;border-radius:10px;display:block}
+.b a{color:inherit;font-weight:700}
 .sys{align-self:center;font-size:12px;color:var(--m);background:var(--card);border-radius:12px;padding:5px 10px}
-.vo{display:flex;align-items:center;gap:10px;min-width:200px}
+.vo{display:flex;align-items:center;gap:10px;min-width:190px}
 .pl{width:36px;height:36px;border-radius:50%;background:#000;color:var(--y);flex:none}
 .b.th .pl{background:var(--y);color:#000}
-.wv{flex:1;display:flex;align-items:center;gap:2px;height:30px}
-.wv i{flex:1;min-width:2px;background:currentColor;opacity:.35;border-radius:2px}
-.wv i.on{opacity:1}
+.pb{flex:1;height:5px;border-radius:3px;background:currentColor;opacity:.9;position:relative;overflow:hidden}
+.pb::before{content:"";position:absolute;inset:0;background:var(--bg);opacity:.55}
+.pb i{position:absolute;left:0;top:0;bottom:0;width:0;background:currentColor;z-index:1}
 .bar{position:relative;padding:8px 12px}
 .comp{background:var(--card);border:1px solid var(--line);border-radius:26px;padding:10px 12px 8px}
 .comp input[type=text]{width:100%;background:none;border:0;color:var(--t);font:inherit;padding:6px 4px 10px;outline:0}
 .crow{display:flex;align-items:center;gap:8px}
 .sp{flex:1}
-.cb{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:20px;border:1px solid var(--line);cursor:pointer;user-select:none;-webkit-user-select:none}
-#mic{position:relative;z-index:3;touch-action:none;-webkit-touch-callout:none}
+.cb{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:20px;border:1px solid var(--line);cursor:pointer}
 .snd{background:var(--r);border-color:var(--r);color:#fff;font-weight:800}
-.recbar{position:absolute;left:12px;right:12px;top:8px;bottom:8px;border-radius:26px;background:var(--card);border:1px solid var(--r);display:none;align-items:center;gap:10px;padding:0 112px 0 16px;z-index:2}
+.recbar{position:absolute;left:12px;right:12px;top:8px;bottom:8px;border-radius:26px;background:var(--card);border:1px solid var(--r);display:none;align-items:center;gap:10px;padding:0 10px 0 12px;z-index:2}
 .bar.rec .recbar{display:flex}
-.bar.rec #mic{background:var(--r);color:#fff;border-color:var(--r);transform:scale(1.3)}
-.dot{width:10px;height:10px;border-radius:50%;background:var(--r);animation:p 1s infinite;flex:none}
-#wave{flex:1;height:32px;min-width:0}
-.rh{font-size:11px;color:var(--m);white-space:nowrap}
-#call{position:fixed;inset:0;background:#000;display:none;flex-direction:column;align-items:center;z-index:50;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color:#fff}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--r);animation:p 1s infinite}
+@keyframes p{50%{opacity:.25}}
+@media(prefers-reduced-motion:reduce){.dot{animation:none}}
+#call{position:fixed;inset:0;background:#000;display:none;flex-direction:column;align-items:center;z-index:90;color:#fff;padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0)}
 #call.open{display:flex}
-#lv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
-#call.vid #lv{display:block}
+#rv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#lv{position:absolute;right:12px;top:12px;width:96px;border:1px solid var(--y);border-radius:10px;background:#111;z-index:3;display:none}
 .cinfo{position:relative;z-index:2;text-align:center;margin-top:48px;text-shadow:0 1px 6px #000}
 .cinfo .av{margin:0 auto 10px;width:88px;height:88px;font-size:32px}
-#call.vid .cinfo .av{display:none}
 .cbtns{position:relative;z-index:2;margin-top:auto;display:flex;gap:18px;padding:24px}
-.cbtns button{width:62px;height:62px;border-radius:50%;background:#2a2a2a;color:#fff;font-size:24px}
-.cbtns .end{background:#e53935}
-#toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--y);color:#000;padding:10px 16px;border-radius:20px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;z-index:99;max-width:90%;text-align:center}
-#toast.on{opacity:1}
+.cbtns button{width:62px;height:62px;border-radius:50%;background:#2a2a2a;font-size:24px}
+.cbtns .end{background:#e53935}.cbtns .ok{background:#25D366}
 #sx{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;z-index:60}
 #sx.open{display:flex}
-.sheet{width:100%;background:var(--bg);border-top:2px solid var(--y);border-radius:22px 22px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));max-height:92%;overflow-y:auto}
+.sheet{width:100%;background:var(--bg);border-top:2px solid var(--y);border-radius:22px 22px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0));max-height:92%;overflow-y:auto}
 .sheet h3{color:var(--y);margin-bottom:12px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.share{padding:6px 16px 0}
-.share span{display:block;font-size:13px;color:var(--m);margin-bottom:6px}
-.share div{display:flex;gap:8px;flex-wrap:wrap}
-.tab.wa{border-color:#25D366;color:#25D366}
 .hint{color:var(--m);font-size:13px;margin:6px 0 8px}
-:focus-visible{outline:2px solid var(--y);outline-offset:2px}
+#iv{position:fixed;inset:0;background:#000e;z-index:95;display:none;align-items:center;justify-content:center}
+#iv.on{display:flex}#iv img{max-width:100%;max-height:100%}
+#toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--y);color:#000;padding:10px 16px;border-radius:20px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;z-index:99;max-width:90%;text-align:center}
+#toast.on{opacity:1}
 </style>
 </head>
 <body>
-<div class="top"><a href="./" class="ic" aria-label="Retour à la boutique" style="text-decoration:none;color:var(--y)">←</a><h1>💬 Amis</h1><div class="turbo"><i></i>Turbo auto</div></div>
-<div class="tabs" id="tabs">
-<button class="tab on" data-t="amis">👥 Amis</button>
-<button class="tab" data-t="rep">📒 Répertoire</button>
-<button class="tab" data-t="dem">🔔 Demandes</button>
-</div>
+<div class="top"><a href="index.html" class="ic" aria-label="Retour à la boutique">←</a><h1>💬 Amis</h1><button class="ic" id="me" aria-label="Changer ma photo"></button></div>
+<div class="tabs" id="tabs"><button class="tab on" data-t="amis">👥 Amis</button><button class="tab" data-t="rep">📒 Répertoire</button><button class="tab" data-t="dem" id="tdem">🔔 Demandes</button></div>
 <input class="search" id="q" type="search" placeholder="Rechercher un ami">
 <div class="list" id="list"></div>
-<div class="share"><span>Invite tes proches à nous rejoindre :</span><div><button class="tab small wa" id="q-wa">💬 WhatsApp</button><button class="tab small" id="q-sms">✉️ SMS</button><button class="tab small" id="q-sh">↗ Partager</button></div></div>
+<div class="share"><span>Invite tes proches à nous rejoindre :</span><div><button class="tab small wa" data-s="wa">💬 WhatsApp</button><button class="tab small" data-s="sms">✉️ SMS</button><button class="tab small" data-s="sh">↗ Partager</button></div></div>
 <button class="invite" id="inv">📤 Inviter des amis ou clients</button>
 
+<section id="login"><h2>Crée ton profil</h2><p>Ton numéro permet à tes amis de te retrouver. Si tu as déjà un compte, entre le même numéro et mot de passe.</p>
+<input class="search" id="ln" placeholder="Ton nom"><input class="search" id="lp" type="tel" placeholder="Ton numéro, ex : 07 87 61 97 17"><input class="search" id="lw" type="password" placeholder="Mot de passe (6 caractères minimum)">
+<button class="invite" id="lg" style="margin:6px 0 0;width:100%">Continuer</button><p id="le" style="color:#f66"></p></section>
+
 <section id="chat" aria-label="Conversation">
-<div class="ch" id="hdr">
-<button class="ic" id="back" aria-label="Retour">←</button>
-<div class="av" id="cav"></div>
-<div class="mid"><b id="cn"></b><span>en ligne · Turbo</span></div>
-<button class="ic" id="cv" aria-label="Appel vocal">📞</button>
-<button class="ic" id="cvid" aria-label="Appel vidéo">🎥</button>
-<div class="selbar"><button class="ic" id="unsel" aria-label="Annuler">✕</button><span id="selc" style="flex:1"></span><button class="tab on" id="del">🗑 Supprimer</button></div>
-</div>
+<div class="ch" id="hdr"><button class="ic" id="back" aria-label="Retour">←</button><div class="av" id="cav"></div><div class="mid"><b id="cn"></b><span id="cs"></span></div><button class="ic" id="cv" aria-label="Appel vocal">📞</button><button class="ic" id="cvid" aria-label="Appel vidéo">🎥</button>
+<div class="selbar"><button class="ic" id="unsel" aria-label="Annuler">✕</button><span id="selc" style="flex:1"></span><button class="tab on" id="del">🗑 Supprimer</button></div></div>
 <div class="msgs" id="msgs" aria-live="polite"></div>
-<div class="bar" id="bar">
-<div class="comp">
-<input type="text" id="txt" placeholder="Message" autocomplete="off">
-<div class="crow">
-<label class="cb" for="file" aria-label="Photo ou fichier">＋</label>
-<input id="file" type="file" hidden>
-<span class="sp"></span>
-<button class="cb" id="mic" aria-label="Maintiens pour enregistrer un vocal">🎤</button>
-<button class="cb snd" id="send" aria-label="Envoyer">↑</button>
-</div></div>
-<div class="recbar"><span class="dot"></span><b id="rt">0:00</b><canvas id="wave"></canvas><span class="rh">◀ glisse pour annuler</span></div>
-</div>
+<div class="bar" id="bar"><div class="comp"><input type="text" id="txt" placeholder="Message" autocomplete="off">
+<div class="crow"><label class="cb" for="file" aria-label="Photo ou fichier">＋</label><input id="file" type="file" hidden><span class="sp"></span><button class="cb" id="mic" aria-label="Enregistrer un vocal">🎤</button><button class="cb snd" id="send" aria-label="Envoyer">↑</button></div></div>
+<div class="recbar"><button class="cb" id="rc" aria-label="Annuler">🗑</button><span class="dot"></span><b id="rt" style="flex:1">0:00</b><button class="cb snd" id="rs" aria-label="Envoyer le vocal">↑</button></div></div>
 </section>
 
-<div id="call"><video id="lv" autoplay playsinline muted></video>
+<div id="call"><video id="rv" autoplay playsinline></video><video id="lv" autoplay playsinline muted></video>
 <div class="cinfo"><div class="av" id="cav2"></div><h2 id="cname"></h2><p id="cst"></p></div>
-<div class="cbtns"><button id="mute" aria-label="Micro">🎙</button><button id="flip" aria-label="Changer de caméra">🔄</button><button class="end" id="end" aria-label="Raccrocher">📵</button></div></div>
-<div id="sx"><div class="sheet" role="dialog" aria-label="Inviter">
-<h3>📤 Inviter des amis ou clients</h3>
-<div class="g2"><button class="tab" id="s-wa">💬 WhatsApp</button><button class="tab" id="s-sms">✉️ SMS</button><button class="tab" id="s-cp">🔗 Copier le lien</button><button class="tab" id="s-sh">↗ Autres apps</button></div>
-<p class="hint">Ou ajoute un ami avec son numéro. Sans indicatif, +225 est ajouté automatiquement. Pour un autre pays, tape + et l'indicatif.</p>
-<input class="search" id="snom" placeholder="Nom (facultatif)" style="width:100%;margin:0 0 8px">
+<div class="cbtns"><button id="mute" aria-label="Micro">🎙</button><button class="ok" id="acc" aria-label="Répondre">📞</button><button class="end" id="end" aria-label="Raccrocher">📵</button></div></div>
+
+<div id="sx"><div class="sheet" role="dialog" aria-label="Inviter"><h3>📤 Inviter des amis ou clients</h3>
+<div class="g2"><button class="tab" data-s="wa">💬 WhatsApp</button><button class="tab" data-s="sms">✉️ SMS</button><button class="tab" data-s="cp">🔗 Copier le lien</button><button class="tab" data-s="sh">↗ Autres apps</button></div>
+<p class="hint">Ou ajoute un ami avec son numéro. Sans indicatif, +225 est ajouté automatiquement.</p>
 <input class="search" id="snum" type="tel" placeholder="Numéro, ex : 07 87 61 97 17" style="width:100%;margin:0 0 10px">
-<button class="invite" id="s-add" style="margin:0;width:100%">➕ Ajouter et inviter sur WhatsApp</button>
-<button class="tab" id="sclose" style="margin-top:10px;width:100%">Fermer</button>
-</div></div>
+<button class="invite" id="sadd" style="margin:0;width:100%">➕ Ajouter cet ami</button><button class="tab" id="sclose" style="margin-top:10px;width:100%">Fermer</button></div></div>
+<div id="iv"><img id="ivi" alt=""></div>
 <div id="toast" role="status"></div>
+<input type="file" id="pf" accept="image/*" hidden>
 
 <script>
-var friends=[
-{n:"Aina Rakoto",on:1,last:"Ok, je t'envoie ça tout de suite",h:"12:41",u:2},
-{n:"Boutique Mahery",on:1,last:"Client : commande reçue ✅",h:"11:58",u:0},
-{n:"Tiana R.",on:0,last:"Salut !",h:"Hier",u:0},
-{n:"Fidy Andria",on:0,last:"Salut !",h:"Hier",u:1}];
-var reqs=[{n:"Hery Solo"},{n:"Lalao Mina"}];
-var phone=[],hist={},cur=null,tab="amis",sel={},mid=0,pl=null,R=null,hold=false,x0=0,lp=0,lpf=false,call=null,tt;
-try{phone=JSON.parse(localStorage.getItem("ph")||"[]")}catch(e){}
-var $=function(i){return document.getElementById(i)};
-function ini(n){return n.split(" ").map(function(w){return w[0]}).join("").slice(0,2).toUpperCase()}
-function esc(s){var d=document.createElement("div");d.textContent=s;return d.innerHTML}
-function fmt(s){s=Math.floor(s);return Math.floor(s/60)+":"+("0"+s%60).slice(-2)}
-function now(){var d=new Date();return d.getHours()+":"+("0"+d.getMinutes()).slice(-2)}
-function toast(m){var t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(function(){t.classList.remove("on")},2800)}
-function base(){return location.href.split("#")[0].split("?")[0].replace(/amis\.html$/,"")}
-var INV="Rejoins-moi sur BOUBA STORE :";
+/* ===== À REMPLIR : copie ici FB_CFG depuis ton index.html (la même configuration Firebase) ===== */
+window.FB_CFG = window.FB_CFG || {
+  apiKey:"", authDomain:"", databaseURL:"", projectId:"", appId:""
+};
+</script>
+<script type="module">
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
+import {getDatabase,ref,get,set,update,remove,push,onValue,onChildAdded,query,limitToLast} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js';
+import {getAuth,signInWithEmailAndPassword,createUserWithEmailAndPassword,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
+
+const $=i=>document.getElementById(i);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const K=s=>{const n=String(s||'').replace(/\D/g,'');return n.length>=10?'u'+n.slice(-10):''};
+const ph=k=>k.slice(1);
+const U=u=>/^data:(image|audio|video|application|text)\/[\w.+-]+(;[\w=.+-]+)*;base64,[A-Za-z0-9+\/=]+$/.test(u||'')?u:'';
+const ini=n=>String(n||'?').trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+const fmt=s=>Math.floor(s/60)+':'+('0'+Math.floor(s%60)).slice(-2);
+const hhmm=t=>{const d=new Date(t||0);return d.getHours()+':'+('0'+d.getMinutes()).slice(-2)};
+const day=t=>{const d=new Date(t),n=new Date();if(d.toDateString()===n.toDateString())return hhmm(t);const y=new Date(n-864e5);return d.toDateString()===y.toDateString()?'Hier':('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)};
+let tt;const toast=m=>{const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2800)};
+const base=()=>location.href.split('#')[0].split('?')[0].replace(/amis\.html$/,'');
+const INV='Rejoins-moi sur BOUBA STORE :';
+const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]};
+
+if(!FB_CFG.apiKey){document.body.innerHTML='<p style="padding:30px;color:#ffd600">Configuration Firebase manquante : colle FB_CFG en haut de amis.html.</p>';throw 0}
+const app=initializeApp(FB_CFG,'amis2'),db=getDatabase(app),au=getAuth(app),R=p=>ref(db,p);
+
+let me=null,fr={},rq={},P={},REG={},L={},W={},tab='amis',cur=null,dir=[],unMsg=null,MSG={},sel={},lastRaw=[];
+let rd={};try{rd=JSON.parse(localStorage.bb_read||'{}');dir=JSON.parse(localStorage.bb_dir||'[]')}catch(e){}
+const online=k=>Date.now()-((P[k]||{}).seen||0)<70000;
+const nm=k=>(fr[k]&&fr[k].name)||(P[k]&&P[k].name)||(rq[k]&&rq[k].name)||ph(k);
+function av(k,size,dot){
+ const p=P[k]&&U(P[k].photo);
+ return '<div class="av'+(dot&&online(k)?' on':'')+'">'+(p?'<img src="'+p+'" alt="">':esc(ini(nm(k))))+'</div>';
+}
+function prof(k){ if(W[k]||REG[k]!==undefined)return;
+ REG[k]=false;get(R('profiles/'+k)).then(s=>{REG[k]=s.exists();P[k]=s.val()||P[k]||{};render()}).catch(()=>{});
+}
+function watch(k){ if(W[k])return;W[k]=1;REG[k]=true;
+ onValue(R('profiles/'+k),s=>{P[k]=s.val()||{};render();if(cur===k)head()});
+ onValue(query(R('chats/'+me.k+'/'+k),limitToLast(1)),s=>{let m=null;s.forEach(c=>{m=c.val()});L[k]=m;render()});
+}
+
+/* ---------- connexion ---------- */
+onAuthStateChanged(au,u=>{
+ let m=null;try{m=JSON.parse(localStorage.bb_me||'null')}catch(e){}
+ if(u&&m){me=m;start()}else $('login').style.display='flex';
+});
+$('lg').onclick=async()=>{
+ const name=$('ln').value.trim(),k=K($('lp').value),pw=$('lw').value;
+ if(!name||!k)return $('le').textContent='Entre ton nom et un numéro valide.';
+ if(pw.length<6)return $('le').textContent='Mot de passe : 6 caractères minimum.';
+ $('le').textContent='Connexion…';const email=k+'@bouba.app';
+ try{try{await signInWithEmailAndPassword(au,email,pw)}catch(e){await createUserWithEmailAndPassword(au,email,pw)}
+  await update(R('profiles/'+k),{name,phone:ph(k),seen:Date.now()});
+  localStorage.bb_me=JSON.stringify({k,name});me={k,name};$('login').style.display='none';start();
+ }catch(e){$('le').textContent='Impossible de se connecter. Vérifie ton mot de passe.'}
+};
+let started=0;
+function start(){
+ if(started)return;started=1;watch(me.k);
+ onValue(R('friends/'+me.k),s=>{fr=s.val()||{};Object.keys(fr).forEach(watch);render()});
+ onValue(R('requests/'+me.k),s=>{rq=s.val()||{};Object.keys(rq).forEach(prof);render()});
+ onValue(R('incoming/'+me.k),s=>{const v=s.val();if(v&&Date.now()-v.t<60000&&!pc)ring(v)});
+ const beat=()=>update(R('profiles/'+me.k),{seen:Date.now()}).catch(()=>{});beat();setInterval(beat,30000);setInterval(render,60000);
+ render();
+}
 
 /* ---------- liste ---------- */
 function render(){
- var q=$("q").value.toLowerCase(),h="";
- if(tab==="dem"){
-  reqs.forEach(function(r,i){h+='<div class="row"><div class="av">'+ini(r.n)+'</div><div class="mid"><b>'+esc(r.n)+'</b><span>Veut devenir ton ami</span></div><button class="tab on" data-ok="'+i+'">Accepter</button></div>'});
-  if(!reqs.length)h='<div class="empty">Aucune demande en attente.</div>';
+ if(!me)return;
+ const q=$('q').value.toLowerCase(),n=Object.keys(rq).length;let h='';
+ $('tdem').textContent='🔔 Demandes'+(n?' ('+n+')':'');
+ $('me').innerHTML=av(me.k).replace('class="av"','class="av" style="width:100%;height:100%"');
+ if(tab==='dem'){
+  h=Object.keys(rq).map(k=>'<div class="row">'+av(k)+'<div class="mid"><b>'+esc(nm(k))+'</b><span>Veut devenir ton ami</span></div><button class="tab on small" data-ok="'+k+'">Accepter</button><button class="tab small" data-no="'+k+'">Refuser</button></div>').join('')||'<div class="empty">Aucune demande en attente.</div>';
+ }else if(tab==='rep'){
+  h='<button class="invite" id="pick" style="margin-top:4px">📲 Choisir dans les contacts du téléphone</button>';
+  h+=dir.filter(x=>(x.n+x.k).toLowerCase().indexOf(q)>-1).map((x,i)=>{
+   const a=fr[x.k]?'<span class="meta">✅ ami</span>':REG[x.k]?'<button class="tab on small" data-add="'+x.k+'">Ajouter</button>':'<button class="tab small wa" data-inv="'+x.k+'">Inviter</button>';
+   return '<div class="row">'+av(x.k)+'<div class="mid"><b>'+esc(x.n)+'</b><span>'+ph(x.k)+(REG[x.k]?' · sur BOUBA STORE':'')+'</span></div>'+a+'</div>'}).join('');
+  dir.forEach(x=>prof(x.k));
  }else{
-  if(tab==="rep"){
-   h+='<button class="invite" id="pick" style="margin-top:4px">📲 Choisir dans les contacts du téléphone</button>';
-   phone.forEach(function(p,i){h+='<div class="row"><div class="av">'+ini(p.n)+'</div><div class="mid"><b>'+esc(p.n)+'</b><span>'+esc(p.t)+'</span></div><button class="tab small" data-wa="'+i+'">WhatsApp</button><button class="tab small" data-sms="'+i+'">SMS</button></div>'});
-  }
-  var L=friends.filter(function(f){return f.n.toLowerCase().indexOf(q)>-1});
-  if(tab==="rep")L=L.slice().sort(function(a,b){return a.n.localeCompare(b.n)});
-  L.forEach(function(f){var i=friends.indexOf(f);
-   h+='<button class="row" data-i="'+i+'"><div class="av'+(f.on?' on':'')+'">'+ini(f.n)+'</div><div class="mid"><b>'+esc(f.n)+'</b><span>'+esc(f.last)+'</span></div><div class="meta">'+f.h+(f.u?'<br><span class="badge">'+f.u+'</span>':'')+'</div></button>'});
-  if(!L.length&&tab==="amis")h='<div class="empty">Aucun ami trouvé. Invite quelqu\'un pour commencer.</div>';
+  const ks=Object.keys(fr).filter(k=>nm(k).toLowerCase().indexOf(q)>-1).sort((a,b)=>((L[b]||{}).t||0)-((L[a]||{}).t||0));
+  h=ks.map(k=>{const m=L[k],un=m&&m.from!==me.k&&m.t>(rd[k]||0);
+   const pv=!m?'Dis bonjour 👋':(m.from===me.k?'Toi : ':'')+(m.type==='audio'?'🎤 Message vocal':m.type==='image'?'🖼️ Photo':m.type==='video'?'🎞️ Vidéo':m.type==='file'?'📎 Fichier':esc(m.text));
+   return '<button class="row" data-i="'+k+'">'+av(k,0,1)+'<div class="mid"><b>'+esc(nm(k))+'</b><span>'+pv+'</span></div><div class="meta">'+(m?day(m.t):'')+(un?'<br><span class="badge">1</span>':'')+'</div></button>'}).join('')
+   ||'<div class="empty">Aucun ami pour l\'instant. Invite quelqu\'un ou ouvre l\'onglet Répertoire.</div>';
  }
- $("list").innerHTML=h;
+ $('list').innerHTML=h;
 }
-$("tabs").onclick=function(e){var t=e.target.closest(".tab");if(!t)return;tab=t.dataset.t;
- [].forEach.call(document.querySelectorAll("#tabs .tab"),function(x){x.classList.toggle("on",x===t)});render()};
-$("q").oninput=render;
+$('tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t)return;tab=t.dataset.t;[].forEach.call(document.querySelectorAll('#tabs .tab'),x=>x.classList.toggle('on',x===t));render()};
+$('q').oninput=render;
+$('list').onclick=async e=>{let t;
+ if(e.target.closest('#pick'))return pick();
+ if(t=e.target.closest('[data-i]'))return openChat(t.dataset.i);
+ if(t=e.target.closest('[data-add]'))return addFriend(t.dataset.add);
+ if(t=e.target.closest('[data-inv]'))return void window.open('https://wa.me/225'+ph(t.dataset.inv)+'?text='+encodeURIComponent(INV+' '+base()),'_blank');
+ if(t=e.target.closest('[data-ok]')){const k=t.dataset.ok,u={};
+  u['friends/'+me.k+'/'+k]={name:nm(k)};u['friends/'+k+'/'+me.k]={name:me.name};u['requests/'+me.k+'/'+k]=null;
+  try{await update(ref(db),u);toast('✅ Ami ajouté')}catch(x){toast('Erreur')}return}
+ if(t=e.target.closest('[data-no]'))remove(R('requests/'+me.k+'/'+t.dataset.no)).catch(()=>{});
+};
 async function pick(){
- if(!(navigator.contacts&&navigator.contacts.select)){toast("Ouvre l'app dans Chrome sur Android pour accéder aux contacts. Sinon utilise « Inviter ».");return}
- try{var r=await navigator.contacts.select(["name","tel"],{multiple:true});
-  r.forEach(function(c){var t=(c.tel&&c.tel[0])||"";if(t&&!phone.some(function(p){return p.t===t}))phone.push({n:(c.name&&c.name[0])||t,t:t})});
-  try{localStorage.setItem("ph",JSON.stringify(phone))}catch(e){}
-  render()}catch(e){}
+ if(!(navigator.contacts&&navigator.contacts.select))return toast('Ouvre l\'app dans Chrome sur Android pour accéder aux contacts.');
+ try{const c=await navigator.contacts.select(['name','tel'],{multiple:true});
+  c.forEach(x=>(x.tel||[]).forEach(t=>{const k=K(t);if(k&&k!==me.k&&!dir.some(d=>d.k===k))dir.push({n:(x.name&&x.name[0])||ph(k),k})}));
+  dir.sort((a,b)=>a.n.localeCompare(b.n));try{localStorage.bb_dir=JSON.stringify(dir)}catch(e){}render();
+ }catch(e){}
 }
-$("list").onclick=function(e){
- var t;
- if(e.target.closest("#pick"))return pick();
- if(t=e.target.closest("[data-wa]")){var n=norm(phone[+t.dataset.wa].t);return void window.open("https://wa.me/"+n+"?text="+encodeURIComponent(INV+" "+base()),"_blank")}
- if(t=e.target.closest("[data-sms]"))return void(location.href="sms:"+phone[+t.dataset.sms].t+"?body="+encodeURIComponent(INV+" "+base()));
- if(t=e.target.closest("[data-ok]")){var r=reqs.splice(+t.dataset.ok,1)[0];friends.unshift({n:r.n,on:1,last:"Vous êtes maintenant amis",h:"Maintenant",u:0});return render()}
- if(t=e.target.closest(".row[data-i]"))openChat(+t.dataset.i);
+async function addFriend(k){
+ if(k===me.k)return toast('C\'est ton numéro');
+ try{if(!(await get(R('profiles/'+k))).exists())return false;
+  await set(R('requests/'+k+'/'+me.k),{name:me.name,t:Date.now()});toast('✅ Demande envoyée');return true}
+ catch(e){toast('Demande impossible')}
+}
+
+/* ---------- invitations ---------- */
+const txt=()=>INV+' '+base();
+function share(s){
+ if(s==='wa')window.open('https://wa.me/?text='+encodeURIComponent(txt()),'_blank');
+ else if(s==='sms')location.href='sms:?body='+encodeURIComponent(txt());
+ else if(s==='cp'){try{navigator.clipboard.writeText(txt());toast('Lien copié')}catch(e){prompt('Copie ce lien',base())}}
+ else if(navigator.share)navigator.share({title:'BOUBA STORE',text:INV,url:base()}).catch(()=>{});else toast('Utilise WhatsApp ou Copier le lien');
+}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-s]');if(t)share(t.dataset.s)});
+$('inv').onclick=()=>$('sx').classList.add('open');
+$('sx').onclick=e=>{if(e.target===$('sx')||e.target.id==='sclose')$('sx').classList.remove('open')};
+$('sadd').onclick=async()=>{
+ const k=K($('snum').value);if(!k)return toast('Entre un numéro valide');
+ if(await addFriend(k)===false){window.open('https://wa.me/225'+ph(k)+'?text='+encodeURIComponent(txt()),'_blank');toast('Pas encore inscrit : invitation WhatsApp')}
+ $('snum').value='';$('sx').classList.remove('open');
 };
-function norm(t){var n=String(t).replace(/\D/g,"");if(n.indexOf("00")===0)n=n.slice(2);if(n.length===10&&n[0]==="0")n="225"+n;return n}
-function waLink(n,txt){return"https://wa.me/"+(n?norm(n):"")+"?text="+encodeURIComponent(txt)}
-$("inv").onclick=function(){$("sx").classList.add("open")};
-$("sx").onclick=function(e){if(e.target===this||e.target.id==="sclose")this.classList.remove("open")};
-$("s-wa").onclick=function(){window.open(waLink("",INV+" "+base()),"_blank")};
-$("s-sms").onclick=function(){location.href="sms:?body="+encodeURIComponent(INV+" "+base())};
-$("s-cp").onclick=function(){try{navigator.clipboard.writeText(INV+" "+base());toast("Lien copié")}catch(e){prompt("Copie ce lien",base())}};
-$("s-sh").onclick=function(){if(navigator.share)navigator.share({title:"BOUBA STORE",text:INV,url:base()}).catch(function(){});else toast("Utilise WhatsApp ou Copier le lien")};
-$("s-add").onclick=function(){
- var v=$("snum").value.trim(),nm=$("snom").value.trim();
- if(norm(v).length<9)return toast("Entre un numéro valide");
- phone.unshift({n:nm||v,t:v});try{localStorage.setItem("ph",JSON.stringify(phone))}catch(e){}
- window.open(waLink(v,INV+" "+base()),"_blank");
- $("snum").value="";$("snom").value="";$("sx").classList.remove("open");render();toast("Ami ajouté dans Répertoire");
-};
+
+/* ---------- photo de profil ---------- */
+function resize(file,max,cb){const r=new FileReader();r.onload=e=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext('2d').drawImage(i,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.7))};i.onerror=()=>toast('Image illisible');i.src=e.target.result};r.readAsDataURL(file)}
+$('me').onclick=()=>$('pf').click();
+$('pf').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+ resize(f,256,d=>set(R('profiles/'+me.k+'/photo'),d).then(()=>toast('✅ Photo mise à jour')).catch(()=>toast('Échec : vérifie les règles Firebase')))};
 
 /* ---------- chat ---------- */
-function add(t,x,a){var m={id:++mid,t:t,x:x,a:a,h:now()};hist[cur].push(m);
- var f=friends[cur];f.last=(t==="me"?"Toi : ":"")+(a?"🎤 Message vocal ("+fmt(a.d)+")":x);f.h=m.h;draw()}
-function openChat(i){
- cur=i;var f=friends[i];f.u=0;
- $("cav").textContent=ini(f.n);$("cn").textContent=f.n;
- $("chat").classList.add("open");
- if(!hist[i])hist[i]=[{id:++mid,t:"th",x:f.last,h:f.h}];
- draw();
+function head(){
+ $('cav').outerHTML=av(cur,0,1).replace('class="av','id="cav" class="av');
+ $('cn').textContent=nm(cur);$('cs').textContent=online(cur)?'en ligne':'hors ligne';
+}
+function openChat(k){
+ cur=k;rd[k]=Date.now();try{localStorage.bb_read=JSON.stringify(rd)}catch(e){}
+ sel={};updSel();head();$('chat').classList.add('open');$('msgs').innerHTML='';
+ if(unMsg)unMsg();
+ unMsg=onValue(query(R('chats/'+me.k+'/'+k),limitToLast(60)),s=>{
+  const a=[];s.forEach(c=>{a.push(Object.assign({id:c.key},c.val()))});a.sort((x,y)=>x.t-y.t);lastRaw=a;a.forEach(m=>MSG[m.id]=m);
+  rd[k]=Date.now();draw();
+ });
 }
 function bub(m){
- var c="b "+m.t+(sel[m.id]?" sel":""),x;
- if(m.a){var on=pl&&pl.id===m.id&&!pl.au.paused;
-  x='<div class="vo"><button class="pl" aria-label="Lire">'+(on?"❚❚":"▶")+'</button><div class="wv" data-w="'+m.id+'">'+m.a.p.map(function(v){return'<i style="height:'+Math.round(v*100)+'%"></i>'}).join("")+'</div><span>'+fmt(m.a.d)+'</span></div>'}
- else x=esc(m.x);
- return'<div class="'+c+'" data-id="'+m.id+'">'+x+'<small>'+m.h+(m.t==="me"?" ✓✓":"")+'</small></div>'
+ const mine=m.from===me.k,u=U(m.media);let c;
+ if(m.type==='audio'&&u)c='<div class="vo"><button class="pl" data-a="'+m.id+'" aria-label="Lire">▶</button><div class="pb" data-p="'+m.id+'"><i></i></div><span>'+fmt(m.dur||0)+'</span></div>';
+ else if(m.type==='image'&&u)c='<img src="'+u+'" data-v="1" alt="Photo">';
+ else if(m.type==='video'&&u)c='<video controls preload="metadata" playsinline src="'+u+'"></video>';
+ else if(m.type==='file'&&u)c='<a download="'+esc(m.name||'fichier')+'" href="'+u+'">📎 '+esc(m.name||'fichier')+'</a>';
+ else c=esc(m.text);
+ return '<div class="b '+(mine?'me':'th')+(sel[m.id]?' sel':'')+'" data-id="'+m.id+'">'+c+'<small>'+hhmm(m.t)+(mine?' ✓✓':'')+'</small></div>';
 }
-function draw(){
- $("msgs").innerHTML='<div class="sys">⚡ Turbo auto : qualité et vitesse réglées pour toi</div>'+hist[cur].map(bub).join("");
- $("msgs").scrollTop=1e9;
+function draw(){const c=$('msgs'),keep=c.scrollHeight-c.scrollTop-c.clientHeight<140||!c.innerHTML;
+ c.innerHTML='<div class="sys">⚡ Messages en direct, appels voix et vidéo gratuits</div>'+lastRaw.map(bub).join('');
+ if(keep)c.scrollTop=c.scrollHeight}
+async function sendMsg(m){
+ if(!cur)return false;const id=Date.now().toString(36)+Math.random().toString(36).slice(2,5),full=Object.assign({from:me.k,text:'',t:Date.now()},m),u={};
+ u['chats/'+me.k+'/'+cur+'/'+id]=full;u['chats/'+cur+'/'+me.k+'/'+id]=full;
+ try{await update(ref(db),u);return true}catch(e){toast('Envoi impossible (fichier trop lourd ?)');return false}
 }
+async function sendTxt(){const i=$('txt'),v=i.value.trim();if(!v)return;i.value='';if(!(await sendMsg({type:'text',text:v.slice(0,1000)})))i.value=v}
+$('send').onclick=sendTxt;$('txt').onkeydown=e=>{if(e.key==='Enter')sendTxt()};
+$('back').onclick=()=>{$('chat').classList.remove('open');if(unMsg){unMsg();unMsg=null}stopPl();cur=null;render()};
+const toData=(b,cb)=>{const r=new FileReader();r.onload=()=>cb(r.result);r.readAsDataURL(b)};
+$('file').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+ if(f.type.indexOf('image/')===0){toast('Envoi de la photo…');return resize(f,1000,d=>sendMsg({type:'image',text:'🖼️ Photo',media:d}))}
+ if(f.size>2.5*1048576)return toast('Fichier trop lourd (max 2,5 Mo)');
+ toast('Envoi…');toData(f,d=>sendMsg({type:f.type.indexOf('video/')===0?'video':'file',text:'📎 '+f.name.slice(0,80),name:f.name.slice(0,80),media:d}))};
+/* lecture vocale + aperçu + sélection */
+let pl=null;
+function stopPl(){if(pl){pl.au.pause();pl=null}}
 function play(id){
- var m=hist[cur].find(function(x){return x.id===id});
- if(pl&&pl.id!==id){pl.au.pause()}
- if(!pl||pl.id!==id){var au=new Audio(m.a.url);pl={id:id,au:au};
-  au.ontimeupdate=function(){var w=document.querySelector('[data-w="'+id+'"]');if(!w)return;var k=Math.floor(au.currentTime/m.a.d*w.children.length);[].forEach.call(w.children,function(c,i){c.classList.toggle("on",i<k)})};
-  au.onended=function(){pl=null;draw()}}
- if(pl.au.paused)pl.au.play();else pl.au.pause();
- draw();
+ const m=MSG[id];if(!m)return;
+ if(pl&&pl.id===id){pl.au.paused?pl.au.play():pl.au.pause();return}
+ stopPl();const au=new Audio(U(m.media));pl={id,au};
+ au.ontimeupdate=()=>{const b=document.querySelector('[data-p="'+id+'"] i');if(b&&au.duration)b.style.width=(au.currentTime/au.duration*100)+'%'};
+ au.onended=()=>{pl=null;draw()};au.play().catch(()=>toast('Lecture impossible'));
 }
-function updSel(){var n=Object.keys(sel).length;$("selc").textContent=n+" sélectionné(s)";$("hdr").classList.toggle("selmode",n>0)}
-function tog(id){if(sel[id])delete sel[id];else sel[id]=1;updSel();draw()}
-var M=$("msgs");
-M.addEventListener("pointerdown",function(e){var b=e.target.closest(".b");if(!b)return;lp=setTimeout(function(){lpf=true;tog(+b.dataset.id);if(navigator.vibrate)navigator.vibrate(20)},500)});
-["pointerup","pointercancel","scroll"].forEach(function(ev){M.addEventListener(ev,function(){clearTimeout(lp)})});
-M.addEventListener("contextmenu",function(e){e.preventDefault()});
-M.onclick=function(e){
- if(lpf){lpf=false;return}
- var b=e.target.closest(".b");if(!b)return;var id=+b.dataset.id;
- if(Object.keys(sel).length)return tog(id);
- if(e.target.closest(".pl"))play(id);
+const M=$('msgs');let lp=0,lpf=0;
+function updSel(){const n=Object.keys(sel).length;$('selc').textContent=n+' sélectionné(s)';$('hdr').classList.toggle('selmode',n>0)}
+function tog(id){sel[id]?delete sel[id]:sel[id]=1;updSel();draw()}
+M.addEventListener('pointerdown',e=>{const b=e.target.closest('.b');if(!b)return;lp=setTimeout(()=>{lpf=1;tog(b.dataset.id);if(navigator.vibrate)navigator.vibrate(20)},500)});
+['pointerup','pointercancel','scroll'].forEach(v=>M.addEventListener(v,()=>clearTimeout(lp)));
+M.addEventListener('contextmenu',e=>e.preventDefault());
+M.onclick=e=>{
+ if(lpf){lpf=0;return}
+ const b=e.target.closest('.b');if(!b)return;
+ if(Object.keys(sel).length)return tog(b.dataset.id);
+ if(e.target.closest('.pl'))return play(b.dataset.id);
+ if(e.target.dataset.v){$('ivi').src=e.target.src;$('iv').classList.add('on')}
 };
-$("del").onclick=function(){
- hist[cur]=hist[cur].filter(function(m){if(sel[m.id]){if(pl&&pl.id===m.id){pl.au.pause();pl=null}return false}return true});
- sel={};updSel();var l=hist[cur][hist[cur].length-1];friends[cur].last=l?(l.a?"🎤 Message vocal":l.x):"";draw();
+$('iv').onclick=()=>$('iv').classList.remove('on');
+$('unsel').onclick=()=>{sel={};updSel();draw()};
+$('del').onclick=async()=>{const u={};Object.keys(sel).forEach(id=>{u['chats/'+me.k+'/'+cur+'/'+id]=null;u['chats/'+cur+'/'+me.k+'/'+id]=null});
+ sel={};updSel();try{await update(ref(db),u)}catch(e){toast('Suppression impossible')}};
+/* enregistrement vocal */
+let rec=null,rch=[],rt0=0,rtm=0,rstream=null;
+function recEnd(){clearInterval(rtm);if(rstream){rstream.getTracks().forEach(t=>t.stop());rstream=null}$('bar').classList.remove('rec')}
+$('mic').onclick=async()=>{
+ if(rec||!cur)return;
+ try{rstream=await navigator.mediaDevices.getUserMedia({audio:true});
+  const mt=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg'].find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t));
+  rec=new MediaRecorder(rstream,mt?{mimeType:mt,audioBitsPerSecond:24000}:{audioBitsPerSecond:24000});
+  rch=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)rch.push(e.data)};rec.start();rt0=Date.now();
+  $('bar').classList.add('rec');$('rt').textContent='0:00';
+  rtm=setInterval(()=>{const s=Math.floor((Date.now()-rt0)/1000);$('rt').textContent=fmt(s);if(s>=120)$('rs').click()},500);
+ }catch(e){rec=null;recEnd();toast('Autorise le micro pour enregistrer')}
 };
-$("unsel").onclick=function(){sel={};updSel();draw()};
-$("back").onclick=function(){$("chat").classList.remove("open");sel={};updSel();if(pl){pl.au.pause();pl=null}render()};
-function sendTxt(){var v=$("txt").value.trim();if(!v)return;$("txt").value="";add("me",v)}
-$("send").onclick=sendTxt;
-$("txt").onkeydown=function(e){if(e.key==="Enter")sendTxt()};
-$("file").onchange=function(){if(this.files[0])add("me","📎 "+this.files[0].name);this.value=""};
+$('rc').onclick=()=>{if(rec){rec.onstop=null;try{rec.stop()}catch(e){}}rec=null;recEnd()};
+$('rs').onclick=()=>{if(!rec)return;const r=rec,dur=Math.round((Date.now()-rt0)/1000);rec=null;
+ r.onstop=()=>{const b=new Blob(rch,{type:r.mimeType||'audio/webm'});recEnd();if(dur<1)return toast('Message trop court');toData(b,d=>sendMsg({type:'audio',text:'🎤 Message vocal',media:d,dur}))};
+ try{r.stop()}catch(e){recEnd()}};
 
-/* ---------- vocal : maintenir pour enregistrer ---------- */
-function drawLive(pk){var c=$("wave"),w=c.clientWidth||160,h=32;if(c.width!==w)c.width=w;c.height=h;var x=c.getContext("2d");x.clearRect(0,0,w,h);x.fillStyle="#ffd600";pk.slice(-Math.floor(w/5)).forEach(function(v,i){var bh=Math.max(3,v*h);x.fillRect(i*5,(h-bh)/2,3,bh)})}
-async function recStart(e){
- e.preventDefault();hold=true;x0=e.clientX;
- try{$("mic").setPointerCapture(e.pointerId)}catch(_){}
- var st;
- try{st=await navigator.mediaDevices.getUserMedia({audio:true})}catch(err){hold=false;toast("Autorise le micro pour enregistrer");return}
- if(!hold){st.getTracks().forEach(function(t){t.stop()});return}
- var mt=["audio/webm;codecs=opus","audio/webm","audio/mp4","audio/ogg"].find(function(m){return window.MediaRecorder&&MediaRecorder.isTypeSupported(m)})||"";
- var mr=new MediaRecorder(st,mt?{mimeType:mt}:{}),ch=[],pk=[];
- mr.ondataavailable=function(ev){if(ev.data.size)ch.push(ev.data)};
- var AC=window.AudioContext||window.webkitAudioContext,ac=new AC(),an=ac.createAnalyser();an.fftSize=256;ac.createMediaStreamSource(st).connect(an);
- var buf=new Uint8Array(an.fftSize),t0=Date.now();
- var iv=setInterval(function(){an.getByteTimeDomainData(buf);var m=0;for(var i=0;i<buf.length;i++)m=Math.max(m,Math.abs(buf[i]-128));pk.push(Math.min(1,m/80));$("rt").textContent=fmt((Date.now()-t0)/1000);drawLive(pk)},100);
- R={mr:mr,st:st,ch:ch,pk:pk,iv:iv,ac:ac,t0:t0,mt:mt};
- mr.start();$("bar").classList.add("rec");
- if(navigator.vibrate)navigator.vibrate(30);
+/* ---------- appels voix / vidéo ---------- */
+let pc=null,ms=null,cid='',role='',cOff=[],pend=[],inc=null,peerK='',ringT=0;
+function showCall(k,txt,ringing,video){
+ $('call').classList.add('open');$('cname').textContent=nm(k);$('cst').textContent=txt;
+ $('cav2').outerHTML=av(k).replace('class="av"','id="cav2" class="av"');
+ $('acc').style.display=ringing?'':'none';$('lv').style.display=video&&!ringing?'block':'none';
 }
-function recStop(cancel){
- var r=R;R=null;clearInterval(r.iv);$("bar").classList.remove("rec");
- var d=(Date.now()-r.t0)/1000;
- r.mr.onstop=function(){
-  r.st.getTracks().forEach(function(t){t.stop()});try{r.ac.close()}catch(e){}
-  if(cancel)return toast("Vocal annulé");
-  if(d<1)return toast("Maintiens le bouton pour enregistrer");
-  var p=[],n=28;
-  for(var i=0;i<n;i++){var s=Math.floor(i*r.pk.length/n),en=Math.max(s+1,Math.floor((i+1)*r.pk.length/n)),mx=0;for(var j=s;j<en&&j<r.pk.length;j++)mx=Math.max(mx,r.pk[j]);p.push(Math.max(.12,mx))}
-  add("me","",{url:URL.createObjectURL(new Blob(r.ch,{type:r.mt||"audio/webm"})),p:p,d:d});
- };
- try{r.mr.stop()}catch(e){}
+async function media(video){ms=await navigator.mediaDevices.getUserMedia({audio:true,video:!!video});$('lv').srcObject=ms}
+function mkpc(){
+ pc=new RTCPeerConnection(ICE);pend=[];ms.getTracks().forEach(t=>pc.addTrack(t,ms));
+ pc.ontrack=e=>{$('rv').srcObject=e.streams[0]};
+ pc.onicecandidate=e=>{if(e.candidate)push(R('calls/'+cid+'/ice_'+role),e.candidate.toJSON())};
+ pc.onconnectionstatechange=()=>{if(!pc)return;if(pc.connectionState==='connected'){clearTimeout(ringT);$('cst').textContent='🟢 En communication'}
+  if(pc.connectionState==='failed'||pc.connectionState==='closed')endCall(false)};
 }
-function recEnd(e){hold=false;if(R)recStop(x0-e.clientX>90)}
-var mic=$("mic");
-mic.addEventListener("pointerdown",recStart);
-mic.addEventListener("pointerup",recEnd);
-mic.addEventListener("pointercancel",recEnd);
-mic.addEventListener("contextmenu",function(e){e.preventDefault()});
+function listen(other){
+ cOff.push(onChildAdded(R('calls/'+cid+'/ice_'+other),s=>{if(!pc)return;pc.remoteDescription?pc.addIceCandidate(s.val()).catch(()=>{}):pend.push(s.val())}));
+ cOff.push(onValue(R('calls/'+cid+'/end'),s=>{if(s.val())endCall(false)}));
+}
+async function flush(){for(const c of pend)await pc.addIceCandidate(c).catch(()=>{});pend=[]}
+async function startCall(video){
+ if(pc||!cur)return;const callee=cur;peerK=callee;
+ try{await media(video);cid='c'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);role='a';mkpc();
+  const o=await pc.createOffer();await pc.setLocalDescription(o);
+  await set(R('calls/'+cid),{caller:me.k,callee,video:!!video,offer:{type:o.type,sdp:o.sdp},t:Date.now()});
+  await set(R('incoming/'+callee),{from:me.k,name:me.name,id:cid,video:!!video,t:Date.now()});
+  showCall(callee,'Appel en cours…',false,video);
+  cOff.push(onValue(R('calls/'+cid+'/answer'),async s=>{const a=s.val();if(a&&pc&&!pc.currentRemoteDescription){await pc.setRemoteDescription(a);flush()}}));
+  listen('b');ringT=setTimeout(()=>{toast('Pas de réponse');endCall(true)},45000);
+ }catch(e){toast('Appel impossible : micro/caméra refusé ?');endCall(false)}
+}
+function ring(v){inc=v;peerK=v.from;P[v.from]=P[v.from]||{name:v.name};showCall(v.from,v.video?'Appel vidéo entrant…':'Appel vocal entrant…',true,false)}
+$('acc').onclick=async()=>{
+ if(!inc)return;const v=inc;inc=null;cid=v.id;role='b';
+ try{await media(v.video);mkpc();const c=(await get(R('calls/'+cid))).val();if(!c||c.end)throw 0;
+  await pc.setRemoteDescription(c.offer);await flush();const a=await pc.createAnswer();await pc.setLocalDescription(a);
+  await set(R('calls/'+cid+'/answer'),{type:a.type,sdp:a.sdp});remove(R('incoming/'+me.k));
+  $('acc').style.display='none';$('lv').style.display=v.video?'block':'none';$('cst').textContent='Connexion…';listen('a');
+ }catch(e){toast('Appel terminé');endCall(true)}
+};
+function endCall(send){
+ clearTimeout(ringT);
+ if(send&&cid)set(R('calls/'+cid+'/end'),1).catch(()=>{});
+ if(inc||role==='a')remove(R('incoming/'+(role==='a'?peerK:me.k))).catch(()=>{});
+ cOff.forEach(f=>{try{f()}catch(e){}});cOff=[];
+ if(pc){try{pc.close()}catch(e){}pc=null}
+ if(ms){ms.getTracks().forEach(t=>t.stop());ms=null}
+ inc=null;cid='';role='';$('rv').srcObject=null;$('call').classList.remove('open');
+}
+$('end').onclick=()=>endCall(true);
+$('mute').onclick=()=>{if(!ms)return;const t=ms.getAudioTracks()[0];if(t){t.enabled=!t.enabled;$('mute').textContent=t.enabled?'🎙':'🔇'}};
+$('cv').onclick=()=>startCall(false);
+$('cvid').onclick=()=>startCall(true);
 
-/* ---------- appels : vraie caméra / micro du téléphone ---------- */
-async function startCall(v){
- var f=friends[cur];$("cname").textContent=f.n;$("cav2").textContent=ini(f.n);
- var c=$("call");c.classList.add("open");c.classList.toggle("vid",v);$("cst").textContent="Connexion…";
- try{call={v:v,face:"user",t0:Date.now(),st:await navigator.mediaDevices.getUserMedia(v?{video:{facingMode:"user"},audio:true}:{audio:true})}}
- catch(e){c.classList.remove("open");toast(v?"Autorise la caméra et le micro":"Autorise le micro");return}
- $("lv").srcObject=call.st;$("lv").style.transform="scaleX(-1)";
- $("cst").textContent=(v?"Caméra active · ":"Appel · ")+"0:00";
- call.iv=setInterval(function(){$("cst").textContent=(v?"Caméra active · ":"Appel · ")+fmt((Date.now()-call.t0)/1000)},1000);
-}
-$("cv").onclick=function(){startCall(false)};
-$("cvid").onclick=function(){startCall(true)};
-$("end").onclick=function(){
- if(!call)return $("call").classList.remove("open");
- clearInterval(call.iv);call.st.getTracks().forEach(function(t){t.stop()});
- var d=(Date.now()-call.t0)/1000,v=call.v;call=null;$("lv").srcObject=null;$("call").classList.remove("open");
- add("me",(v?"🎥 Appel vidéo":"📞 Appel vocal")+" · "+fmt(d));
-};
-$("mute").onclick=function(){if(!call)return;var t=call.st.getAudioTracks()[0];if(t){t.enabled=!t.enabled;this.textContent=t.enabled?"🎙":"🔇"}};
-$("flip").onclick=async function(){
- if(!call||!call.v)return;
- call.face=call.face==="user"?"environment":"user";call.st.getTracks().forEach(function(t){t.stop()});
- try{call.st=await navigator.mediaDevices.getUserMedia({video:{facingMode:call.face},audio:true});$("lv").srcObject=call.st;$("lv").style.transform=call.face==="user"?"scaleX(-1)":"none"}
- catch(e){toast("Caméra indisponible")}
-};
-$("q-wa").onclick=function(){$("s-wa").onclick()};
-$("q-sms").onclick=function(){$("s-sms").onclick()};
-$("q-sh").onclick=function(){$("s-sh").onclick()};
-window.busy=function(){return !!R||!!call||!!$("txt").value};
-render();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
-<script src="maj.js"></script>
 </body>
 </html>
