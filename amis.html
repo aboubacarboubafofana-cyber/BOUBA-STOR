@@ -147,7 +147,8 @@ window.FB_CFG = window.FB_CFG || {
 </script>
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
-import {getDatabase,ref,get,set,update,remove,push,onValue,onChildAdded,query,limitToLast} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js';
+const K=s=>{s=String(s||'').trim().toLowerCase();if(s.indexOf('@')>0)return /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(s)?'e'+s.replace(/\./g,','):'';const n=s.replace(/\D/g,'');return n.length>=10?'u'+n.slice(-10):''};
+const ph=k=>k[0]==='e'?k.slice(1).replace(/,/g,'.'):k.slice(1);
 import {getAuth,signInWithEmailAndPassword,createUserWithEmailAndPassword,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
 
 const $=i=>document.getElementById(i);
