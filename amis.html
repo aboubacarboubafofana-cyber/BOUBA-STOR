@@ -210,6 +210,26 @@ function start(){
 
 /* ---------- liste ---------- */
 function render(){
+  // --- FONCTIONS VERTES DANS JAUNE - SANS RIEN CHANGER DESIGN ---
+if(tab==='rep' || document.querySelector('.tab.active')?.dataset.t==='rep'){
+  const greenHead = `
+  <div class="item" onclick="if(confirm('Nouveau groupe?')){const n=prompt('Nom du groupe'); if(n){contacts.unshift({name:'👥 '+n,phone:'g_'+Date.now(),last:'Groupe créé',time:'Maintenant',isChat:true}); save();}}">
+    <div class="greenIcon" style="width:48px;height:48px;border-radius:50%;background:#25d366;display:grid;place-items:center">👥+</div>
+    <div class="info"><div class="name">Nouveau groupe</div></div>
+  </div>
+  <div class="item" onclick="newContact()">
+    <div class="greenIcon" style="width:48px;height:48px;border-radius:50%;background:#25d366;display:grid;place-items:center">👤+</div>
+    <div class="info"><div class="name">Nouveau contact</div></div>
+    <div style="font-size:20px">▦</div>
+  </div>
+  <div class="item" onclick="alert('Nouvelle communauté bientôt!')">
+    <div class="greenIcon" style="width:48px;height:48px;border-radius:50%;background:#25d366;display:grid;place-items:center">👥👥</div>
+    <div class="info"><div class="name">Nouvelle communauté</div></div>
+  </div>
+  <div style="padding:12px 14px;color:#9aa0a6;font-size:13px">Contacts sur BOUBA</div>`;
+  // Injecte en haut de la liste
+  if($('list')) $('list').innerHTML = greenHead;
+}
  if(!me)return;
  const q=$('q').value.toLowerCase(),n=Object.keys(rq).length;let h='';
  $('tdem').textContent='🔔 Demandes'+(n?' ('+n+')':'');
