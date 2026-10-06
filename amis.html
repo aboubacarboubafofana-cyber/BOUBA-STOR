@@ -2,25 +2,61 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Amis - BOUBA STORE</title>
-<style>*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
 body{background:#000;color:#fff;height:100vh;display:flex;flex-direction:column;overflow:hidden}
-.header{display:flex;justify-content:space-between;padding:14px 16px}
-.header h1{font-size:22px;font-weight:900;color:#FFD400}
-.searchWrap{padding:0 14px 10px}.search{background:#111;border:1.5px solid #333;border-radius:24px;padding:12px 14px;display:flex;gap:10px}
-.search input{background:transparent;border:none;outline:none;color:#fff;width:100%}
-.filters{display:flex;gap:8px;padding:0 14px 12px;overflow:auto}.chip{padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid #FFD400;color:#FFD400;background:transparent}
-.chip.active{background:#FFD400;color:#000}.content{flex:1;overflow:auto;padding-bottom:85px}
-.item{display:flex;gap:12px;padding:11px 16px}.avatar{width:50px;height:50px;border-radius:50%;background:#FFD400;color:#000;display:grid;place-items:center;font-weight:900;overflow:hidden}
-.avatar img{width:100%;height:100%;object-fit:cover}.info{flex:1;border-bottom:1px solid #111;padding-bottom:12px}
-.name{font-weight:800;font-size:15px}.time{font-size:11px;color:#9aa0a6}.last{font-size:13px;color:#9aa0a6}
-.bottom{position:fixed;bottom:0;left:0;right:0;background:#000;border-top:1px solid #222;display:flex;justify-content:space-around;padding:8px 0}
-.bnav{display:flex;flex-direction:column;align-items:center;color:#9aa0a6;font-size:10px;cursor:pointer}
-.bnav.active{color:#FFD400}.fab{position:fixed;right:16px;bottom:90px;width:56px;height:56px;border-radius:16px;background:#FFD400;display:grid;place-items:center;font-size:26px;color:#000}
+.top{padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.top h1{color:#FFD400;font-weight:900;font-size:22px}
+.searchBox{margin:0 14px 10px;background:#111;border:1.5px solid #222;border-radius:24px;padding:12px 14px;display:flex;gap:10px}
+.searchBox input{flex:1;background:transparent;border:none;outline:none;color:#fff}
+.filters{display:flex;gap:8px;padding:0 14px 12px;overflow-x:auto}
+.f{padding:7px 14px;border-radius:20px;border:1.5px solid #FFD400;color:#FFD400;font-size:12px;font-weight:700;white-space:nowrap}
+.f.on{background:#FFD400;color:#000}
+.view{flex:1;overflow:auto;padding-bottom:80px}
+.row{display:flex;gap:12px;padding:11px 16px}
+.row:active{background:#111}
+.av{width:50px;height:50px;border-radius:50%;background:#FFD400;color:#000;display:grid;place-items:center;font-weight:900;flex-shrink:0}
+.txt{flex:1;min-width:0;border-bottom:1px solid #111;padding-bottom:11px}
+.nm{font-weight:800;font-size:15px}.tm{font-size:11px;color:#9aa0a6;float:right}.sb{font-size:13px;color:#9aa0a6;margin-top:2px}
+.sec{padding:14px 16px 6px;color:#9aa0a6;font-size:11px;font-weight:700}
+.circle{width:56px;height:56px;border-radius:50%;background:#111;border:1.5px solid #FFD400;display:grid;place-items:center;font-size:22px;color:#FFD400}
+.meta{display:flex;gap:14px;padding:10px 16px;overflow:auto}
+.fab{position:fixed;right:16px;bottom:85px;width:56px;height:56px;border-radius:16px;background:#FFD400;color:#000;display:grid;place-items:center;font-size:26px;font-weight:900}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:#000;border-top:1px solid #222;display:flex;justify-content:space-around;padding:6px 0}
+.bn{display:flex;flex-direction:column;align-items:center;color:#9aa0a6;font-size:10px;padding:4px 12px;cursor:pointer}
+.bn.on{color:#FFD400}
 </style>
 </head>
 <body>
-<!-- COPIE TOUT LE FICHIER COMPLET DE /mnt/data/amis.html -->
+<div class="top"><h1 id="ht">Discussions</h1><div><span>🔍</span> <span style="margin-left:12px">⋮</span></div></div>
+<div id="vd">
+<div class="searchBox">🔍<input id="q" placeholder="Demander à Meta AI ou rechercher" oninput="filtrer(this.value)"></div>
+<div class="filters"><div class="f on">Toutes</div><div class="f">Non lues 1</div><div class="f">Favoris</div><div class="f">Groupes</div><div class="f">+</div></div>
+<div class="view" id="ld"></div>
+<div class="fab" onclick="newChat()">+</div>
+</div>
+<div id="va" style="display:none"><div class="view"><div class="sec">Statut</div><div class="row"><div class="av" style="background:#111;border:2px dashed #FFD400;color:#FFD400">B</div><div class="txt"><div class="nm">Mon statut</div><div class="sb">13:43</div></div></div><div class="sec">Mises à jour récentes</div><div id="ls"></div></div></div>
+<div id="vp" style="display:none"><div class="view"><div class="meta"><div style="text-align:center"><div class="circle">📞</div>Appeler</div><div style="text-align:center"><div class="circle">📅</div>Planifier</div><div style="text-align:center"><div class="circle">⌨️</div>Clavier</div></div><div class="sec">Récents</div><div id="lp"></div></div></div>
+<div id="vc" style="display:none"><div class="view" style="display:grid;place-items:center;height:60vh;text-align:center;padding:20px"><div><div style="font-size:50px">👥</div><h2 style="color:#FFD400;margin-top:10px">Communautés BOUBA</h2></div></div></div>
+<div class="bottom">
+<div class="bn on" id="bd" onclick="go('d')"><div style="font-size:20px">💬</div>Discussions</div>
+<div class="bn" id="ba" onclick="go('a')"><div style="font-size:20px">◎</div>Actus</div>
+<div class="bn" id="bc" onclick="go('c')"><div style="font-size:20px">👥</div>Communaut...</div>
+<div class="bn" id="bp" onclick="go('p')"><div style="font-size:20px">📞</div>Appels</div>
+</div>
+<script>
+var chats=[{n:"Dachenko (AFGHAN)",s:"",t:"",p:true},{n:"Awa toure or",s:"Rejoins-moi sur BOUBA STORE : https://bouba-stor.vercel.app/",t:"13:03",c:true},{n:"Ayouba Ayouba",s:"Oui comment vas-tu",t:"17:53",c:true},{n:"Gaspy",s:"Message vocal (0:16)",t:"17:53",c:true},{n:"Sissoko",s:"Message vocal (0:04)",t:"17:52",c:true},{n:"Ali Rasta",s:"Photo",t:"17:52",c:true}];
+var stats=[{n:"Awa toure or",t:"Hier"},{n:"Emanuela Parfum",t:"13:46"},{n:"Le Roi",t:"il y a 25 minutes"},{n:"Ali Rasta",t:"Hier"}];
+var calls=[{n:"Sissoko (2)",s:"il y a 45 minutes",r:true},{n:"Djha",s:"Hier, 12:45"},{n:"Awa toure or",s:"3 octobre, 19:47"}];
+function renderD(){var e=document.getElementById('ld');e.innerHTML='';for(var i=0;i<chats.length;i++){var c=chats[i];e.innerHTML+='<div class="row"><div class="av">'+c.n.charAt(0)+'</div><div class="txt"><div class="nm">'+c.n+'<span class="tm">'+c.t+'</span></div><div class="sb">'+(c.c?'✓✓ ':'')+c.s+(c.p?' 📌':'')+'</div></div></div>';}}
+function renderS(){var e=document.getElementById('ls');e.innerHTML='';for(var i=0;i<stats.length;i++){var s=stats[i];e.innerHTML+='<div class="row"><div class="av" style="border:2px solid #FFD400">'+s.n.charAt(0)+'</div><div class="txt"><div class="nm">'+s.n+'</div><div class="sb">'+s.t+'</div></div></div>';}}
+function renderP(){var e=document.getElementById('lp');e.innerHTML='';for(var i=0;i<calls.length;i++){var c=calls[i];e.innerHTML+='<div class="row"><div class="av">'+c.n.charAt(0)+'</div><div class="txt"><div class="nm" style="color:'+(c.r?'#f15c6d':'#fff')+'">'+c.n+'</div><div class="sb">↙ '+c.s+'</div></div><div style="color:#FFD400">📞</div></div>';}}
+function go(v){document.getElementById('vd').style.display=v=='d'?'block':'none';document.getElementById('va').style.display=v=='a'?'block':'none';document.getElementById('vp').style.display=v=='p'?'block':'none';document.getElementById('vc').style.display=v=='c'?'block':'none';document.getElementById('bd').className='bn'+(v=='d'?' on':'');document.getElementById('ba').className='bn'+(v=='a'?' on':'');document.getElementById('bp').className='bn'+(v=='p'?' on':'');document.getElementById('bc').className='bn'+(v=='c'?' on':'');document.getElementById('ht').innerHTML=v=='d'?'Discussions':v=='a'?'Actus':v=='p'?'Appels':'Communautés';}
+function filtrer(q){q=q.toLowerCase();var rows=document.getElementById('ld').getElementsByClassName('row');for(var i=0;i<rows.length;i++){rows[i].style.display=rows[i].innerText.toLowerCase().indexOf(q)>-1?'flex':'none';}}
+function newChat(){var n=prompt('Nom du client BOSS?');if(n){chats.unshift({n:n,s:'Nouveau BOUBA 📦',t:'Maintenant'});renderD();}}
+renderD();renderS();renderP();
+</script>
 </body>
 </html>
