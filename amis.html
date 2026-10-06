@@ -12,7 +12,7 @@
   };
   </script>
   <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  
 <meta name="theme-color" content="#000000">
 <link rel="manifest" href="manifest.json">
 <title>Amis - BOUBA STORE</title>
@@ -184,20 +184,19 @@ function watch(k){ if(W[k])return;W[k]=1;REG[k]=true;
  onValue(query(R('chats/'+me.k+'/'+k),limitToLast(1)),s=>{let m=null;s.forEach(c=>{m=c.val()});L[k]=m;render()});
 }
 
-/* ---------- connexion ---------- */
-onAuthStateChanged(au,u=>{
- let m=null;try{m=JSON.parse(localStorage.bb_me||'null')}catch(e){}
- if(u&&m){me=m;start()}else $('login').style.display='flex';
-});
+  let mm=null; try{mm=JSON.parse(localStorage.bb_me||'null')}catch(e){}
+if(mm&&mm.k){me=mm; $('login').style.display='none'; start();}else{$('login').style.display='flex';}
+
 $('lg').onclick=async()=>{
- const name=$('ln').value.trim(),k=K($('lp').value),pw=$('lw').value;
- if(!name||!k)return $('le').textContent='Entre ton nom et un numéro valide.';
- if(pw.length<6)return $('le').textContent='Mot de passe : 6 caractères minimum.';
- $('le').textContent='Connexion…';const email=k+'@bouba.app';
- try{try{await signInWithEmailAndPassword(au,email,pw)}catch(e){await createUserWithEmailAndPassword(au,email,pw)}
-  await update(R('profiles/'+k),{name,phone:ph(k),seen:Date.now()});
-  localStorage.bb_me=JSON.stringify({k,name});me={k,name};$('login').style.display='none';start();
- }catch(e){$('le').textContent='Impossible de se connecter. Vérifie ton mot de passe.'}
+  const name=$('ln').value.trim();
+  const k=K($('lp').value);
+  if(!name||!k){$('le').textContent='Mets nom et numéro BOSS!';return;}
+  const profil={k,name,phone:ph(k)};
+  localStorage.bb_me=JSON.stringify(profil);
+  me=profil;
+  try{await set(R('profiles/'+k),{name,phone:ph(k),seen:Date.now()});}catch(e){}
+  $('login').style.display='none';
+  start();
 };
 let started=0;
 function start(){
