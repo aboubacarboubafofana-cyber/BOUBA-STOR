@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="BOUBA — Amis">
+<title>BOUBA — Amis</title>
+<style>
+:root{
+  --bg:#050505; --panel:#111111; --panel2:#171717; --soft:#222;
+  --yellow:#ffd400; --yellow2:#ffeb66; --text:#fff; --muted:#a9a9a9;
+  --danger:#ff4d4d; --green:#32d583; --line:rgba(255,212,0,.20);
+  --radius:20px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body{min-height:100vh;padding-bottom:82px}
+button,input{font:inherit}
+button{border:0;color:inherit;background:none;cursor:pointer}
+.app{max-width:760px;margin:auto;min-height:100vh;background:#050505}
+.top{
+  position:sticky;top:0;z-index:20;background:rgba(5,5,5,.96);
+  padding:18px 16px 12px;border-bottom:1px solid var(--line);
+  backdrop-filter:blur(14px)
+}
+.toprow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.title{font-size:31px;font-weight:900;color:var(--yellow);letter-spacing:-1px}
+.actions{display:flex;gap:8px}
+.icon{
+  width:43px;height:43px;border-radius:50%;display:grid;place-items:center;
+  background:#191919;border:1px solid #3a3a3a;font-size:21px
+}
+.icon.primary{background:var(--yellow);color:#000;border-color:var(--yellow);font-weight:900}
+.search{
+  margin-top:14px;background:#202020;border-radius:15px;padding:0 15px;
+  display:flex;align-items:center;gap:10px;height:48px
+}
+.search span{font-size:22px}
+.search input{flex:1;border:0;outline:0;background:transparent;color:#fff;font-size:15px}
+.search input::placeholder{color:#858585}
+.tabs{display:flex;gap:8px;overflow:auto;padding:14px 0 3px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  white-space:nowrap;padding:9px 15px;border-radius:11px;background:#242424;
+  color:#ddd;border:1px solid #333;font-weight:700;font-size:13px
+}
+.tab.active{background:var(--yellow);color:#000;border-color:var(--yellow)}
+.section{padding:18px 15px 0}
+.sectionhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.sectiontitle{font-size:20px;font-weight:900;color:var(--yellow)}
+.link{color:var(--yellow);font-weight:800;font-size:13px}
+.status-card{
+  display:flex;align-items:center;gap:13px;background:linear-gradient(90deg,#151515,#101010);
+  border:1px solid #292929;border-radius:18px;padding:13px;margin-bottom:8px
+}
+.avatar{
+  width:56px;height:56px;border-radius:50%;object-fit:cover;background:#252525;
+  border:2px solid var(--yellow);flex:none
+}
+.avatar.small{width:48px;height:48px}
+.avatar.xs{width:42px;height:42px}
+.avatar-wrap{position:relative}
+.online{
+  position:absolute;right:0;bottom:1px;width:14px;height:14px;border-radius:50%;
+  background:var(--green);border:3px solid #111
+}
+.me-avatar{
+  display:grid;place-items:center;background:var(--yellow);color:#000;font-size:22px;font-weight:900
+}
+.status-info{min-width:0;flex:1}
+.name{font-weight:900;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:13px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plus{
+  width:40px;height:40px;border:1px solid var(--yellow);border-radius:50%;color:var(--yellow);
+  font-size:25px;display:grid;place-items:center
+}
+.friend{
+  display:flex;align-items:center;gap:12px;padding:13px 4px;
+  border-bottom:1px solid #1d1d1d
+}
+.friend:last-child{border-bottom:0}
+.friend-main{min-width:0;flex:1}
+.friend-name{font-weight:900;font-size:16px}
+.friend-state{font-size:12px;color:var(--muted);margin-top:5px}
+.badge{font-size:10px;color:#000;background:var(--yellow);padding:3px 7px;border-radius:8px;font-weight:900;margin-left:5px}
+.friend-actions{display:flex;gap:6px}
+.mini{
+  width:38px;height:38px;border-radius:50%;background:#1d1d1d;border:1px solid #333;
+  display:grid;place-items:center;font-size:17px
+}
+.mini:hover{border-color:var(--yellow)}
+.empty{text-align:center;color:#777;padding:35px 10px}
+.bottom{
+  position:fixed;z-index:30;bottom:0;left:50%;transform:translateX(-50%);
+  width:min(760px,100%);height:76px;background:rgba(15,15,15,.98);
+  border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);
+  padding:7px 7px max(7px,env(safe-area-inset-bottom))
+}
+.nav{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  color:#999;font-size:11px;font-weight:700;border-radius:15px
+}
+.nav .nicon{font-size:22px;line-height:1}
+.nav.active{color:var(--yellow)}
+.fab{
+  position:fixed;right:18px;bottom:92px;z-index:25;width:58px;height:58px;border-radius:50%;
+  background:var(--yellow);color:#000;font-size:28px;font-weight:900;
+  box-shadow:0 7px 25px rgba(255,212,0,.25)
+}
+.toast{
+  position:fixed;z-index:50;left:50%;bottom:94px;transform:translate(-50%,20px);
+  background:#242424;border:1px solid var(--yellow);color:#fff;padding:12px 16px;
+  border-radius:13px;opacity:0;pointer-events:none;transition:.22s;font-size:14px;
+  max-width:90%;text-align:center
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:60;display:none;padding:18px}
+.modal-back.show{display:flex;align-items:flex-end;justify-content:center}
+.modal{
+  width:min(600px,100%);background:#141414;border:1px solid #3b3b3b;border-radius:24px;
+  padding:18px;box-shadow:0 20px 70px #000
+}
+.modal h2{margin:0 0 15px;color:var(--yellow)}
+.field{
+  width:100%;height:48px;background:#222;border:1px solid #3a3a3a;border-radius:13px;
+  color:#fff;padding:0 14px;outline:0;margin-bottom:10px
+}
+.field:focus{border-color:var(--yellow)}
+.row{display:flex;gap:9px}.row>*{flex:1}
+.btn{
+  min-height:46px;border-radius:13px;background:#242424;border:1px solid #3a3a3a;
+  padding:0 15px;font-weight:800
+}
+.btn.gold{background:var(--yellow);color:#000;border-color:var(--yellow)}
+.close{float:right;font-size:22px;color:#aaa}
+@media(max-width:430px){
+  .title{font-size:28px}.friend-actions .mini:nth-child(3){display:none}
+  .section{padding-left:13px;padding-right:13px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="toprow">
+      <div class="title">Amis</div>
+      <div class="actions">
+        <button class="icon" id="searchBtn" aria-label="Rechercher">⌕</button>
+        <button class="icon" id="cameraBtn" aria-label="Caméra">▣</button>
+        <button class="icon primary" id="addBtn" aria-label="Ajouter">＋</button>
+      </div>
+    </div>
+
+    <div class="search" id="searchBox">
+      <span>⌕</span>
+      <input id="searchInput" type="search" placeholder="Rechercher un ami..." autocomplete="off">
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-filter="all">Tous</button>
+      <button class="tab" data-filter="online">En ligne</button>
+      <button class="tab" data-filter="favorites">Favoris</button>
+      <button class="tab" data-filter="groups">Groupes</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="sectionhead">
+        <div class="sectiontitle">Mon profil</div>
+        <button class="link" id="editProfile">Modifier</button>
+      </div>
+      <div class="status-card">
+        <div class="avatar me-avatar" id="myAvatar">B</div>
+        <div class="status-info">
+          <div class="name" id="myName">BOUBA</div>
+          <div class="sub" id="myStatus">Disponible • Appuyez pour modifier</div>
+        </div>
+        <button class="plus" id="myStatusBtn">＋</button>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="sectionhead">
+        <div class="sectiontitle">Amis</div>
+        <div class="link" id="count">0</div>
+      </div>
+      <div id="friends"></div>
+    </section>
+  </main>
+</div>
+
+<button class="fab" id="fab" aria-label="Ajouter un ami">＋</button>
+
+<nav class="bottom">
+  <button class="nav" data-page="discussions"><span class="nicon">▤</span>Discussions</button>
+  <button class="nav active" data-page="amis"><span class="nicon">●●</span>Amis</button>
+  <button class="nav" data-page="actu"><span class="nicon">◉</span>Actus</button>
+  <button class="nav" data-page="appels"><span class="nicon">☎</span>Appels</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-back" id="modalBack">
+  <div class="modal">
+    <button class="close" id="closeModal">×</button>
+    <h2 id="modalTitle">Ajouter un ami</h2>
+    <input class="field" id="friendName" placeholder="Nom complet">
+    <input class="field" id="friendPhone" placeholder="WhatsApp / téléphone">
+    <input class="field" id="friendPhoto" placeholder="URL de la photo (facultatif)">
+    <div class="row">
+      <button class="btn" id="cancelModal">Annuler</button>
+      <button class="btn gold" id="saveFriend">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const KEY = "bouba_amis_v1";
+  const PROFILE_KEY = "bouba_profile_v1";
+
+  const defaultFriends = [
+    {id:1,name:"Awa Touré",phone:"+225 07 00 00 00 01",photo:"https://i.pravatar.cc/160?img=47",online:true,favorite:true,group:false},
+    {id:2,name:"Dachenko",phone:"+225 07 00 00 00 02",photo:"https://i.pravatar.cc/160?img=11",online:true,favorite:false,group:false},
+    {id:3,name:"Ayoubа",phone:"+225 07 00 00 00 03",photo:"https://i.pravatar.cc/160?img=12",online:false,favorite:true,group:false},
+    {id:4,name:"Gaspy",phone:"+225 07 00 00 00 04",photo:"https://i.pravatar.cc/160?img=33",online:false,favorite:false,group:false},
+    {id:5,name:"Sissoko",phone:"+225 07 00 00 00 05",photo:"https://i.pravatar.cc/160?img=68",online:false,favorite:false,group:true},
+    {id:6,name:"Djha",phone:"+225 07 00 00 00 06",photo:"https://i.pravatar.cc/160?img=44",online:true,favorite:false,group:false}
+  ];
+
+  const $ = id => document.getElementById(id);
+  let friends = loadFriends();
+  let profile = loadProfile();
+  let filter = "all";
+
+  function loadFriends(){
+    try {
+      const x = JSON.parse(localStorage.getItem(KEY));
+      return Array.isArray(x) && x.length ? x : defaultFriends;
+    } catch(e){ return defaultFriends; }
+  }
+
+  function loadProfile(){
+    try { return JSON.parse(localStorage.getItem(PROFILE_KEY)) || {name:"BOUBA",status:"Disponible",photo:""}; }
+    catch(e){ return {name:"BOUBA",status:"Disponible",photo:""}; }
+  }
+
+  function save(){
+    localStorage.setItem(KEY, JSON.stringify(friends));
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+  }
+
+  function esc(s){
+    return String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  }
+
+  function avatar(f, small=false){
+    if(f.photo) return `<img class="avatar ${small?'small':''}" src="${esc(f.photo)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+      <span class="avatar ${small?'small':''} me-avatar" style="display:none">${esc((f.name||"?")[0].toUpperCase())}</span>`;
+    return `<span class="avatar ${small?'small':''} me-avatar">${esc((f.name||"?")[0].toUpperCase())}</span>`;
+  }
+
+  function render(){
+    const q = $("searchInput").value.trim().toLowerCase();
+    let list = friends.filter(f => {
+      const text = (f.name+" "+f.phone).toLowerCase();
+      const matchesSearch = !q || text.includes(q);
+      const matchesFilter =
+        filter==="all" ||
+        (filter==="online" && f.online) ||
+        (filter==="favorites" && f.favorite) ||
+        (filter==="groups" && f.group);
+      return matchesSearch && matchesFilter;
+    });
+
+    $("count").textContent = list.length;
+    $("friends").innerHTML = list.length ? list.map(f => `
+      <article class="friend" data-id="${f.id}">
+        <div class="avatar-wrap">
+          ${avatar(f,true)}
+          ${f.online ? '<span class="online"></span>' : ''}
+        </div>
+        <div class="friend-main">
+          <div class="friend-name">${esc(f.name)}
+            ${f.favorite ? '<span class="badge">★</span>' : ''}
+          </div>
+          <div class="friend-state">${f.online ? '🟢 En ligne' : '⚫ Hors ligne'} • ${esc(f.phone)}</div>
+        </div>
+        <div class="friend-actions">
+          <button class="mini" data-action="message" title="Message">💬</button>
+          <button class="mini" data-action="call" title="Appeler">☎</button>
+          <button class="mini" data-action="favorite" title="Favori">${f.favorite?'★':'☆'}</button>
+        </div>
+      </article>
+    `).join("") : '<div class="empty">Aucun ami trouvé.</div>';
+  }
+
+  function renderProfile(){
+    $("myName").textContent = profile.name || "BOUBA";
+    $("myStatus").textContent = (profile.status || "Disponible") + " • Appuyez pour modifier";
+    if(profile.photo){
+      $("myAvatar").style.backgroundImage = `url("${profile.photo.replace(/"/g,'')}")`;
+      $("myAvatar").style.backgroundSize = "cover";
+      $("myAvatar").textContent = "";
+    } else {
+      $("myAvatar").style.backgroundImage = "";
+      $("myAvatar").textContent = (profile.name || "B")[0].toUpperCase();
+    }
+  }
+
+  function toast(msg){
+    const t=$("toast"); t.textContent=msg; t.classList.add("show");
+    clearTimeout(window.__toast); window.__toast=setTimeout(()=>t.classList.remove("show"),2200);
+  }
+
+  function openModal(title="Ajouter un ami"){
+    $("modalTitle").textContent=title;
+    $("modalBack").classList.add("show");
+    setTimeout(()=>$("friendName").focus(),50);
+  }
+  function closeModal(){ $("modalBack").classList.remove("show"); }
+
+  $("searchInput").addEventListener("input", render);
+  $("searchBtn").addEventListener("click", () => {
+    $("searchBox").scrollIntoView({behavior:"smooth",block:"center"});
+    $("searchInput").focus();
+  });
+
+  $("tabs").addEventListener("click", e => {
+    const b=e.target.closest(".tab"); if(!b) return;
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active"); filter=b.dataset.filter; render();
+  });
+
+  function addFriend(){
+    const name=$("friendName").value.trim();
+    const phone=$("friendPhone").value.trim();
+    const photo=$("friendPhoto").value.trim();
+    if(!name){ toast("Veuillez entrer le nom de l'ami."); return; }
+    friends.unshift({id:Date.now(),name,phone:phone||"Non renseigné",photo,online:false,favorite:false,group:false});
+    save(); render(); closeModal();
+    $("friendName").value=""; $("friendPhone").value=""; $("friendPhoto").value="";
+    toast("✅ Ami ajouté");
+  }
+
+  $("addBtn").onclick=()=>openModal();
+  $("fab").onclick=()=>openModal();
+  $("closeModal").onclick=closeModal;
+  $("cancelModal").onclick=closeModal;
+  $("saveFriend").onclick=addFriend;
+  $("modalBack").addEventListener("click",e=>{if(e.target===$("modalBack"))closeModal();});
+  $("friendName").addEventListener("keydown",e=>{if(e.key==="Enter")addFriend();});
+
+  $("friends").addEventListener("click", e => {
+    const b=e.target.closest("[data-action]"); if(!b) return;
+    const card=b.closest(".friend"); const id=Number(card.dataset.id);
+    const f=friends.find(x=>x.id===id); if(!f)return;
+    const action=b.dataset.action;
+    if(action==="message") toast("💬 Ouverture de la discussion avec "+f.name);
+    if(action==="call"){
+      if(f.phone && f.phone!=="Non renseigné") window.location.href="tel:"+f.phone.replace(/[^+0-9]/g,"");
+      else toast("Numéro non renseigné");
+    }
+    if(action==="favorite"){
+      f.favorite=!f.favorite; save(); render();
+      toast(f.favorite?"⭐ Ajouté aux favoris":"Retiré des favoris");
+    }
+  });
+
+  $("myStatusBtn").onclick=()=>{
+    const s=prompt("Votre statut :", profile.status || "Disponible");
+    if(s!==null){profile.status=s.trim()||"Disponible";save();renderProfile();toast("✅ Statut enregistré");}
+  };
+
+  $("editProfile").onclick=()=>{
+    const name=prompt("Nom :", profile.name || "BOUBA");
+    if(name===null)return;
+    const status=prompt("Statut :", profile.status || "Disponible");
+    if(status===null)return;
+    profile.name=name.trim()||"BOUBA";
+    profile.status=status.trim()||"Disponible";
+    save();renderProfile();toast("✅ Profil enregistré");
+  };
+
+  $("cameraBtn").onclick=()=>toast("📷 Caméra prête — votre navigateur demandera l'autorisation si nécessaire.");
+
+  document.querySelector(".bottom").addEventListener("click",e=>{
+    const b=e.target.closest(".nav"); if(!b)return;
+    const p=b.dataset.page;
+    if(p==="amis"){toast("👥 Vous êtes dans Amis");return;}
+    toast("Section « "+p+" » prête à être reliée à votre écran.");
+  });
+
+  renderProfile();
+  render();
+})();
+</script>
+</body>
+</html>
