@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Amis</title>
+<style>
+:root{--y:#FFD60A;--bg:#070707;--c:#1e1e1e;--b:#2a2a2a;--t:#f2f2f2;--m:#8a8a8a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--t);font-family:Roboto,system-ui,sans-serif;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+#app{height:100%;display:flex;flex-direction:column}
+header{padding:14px 16px 6px;display:flex;align-items:center;gap:10px}
+h1{margin:0;font-size:32px;color:var(--y);font-weight:900;flex:1}
+.ic{width:42px;height:42px;border-radius:50%;background:var(--c);border:1px solid var(--b);font-size:18px;flex:none}
+.ic.y{background:var(--y);color:#000;font-size:26px}
+main{flex:1;overflow-y:auto;padding:0 16px 90px}
+input,textarea{width:100%;background:var(--c);border:0;border-radius:16px;padding:14px 16px;color:var(--t);font:inherit;outline:0}
+.chips{display:flex;gap:8px;margin:12px 0;overflow-x:auto}
+.chip{padding:10px 18px;border-radius:14px;background:var(--c);border:1px solid var(--b);font-weight:600;white-space:nowrap}
+.chip.on{background:var(--y);color:#000}
+.sec{display:flex;justify-content:space-between;color:var(--y);font-weight:800;font-size:20px;border-top:1px solid #3a3000;padding:14px 0 6px;margin-top:6px}
+.row{display:flex;align-items:center;gap:12px;padding:10px 0}
+.av{width:46px;height:46px;border-radius:50%;background:var(--y);color:#000;display:grid;place-items:center;font-weight:800;flex:none;position:relative}
+.av i{position:absolute;right:0;bottom:0;width:12px;height:12px;border-radius:50%;background:#2ecc71;border:2px solid var(--bg)}
+.grow{flex:1;min-width:0}.nm{font-weight:700}.sub{color:var(--m);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{background:var(--y);color:#000;border-radius:12px;padding:8px 13px;font-weight:700;font-size:13px}
+.empty{color:var(--m);text-align:center;padding:36px 10px;line-height:1.5}
+nav{display:flex;border-top:1px solid #3a3000;background:#101010}
+nav button{flex:1;padding:10px 0 8px;color:var(--m);font-size:12px;font-weight:600}
+nav button b{display:block;font-size:20px}nav button.on{color:var(--y)}
+.fab{position:fixed;right:18px;bottom:calc(84px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;background:var(--y);color:#000;font-size:34px;box-shadow:0 6px 20px #ffd60a55}
+.ov{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;z-index:5;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.sheet{position:fixed;inset:0;background:#000a;z-index:30;display:flex;align-items:flex-end}
+.sheet>div{background:#151515;width:100%;border-radius:24px 24px 0 0;padding:20px;display:flex;flex-direction:column;gap:10px;max-height:90%;overflow-y:auto}
+.opt{display:flex;gap:12px;align-items:center;background:var(--c);border-radius:16px;padding:14px;font-weight:600;text-align:left;width:100%}
+#msgs{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.m{max-width:78%;padding:9px 13px;border-radius:16px;background:var(--c);align-self:flex-start;word-wrap:break-word}
+.m.me{background:var(--y);color:#000;align-self:flex-end}
+.m small{display:block;font-size:10px;opacity:.6;margin-top:3px;text-align:right}
+.m audio{height:34px;max-width:100%}
+.bar{display:flex;gap:8px;padding:10px;align-items:center;border-top:1px solid var(--b)}
+.rec{background:#e53935!important;color:#fff!important}
+.post{background:var(--c);border-radius:16px;padding:14px;margin:10px 0}
+#toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);background:var(--y);color:#000;padding:10px 16px;border-radius:12px;font-weight:700;z-index:99;display:none;max-width:90%;text-align:center}
+.call{align-items:center;justify-content:center;gap:16px;text-align:center;z-index:40}
+.call .av{width:110px;height:110px;font-size:42px}
+</style></head><body>
+<div id="app"><div class="empty">Chargement…</div></div><div id="toast"></div><audio id="ra" autoplay></audio>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+/* ====== 1) COLLE ICI TA CONFIG FIREBASE ====== */
+const firebaseConfig={apiKey:"AIzaSyAnLLXpUC35OleB0hCLUXnLU0lMiesY7j4",authDomain:"project-f4477c80-7c55-4db7-b2e.firebaseapp.com",projectId:"project-f4477c80-7c55-4db7-b2e",appId:"1:697604298457:web:4f9a6d66ec6fde9c1990c8"};
+/* ============================================ */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const hm=t=>new Date(t).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+const dt=t=>new Date(t).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'});
+const ini=n=>(n||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+const digits=p=>(p||'').replace(/\D/g,'');
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',3500)}
+let db,auth,me,U={},M=[],N=[],C=[],tab='amis',filter='Tous',q='',cur=null,rec=null;
+let fav={},contacts=[];try{fav=JSON.parse(localStorage.getItem('fav')||'{}');contacts=JSON.parse(localStorage.getItem('ctc')||'[]')}catch(e){}
+const sv=()=>{try{localStorage.setItem('fav',JSON.stringify(fav));localStorage.setItem('ctc',JSON.stringify(contacts))}catch(e){}};
+const nameOf=id=>(U[id]&&U[id].name)||'Ami';
+const isOn=id=>U[id]&&Date.now()-(U[id].seen||0)<45000;
+const LINK=()=>location.href.split('#')[0];
+const TXT=()=>"Salut ! Rejoins-moi sur Amis pour discuter, s'appeler et partager des actus : "+LINK();
+const er=e=>toast('Erreur : '+(e.code||e.message));
+
+function askName(){return new Promise(r=>{const s=document.createElement('div');s.className='sheet';s.innerHTML='<div><div class="nm" style="font-size:20px">Ton prénom</div><input id="nn" placeholder="Ex : Aboubacar"><button class="pill" id="nok" style="padding:14px">Continuer</button></div>';document.body.appendChild(s);s.querySelector('#nok').onclick=()=>{const v=s.querySelector('#nn').value.trim();if(v){s.remove();r(v)}}})}
+
+async function init(){
+ if(!firebaseConfig.apiKey){$('#app').innerHTML='<div class="empty">Configuration Firebase manquante.<br>Remplace <b>firebaseConfig</b> en haut du fichier.</div>';return}
+ try{firebase.initializeApp(firebaseConfig);auth=firebase.auth();db=firebase.firestore();me=(await auth.signInAnonymously()).user.uid}
+ catch(e){$('#app').innerHTML='<div class="empty">Connexion impossible : '+esc(e.code||e.message)+'<br>Active « Anonyme » dans Firebase > Authentication.</div>';return}
+ const me0=await db.collection('users').doc(me).get();
+ const nm=me0.exists?me0.data().name:await askName();
+ const beat=()=>db.collection('users').doc(me).set({name:nm,seen:Date.now()},{merge:true}).catch(er);
+ await beat();setInterval(beat,20000);
+ setInterval(()=>{if(!cur&&tab==='amis'&&document.activeElement.id!=='sq')render()},20000);
+ db.collection('users').onSnapshot(s=>{U={};s.docs.forEach(d=>U[d.id]=d.data());if(!cur&&document.activeElement.id!=='sq'&&document.activeElement.id!=='np')render()},er);
+ db.collection('msgs').where('p','array-contains',me).onSnapshot(s=>{M=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>a.t-b.t);cur?drawMsgs():render()},er);
+ db.collection('news').orderBy('t','desc').limit(50).onSnapshot(s=>{N=s.docs.map(d=>({id:d.id,...d.data()}));if(tab==='actus'&&!$('#np')?.value)render()},er);
+ db.collection('calls').where('p','array-contains',me).onSnapshot(s=>{C=s.docs.map(d=>d.data()).sort((a,b)=>b.t-a.t);if(tab==='appels')render()},er);
+ db.collection('sig').where('to','==',me).onSnapshot(s=>s.docChanges().forEach(c=>{if(c.type!=='added')return;const d=c.doc.data();c.doc.ref.delete();if(Date.now()-d.t<30000)onSig(d)}),er);
+ render();
+}
+const friends=()=>Object.keys(U).filter(i=>i!==me);
+const thread=id=>M.filter(m=>m.from===id||m.to===id);
+
+function render(){
+ const T={discussions:'Discussions',amis:'Amis',actus:'Actus',appels:'Appels'};let b='';
+ if(tab==='amis'){
+  const l=friends().filter(i=>nameOf(i).toLowerCase().includes(q.toLowerCase())&&(filter==='Tous'||(filter==='Favoris'&&fav[i])||(filter==='En ligne'&&isOn(i))));
+  b=`<input id="sq" placeholder="Rechercher un ami..." value="${esc(q)}"><div class="chips">${['Tous','En ligne','Favoris'].map(c=>`<button class="chip ${c===filter?'on':''}" data-f="${c}">${c}</button>`).join('')}</div>
+  <div class="sec"><span>Amis</span><span>${l.length}</span></div>
+  ${l.length?l.map(i=>`<div class="row"><button class="av" data-chat="${i}">${ini(nameOf(i))}${isOn(i)?'<i></i>':''}</button><div class="grow" data-chat="${i}"><div class="nm">${esc(nameOf(i))}${fav[i]?' ★':''}</div><div class="sub">${isOn(i)?'En ligne':'Hors ligne'}</div></div><button class="ic" data-star="${i}">${fav[i]?'★':'☆'}</button><button class="ic" data-call="${i}">📞</button></div>`).join(''):'<div class="empty">Personne ici pour le moment.<br>Appuie sur + pour inviter tes amis.</div>'}
+  ${contacts.length?`<div class="sec"><span>Mon répertoire</span><span>${contacts.length}</span></div>`+contacts.map((c,k)=>`<div class="row"><div class="av">${ini(c.name)}</div><div class="grow"><div class="nm">${esc(c.name)}</div><div class="sub">${esc(c.tel||'')}</div></div><button class="pill" data-wa="${k}">WhatsApp</button><button class="pill" data-sms="${k}">SMS</button></div>`).join(''):''}`;
+ }
+ if(tab==='discussions'){
+  const l=friends().filter(i=>thread(i).length).sort((a,z)=>thread(z).at(-1).t-thread(a).at(-1).t);
+  b=l.length?l.map(i=>{const m=thread(i).at(-1);return `<div class="row" data-chat="${i}"><div class="av">${ini(nameOf(i))}</div><div class="grow"><div class="nm">${esc(nameOf(i))}</div><div class="sub">${m.from===me?'Toi : ':''}${m.audio?'🎤 Message vocal':esc(m.text)}</div></div><div class="sub">${hm(m.t)}</div></div>`}).join(''):'<div class="empty">Aucune discussion.<br>Ouvre un ami depuis l\'onglet Amis.</div>';
+ }
+ if(tab==='actus'){
+  b=`<textarea id="np" rows="3" placeholder="Quoi de neuf ?"></textarea><button class="pill" id="pub" style="margin:10px 0;padding:11px 18px">Publier</button>`+(N.length?N.map(n=>`<div class="post"><div class="nm" style="color:var(--y)">${n.from===me?'Moi':esc(nameOf(n.from))} · <span class="sub">${dt(n.t)}</span></div><p style="margin:8px 0">${esc(n.text)}</p>${n.from===me?`<button class="sub" data-del="${n.id}">Supprimer</button>`:''}</div>`).join(''):'<div class="empty">Aucune actu.</div>');
+ }
+ if(tab==='appels'){
+  b=C.length?C.map(c=>{const o=c.from===me?c.to:c.from;return `<div class="row"><div class="av">${ini(nameOf(o))}</div><div class="grow"><div class="nm">${esc(nameOf(o))}</div><div class="sub">${c.from===me?'↗ Sortant':'↙ Entrant'} · ${dt(c.t)} · ${c.dur}s</div></div><button class="ic" data-call="${o}">📞</button></div>`}).join(''):'<div class="empty">Aucun appel.</div>';
+ }
+ const np=$('#np')?.value||'';
+ $('#app').innerHTML=`<header><h1>${T[tab]}</h1>${tab==='amis'?'<button class="ic y" id="add">+</button>':''}</header><main>${b}</main>${tab==='amis'?'<button class="fab" id="add2">+</button>':''}
+ <nav>${[['discussions','💬','Discussions'],['amis','👥','Amis'],['actus','◉','Actus'],['appels','☎','Appels']].map(([k,i,l])=>`<button class="${tab===k?'on':''}" data-tab="${k}"><b>${i}</b>${l}</button>`).join('')}</nav>`;
+ if($('#np'))$('#np').value=np;
+ if(q&&$('#sq')){const s=$('#sq');s.focus();s.setSelectionRange(q.length,q.length)}
+}
+document.addEventListener('click',e=>{
+ const t=e.target.closest('button,[data-chat]');if(!t||!db)return;const d=t.dataset;
+ if(d.tab){tab=d.tab;render()}else if(d.f){filter=d.f;render()}
+ else if(t.id==='add'||t.id==='add2')invSheet();
+ else if(d.chat)openChat(d.chat);
+ else if(d.star){fav[d.star]=!fav[d.star];sv();render()}
+ else if(d.call)startCall(d.call);
+ else if(d.wa!==undefined)window.open('https://wa.me/'+digits(contacts[d.wa].tel)+'?text='+encodeURIComponent(TXT()),'_blank');
+ else if(d.sms!==undefined)location.href='sms:'+contacts[d.sms].tel+'?body='+encodeURIComponent(TXT());
+ else if(d.del)db.collection('news').doc(d.del).delete().catch(er);
+ else if(t.id==='pub'){const v=$('#np').value.trim();if(!v)return;$('#np').value='';db.collection('news').add({from:me,text:v,t:Date.now()}).catch(er)}
+});
+document.addEventListener('input',e=>{if(e.target.id==='sq'){q=e.target.value;render()}});
+
+function sheet(h){const s=document.createElement('div');s.className='sheet';s.innerHTML='<div>'+h+'</div>';s.onclick=e=>{if(e.target===s)s.remove()};document.body.appendChild(s);return s}
+function invSheet(){
+ const s=sheet(`<div class="nm" style="font-size:20px">Inviter des amis</div>
+ <button class="opt" id="o1"><span>🟢</span>WhatsApp</button><button class="opt" id="o2"><span>📇</span>Depuis le répertoire</button>
+ <button class="opt" id="o3"><span>💬</span>SMS</button><button class="opt" id="o4"><span>✉️</span>E-mail</button><button class="opt" id="o5"><span>🔗</span>Partager / copier le lien</button>`);
+ const g=id=>s.querySelector(id);
+ g('#o1').onclick=()=>{s.remove();window.open('https://wa.me/?text='+encodeURIComponent(TXT()),'_blank')};
+ g('#o3').onclick=()=>{location.href='sms:?body='+encodeURIComponent(TXT())};
+ g('#o4').onclick=()=>{location.href='mailto:?subject='+encodeURIComponent('Rejoins-moi sur Amis')+'&body='+encodeURIComponent(TXT())};
+ g('#o5').onclick=async()=>{s.remove();try{if(navigator.share)await navigator.share({text:TXT()});else{await navigator.clipboard.writeText(LINK());toast('Lien copié')}}catch(e){}};
+ g('#o2').onclick=async()=>{
+  if(!(navigator.contacts&&navigator.contacts.select))return toast('Répertoire non supporté : utilise Chrome sur Android.');
+  try{const r=await navigator.contacts.select(['name','tel'],{multiple:true});
+   r.forEach(c=>{const tel=(c.tel||[])[0]||'';if(tel&&!contacts.some(x=>digits(x.tel)===digits(tel)))contacts.push({name:(c.name||[])[0]||'Contact',tel})});
+   sv();s.remove();tab='amis';render();toast('Contacts ajoutés : invite-les via WhatsApp ou SMS')}catch(e){}};
+}
+
+function openChat(id){
+ cur=id;const o=document.createElement('div');o.className='ov';o.id='chat';
+ o.innerHTML=`<header><button class="ic" id="bk">←</button><div class="av" style="width:38px;height:38px">${ini(nameOf(id))}</div><div class="grow nm">${esc(nameOf(id))}</div><button class="ic" id="cl">📞</button></header><div id="msgs"></div>
+ <div class="bar"><button class="ic" id="mic">🎤</button><input id="tx" placeholder="Message"><button class="ic y" id="snd" style="font-size:20px">➤</button></div>`;
+ document.body.appendChild(o);drawMsgs();
+ $('#bk').onclick=()=>{stopRec(true);o.remove();cur=null;render()};
+ $('#cl').onclick=()=>startCall(id);$('#mic').onclick=toggleRec;
+ const send=()=>{const v=$('#tx').value.trim();if(!v)return;$('#tx').value='';push({text:v})};
+ $('#snd').onclick=send;$('#tx').onkeydown=e=>{if(e.key==='Enter')send()};
+}
+const push=m=>db.collection('msgs').add({p:[me,cur],from:me,to:cur,t:Date.now(),...m}).catch(er);
+function drawMsgs(){const el=$('#msgs');if(!el)return;const a=thread(cur);
+ el.innerHTML=a.length?a.map(m=>`<div class="m ${m.from===me?'me':''}">${m.audio?`<audio controls src="${m.audio}"></audio>`:esc(m.text)}<small>${hm(m.t)}</small></div>`).join(''):'<div class="empty">Écris un message ou envoie un vocal.</div>';el.scrollTop=el.scrollHeight}
+async function toggleRec(){
+ if(rec)return stopRec(false);
+ try{const st=await navigator.mediaDevices.getUserMedia({audio:true}),ch=[],mr=new MediaRecorder(st,{audioBitsPerSecond:24000});
+  mr.ondataavailable=e=>ch.push(e.data);
+  mr.onstop=()=>{st.getTracks().forEach(t=>t.stop());clearTimeout(mr.to);if(mr.cancel)return;const fr=new FileReader();fr.onload=()=>fr.result.length>230000?toast('Vocal trop long'):push({audio:fr.result});fr.readAsDataURL(new Blob(ch,{type:mr.mimeType}))};
+  mr.start();mr.to=setTimeout(()=>stopRec(false),30000);rec=mr;$('#mic').classList.add('rec');$('#mic').textContent='■';toast('Enregistrement (30 s max) — appuie pour envoyer')}
+ catch(e){toast('Micro refusé ou indisponible')}}
+function stopRec(c){if(!rec)return;rec.cancel=c;if(rec.state!=='inactive')rec.stop();rec=null;const m=$('#mic');if(m){m.classList.remove('rec');m.textContent='🎤'}}
+
+/* Appels vocaux WebRTC, signalisation via Firestore */
+let pc,ls,peer,t0,iv,dir,ui;
+const sig=(to,type,x)=>db.collection('sig').add({to,from:me,type,t:Date.now(),...x}).catch(er);
+const gathered=p=>new Promise(r=>{if(p.iceGatheringState==='complete')return r();p.onicegatheringstatechange=()=>p.iceGatheringState==='complete'&&r();setTimeout(r,3000)});
+async function mkPc(){ls=await navigator.mediaDevices.getUserMedia({audio:true});pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});ls.getTracks().forEach(t=>pc.addTrack(t,ls));pc.ontrack=e=>{$('#ra').srcObject=e.streams[0]}}
+function callUI(id,status,btns){ui&&ui.remove();ui=document.createElement('div');ui.className='ov call';ui.innerHTML=`<div class="av">${ini(nameOf(id))}</div><div class="nm" style="font-size:24px">${esc(nameOf(id))}</div><div id="ct" class="sub">${status}</div><div style="display:flex;gap:24px;margin-top:20px">${btns}</div>`;document.body.appendChild(ui)}
+const B=(i,id,bg)=>`<button class="ic" id="${id}" style="width:64px;height:64px;font-size:26px;${bg?'background:'+bg:''}">${i}</button>`;
+async function startCall(id){
+ if(pc)return;if(!isOn(id))return toast(nameOf(id)+" n'est pas en ligne");
+ try{await mkPc()}catch(e){return toast('Micro refusé')}
+ peer=id;dir='out';callUI(id,'Appel en cours…',B('📵','hg','#e53935'));$('#hg').onclick=()=>endCall(true);
+ await pc.setLocalDescription(await pc.createOffer());await gathered(pc);sig(id,'offer',{sdp:pc.localDescription.sdp});
+}
+async function onSig(d){
+ if(d.type==='offer'){
+  if(pc){sig(d.from,'end');return}
+  peer=d.from;dir='in';callUI(d.from,'Appel entrant…',B('✅','ok','#2ecc71')+B('📵','hg','#e53935'));window._off=d.sdp;
+  $('#hg').onclick=()=>{sig(peer,'end');ui.remove();peer=null};
+  $('#ok').onclick=async()=>{try{await mkPc();await pc.setRemoteDescription({type:'offer',sdp:window._off});await pc.setLocalDescription(await pc.createAnswer());await gathered(pc);sig(peer,'answer',{sdp:pc.localDescription.sdp});connected()}catch(e){toast('Appel impossible');endCall(true)}}}
+ else if(d.type==='answer'&&pc&&d.from===peer){await pc.setRemoteDescription({type:'answer',sdp:d.sdp});connected()}
+ else if(d.type==='end'&&d.from===peer)endCall(false);
+}
+function connected(){t0=Date.now();callUI(peer,'En communication 0:00',B('🎙️','mu')+B('📵','hg','#e53935'));let mu=false;
+ $('#mu').onclick=()=>{mu=!mu;ls.getAudioTracks().forEach(t=>t.enabled=!mu);$('#mu').textContent=mu?'🔇':'🎙️'};$('#hg').onclick=()=>endCall(true);
+ iv=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);const c=$('#ct');if(c)c.textContent='En communication '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0')},1000)}
+function endCall(notify){
+ if(notify&&peer)sig(peer,'end');clearInterval(iv);
+ if(t0){const dur=Math.floor((Date.now()-t0)/1000);db.collection('calls').add({p:[me,peer],from:dir==='out'?me:peer,to:dir==='out'?peer:me,t:t0,dur}).catch(()=>{})}
+ ls&&ls.getTracks().forEach(t=>t.stop());pc&&pc.close();pc=ls=peer=t0=null;ui&&ui.remove();ui=null}
+init();
+</script></body></html>
