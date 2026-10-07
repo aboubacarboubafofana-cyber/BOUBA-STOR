@@ -379,8 +379,8 @@ window.recordVoice = async () => {
             audioChunks.push(event.data);
         });
 
-        mediaRecorder.addEventListener("stop", async () => {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+    
+        
             
             mediaRecorder.addEventListener("stop", async () => {
     const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
