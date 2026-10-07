@@ -354,71 +354,10 @@
             alert("📹 Appel vidéo vers " + (currentChatId ? "cet ami" : "l'ami") + "...\n(Fonctionnalité WebRTC à connecter)");
         };
 
-        // 9. MESSAGE VOCAL (RÉEL)
-let mediaRecorder;
-let audioChunks = [];
-let isRecording = false;
-
-window.recordVoice = async () => {
-    // Si on est déjà en train d'enregistrer, on arrête
-    if (isRecording) {
-        mediaRecorder.stop();
-        isRecording = false;
-        // On change l'icône ou la couleur pour indiquer l'arrêt (optionnel)
-        document.querySelector('.fa-microphone').style.color = ""; 
-        return;
-    }
-
-    // Sinon, on démarre l'enregistrement
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
-
-        mediaRecorder.addEventListener("dataavailable", event => {
-            audioChunks.push(event.data);
-        });
-mediaRecorder.addEventListener("stop", async () => {
-    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-
-    // --- ENVOI VERS FIREBASE FIRESTORE (Méthode Base64) ---
-try {
-    // 1. Convertir l'audio en Base64 (texte)
-    const reader = new FileReader();
-    reader.readAsDataURL(audioBlob);
-    reader.onloadend = async () => {
-        const base64Audio = reader.result;
-
-        // 2. Envoyer directement dans Firestore
-        await addDoc(collection(db, "chats", currentChatId, "messages"), {
-            text: "🎤 Message vocal",
-            audioUrl: base64Audio, // On stocke l'audio directement ici
-            senderId: currentUser ? currentUser.uid : "anonyme",
-            timestamp: serverTimestamp()
-        });
-
-        console.log("Message vocal envoyé avec succès !");
-    };
-} catch (error) {
-    console.error("Erreur lors de l'envoi du message vocal :", error);
-    alert("Erreur lors de l'envoi du message vocal.");
-}
-    
-    // Arrêter le micro
-    stream.getTracks().forEach(track => track.stop());
-});
-
-        mediaRecorder.start();
-        isRecording = true;
-        // Change la couleur du micro en rouge pour indiquer l'enregistrement
-        document.querySelector('.fa-microphone').style.color = "red"; 
-        console.log("Enregistrement démarré...");
-
-    } catch (error) {
-        console.error("Erreur micro :", error);
-        alert("Impossible d'accéder au microphone. Vérifiez les permissions.");
-    }
-};
+        // 9. MESSAGE VOCAL (SIMULATION)
+        window.recordVoice = () => {
+            alert("🎤 Enregistrement vocal...\n(Fonctionnalité MediaRecorder à connecter)");
+        };
 
     </script>
 </body>
