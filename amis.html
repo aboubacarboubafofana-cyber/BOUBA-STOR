@@ -380,21 +380,8 @@ window.recordVoice = async () => {
         });
 mediaRecorder.addEventListener("stop", async () => {
     const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-    
-    // --- ENVOI VERS FIREBASE STORAGE ---
-    try {
-        // 1. Créer un nom de fichier unique
-        const fileName = `voice_messages/${Date.now()}_${currentUser.uid}.webm`;
-        
-        // 2. Référence vers Firebase Storage
-        // Assurez-vous d'avoir importé 'storage' en haut de votre script (ex: import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";)
-        const storageRef = ref(storage, fileName); 
-        
-        // 3. Uploader le fichier
-        await uploadBytes(storageRef, audioBlob);
-        const downloadURL = await getDownloadURL(storageRef);
 
-        // --- ENVOI VERS FIREBASE FIRESTORE (Méthode Base64) ---
+    // --- ENVOI VERS FIREBASE FIRESTORE (Méthode Base64) ---
 try {
     // 1. Convertir l'audio en Base64 (texte)
     const reader = new FileReader();
