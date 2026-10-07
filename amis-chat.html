@@ -67,27 +67,40 @@ const isOn=id=>U[id]&&Date.now()-(U[id].seen||0)<45000;
 const LINK=()=>location.href.split('#')[0];
 const TXT=()=>"Salut ! Rejoins-moi sur Amis pour discuter, s'appeler et partager des actus : "+LINK();
 const er=e=>toast('Erreur : '+(e.code||e.message));
+const p10=s=>digits(s).slice(-10);
+const byPhone=t=>{const k=p10(t);return Object.keys(U).find(i=>i!==me&&U[i].p10===k)};
+const okImg=u=>/^(data:image\/|https?:\/\/|icon-)/.test(u||'');
+const A=id=>{const u=U[id];return u&&okImg(u.photo)?`<img src="${esc(u.photo)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`:A(id)};
+let tel=(location.hash.match(/tel=(\d+)/)||[])[1],firstU=true;
+function handleTel(){if(!tel)return;const id=byPhone(tel);
+ if(id){tel=null;history.replaceState(null,'',location.pathname);openChat(id)}
+ else if(firstU){const n=digits(tel);tel=null;if(confirm("Ce client n'a pas encore ouvert le chat. L'inviter sur WhatsApp ?"))window.open('https://wa.me/'+(n.startsWith('225')?n:'225'+n)+'?text='+encodeURIComponent(TXT()),'_blank')}
+ firstU=false}
 
 function askName(){return new Promise(r=>{const s=document.createElement('div');s.className='sheet';s.innerHTML='<div><div class="nm" style="font-size:20px">Ton prénom</div><input id="nn" placeholder="Ex : Aboubacar"><button class="pill" id="nok" style="padding:14px">Continuer</button></div>';document.body.appendChild(s);s.querySelector('#nok').onclick=()=>{const v=s.querySelector('#nn').value.trim();if(v){s.remove();r(v)}}})}
 
 async function init(){
  if(!firebaseConfig.apiKey){$('#app').innerHTML='<div class="empty">Configuration Firebase manquante.<br>Remplace <b>firebaseConfig</b> en haut du fichier.</div>';return}
- try{firebase.initializeApp(firebaseConfig);auth=firebase.auth();db=firebase.firestore();me=(await auth.signInAnonymously()).user.uid}
+ try{firebase.initializeApp(firebaseConfig);auth=firebase.auth();db=firebase.firestore();const cu=await new Promise(r=>{const un=auth.onAuthStateChanged(x=>{un();r(x)})});me=(cu||(await auth.signInAnonymously()).user).uid}
  catch(e){$('#app').innerHTML='<div class="empty">Connexion impossible : '+esc(e.code||e.message)+'<br>Active « Anonyme » dans Firebase > Authentication.</div>';return}
+ const staff=!!auth.currentUser&&!auth.currentUser.isAnonymous;
  const me0=await db.collection('users').doc(me).get();
  let bm=null;try{bm=JSON.parse(localStorage.getItem('b_me'))}catch(e){}
- const nm=(bm&&bm.name)||(me0.exists?me0.data().name:await askName());
- const beat=()=>db.collection('users').doc(me).set({name:nm,seen:Date.now()},{merge:true}).catch(er);
+ const nm=staff?'BOUBA STORE':((bm&&bm.name)||(me0.exists?me0.data().name:await askName()));
+ const ex={name:nm};
+ if(bm){const ph=digits(bm.phone||bm.key).slice(-10);if(ph)ex.p10=ph;if(bm.city)ex.city=bm.city}
+ if(staff){ex.photo='icon-192.png';ex.p10='admin'}
+ const beat=()=>db.collection('users').doc(me).set({...ex,seen:Date.now()},{merge:true}).catch(er);
  await beat();setInterval(beat,20000);
  setInterval(()=>{if(!cur&&tab==='amis'&&document.activeElement.id!=='sq')render()},20000);
- db.collection('users').onSnapshot(s=>{U={};s.docs.forEach(d=>U[d.id]=d.data());if(!cur&&document.activeElement.id!=='sq'&&document.activeElement.id!=='np')render()},er);
+ db.collection('users').onSnapshot(s=>{U={};s.docs.forEach(d=>U[d.id]=d.data());handleTel();if(!cur&&document.activeElement.id!=='sq'&&document.activeElement.id!=='np')render()},er);
  db.collection('msgs').where('p','array-contains',me).onSnapshot(s=>{M=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>a.t-b.t);cur?drawMsgs():render()},er);
  db.collection('news').orderBy('t','desc').limit(50).onSnapshot(s=>{N=s.docs.map(d=>({id:d.id,...d.data()}));if(tab==='actus'&&!$('#np')?.value)render()},er);
  db.collection('calls').where('p','array-contains',me).onSnapshot(s=>{C=s.docs.map(d=>d.data()).sort((a,b)=>b.t-a.t);if(tab==='appels')render()},er);
  db.collection('sig').where('to','==',me).onSnapshot(s=>s.docChanges().forEach(c=>{if(c.type!=='added')return;const d=c.doc.data();c.doc.ref.delete();if(Date.now()-d.t<30000)onSig(d)}),er);
  render();
 }
-const friends=()=>Object.keys(U).filter(i=>i!==me);
+const friends=()=>Object.keys(U).filter(i=>i!==me).sort((a,b)=>(U[b].p10==='admin')-(U[a].p10==='admin'));
 const thread=id=>M.filter(m=>m.from===id||m.to===id);
 
 function render(){
@@ -96,21 +109,21 @@ function render(){
   const l=friends().filter(i=>nameOf(i).toLowerCase().includes(q.toLowerCase())&&(filter==='Tous'||(filter==='Favoris'&&fav[i])||(filter==='En ligne'&&isOn(i))));
   b=`<input id="sq" placeholder="Rechercher un ami..." value="${esc(q)}"><div class="chips">${['Tous','En ligne','Favoris'].map(c=>`<button class="chip ${c===filter?'on':''}" data-f="${c}">${c}</button>`).join('')}</div>
   <div class="sec"><span>Amis</span><span>${l.length}</span></div>
-  ${l.length?l.map(i=>`<div class="row"><button class="av" data-chat="${i}">${ini(nameOf(i))}${isOn(i)?'<i></i>':''}</button><div class="grow" data-chat="${i}"><div class="nm">${esc(nameOf(i))}${fav[i]?' ★':''}</div><div class="sub">${isOn(i)?'En ligne':'Hors ligne'}</div></div><button class="ic" data-star="${i}">${fav[i]?'★':'☆'}</button><button class="ic" data-call="${i}">📞</button></div>`).join(''):'<div class="empty">Personne ici pour le moment.<br>Appuie sur + pour inviter tes amis.</div>'}
-  ${contacts.length?`<div class="sec"><span>Mon répertoire</span><span>${contacts.length}</span></div>`+contacts.map((c,k)=>`<div class="row"><div class="av">${ini(c.name)}</div><div class="grow"><div class="nm">${esc(c.name)}</div><div class="sub">${esc(c.tel||'')}</div></div><button class="pill" data-wa="${k}">WhatsApp</button><button class="pill" data-sms="${k}">SMS</button></div>`).join(''):''}`;
+  ${l.length?l.map(i=>`<div class="row"><button class="av" data-chat="${i}">${A(i)}${isOn(i)?'<i></i>':''}</button><div class="grow" data-chat="${i}"><div class="nm">${esc(nameOf(i))}${fav[i]?' ★':''}</div><div class="sub">${isOn(i)?'En ligne':'Hors ligne'}${U[i].city?' · '+esc(U[i].city):''}</div></div><button class="ic" data-star="${i}">${fav[i]?'★':'☆'}</button><button class="ic" data-call="${i}">📞</button></div>`).join(''):'<div class="empty">Personne ici pour le moment.<br>Appuie sur + pour inviter tes amis.</div>'}
+  ${contacts.length?`<div class="sec"><span>Mon répertoire</span><span>${contacts.length}</span></div>`+contacts.map((c,k)=>{const m=byPhone(c.tel);return m?`<div class="row"><button class="av" data-chat="${m}">${A(m)}</button><div class="grow" data-chat="${m}"><div class="nm">${esc(nameOf(m))} <span style="color:#2ecc71;font-size:12px">✓ sur BOUBA</span></div><div class="sub">${esc(c.name)} · ${esc(c.tel||'')}</div></div><button class="pill" data-chat="${m}">Discuter</button></div>`:`<div class="row"><div class="av">${ini(c.name)}</div><div class="grow"><div class="nm">${esc(c.name)}</div><div class="sub">${esc(c.tel||'')}</div></div><button class="pill" data-wa="${k}">WhatsApp</button><button class="pill" data-sms="${k}">SMS</button></div>`}).join(''):''}`;
  }
  if(tab==='discussions'){
   const l=friends().filter(i=>thread(i).length).sort((a,z)=>thread(z).at(-1).t-thread(a).at(-1).t);
-  b=l.length?l.map(i=>{const m=thread(i).at(-1);return `<div class="row" data-chat="${i}"><div class="av">${ini(nameOf(i))}</div><div class="grow"><div class="nm">${esc(nameOf(i))}</div><div class="sub">${m.from===me?'Toi : ':''}${m.audio?'🎤 Message vocal':esc(m.text)}</div></div><div class="sub">${hm(m.t)}</div></div>`}).join(''):'<div class="empty">Aucune discussion.<br>Ouvre un ami depuis l\'onglet Amis.</div>';
+  b=l.length?l.map(i=>{const m=thread(i).at(-1);return `<div class="row" data-chat="${i}"><div class="av">${A(i)}</div><div class="grow"><div class="nm">${esc(nameOf(i))}</div><div class="sub">${m.from===me?'Toi : ':''}${m.audio?'🎤 Message vocal':esc(m.text)}</div></div><div class="sub">${hm(m.t)}</div></div>`}).join(''):'<div class="empty">Aucune discussion.<br>Ouvre un ami depuis l\'onglet Amis.</div>';
  }
  if(tab==='actus'){
   b=`<textarea id="np" rows="3" placeholder="Quoi de neuf ?"></textarea><button class="pill" id="pub" style="margin:10px 0;padding:11px 18px">Publier</button>`+(N.length?N.map(n=>`<div class="post"><div class="nm" style="color:var(--y)">${n.from===me?'Moi':esc(nameOf(n.from))} · <span class="sub">${dt(n.t)}</span></div><p style="margin:8px 0">${esc(n.text)}</p>${n.from===me?`<button class="sub" data-del="${n.id}">Supprimer</button>`:''}</div>`).join(''):'<div class="empty">Aucune actu.</div>');
  }
  if(tab==='appels'){
-  b=C.length?C.map(c=>{const o=c.from===me?c.to:c.from;return `<div class="row"><div class="av">${ini(nameOf(o))}</div><div class="grow"><div class="nm">${esc(nameOf(o))}</div><div class="sub">${c.from===me?'↗ Sortant':'↙ Entrant'} · ${dt(c.t)} · ${c.dur}s</div></div><button class="ic" data-call="${o}">📞</button></div>`}).join(''):'<div class="empty">Aucun appel.</div>';
+  b=C.length?C.map(c=>{const o=c.from===me?c.to:c.from;return `<div class="row"><div class="av">${A(o)}</div><div class="grow"><div class="nm">${esc(nameOf(o))}</div><div class="sub">${c.from===me?'↗ Sortant':'↙ Entrant'} · ${dt(c.t)} · ${c.dur}s</div></div><button class="ic" data-call="${o}">📞</button></div>`}).join(''):'<div class="empty">Aucun appel.</div>';
  }
  const np=$('#np')?.value||'';
- $('#app').innerHTML=`<header><button class="ic" onclick="location.href='index.html'">🏠</button><h1>${T[tab]}</h1>${tab==='amis'?'<button class="ic y" id="add">+</button>':''}</header><main>${b}</main>${tab==='amis'?'<button class="fab" id="add2">+</button>':''}
+ $('#app').innerHTML=`<header><button class="ic" onclick="location.href='index.html'">🏠</button><h1>${T[tab]}</h1><button class="av" id="mep" style="width:42px;height:42px;padding:0;overflow:hidden">${A(me)}</button>${tab==='amis'?'<button class="ic y" id="add">+</button>':''}</header><main>${b}</main>${tab==='amis'?'<button class="fab" id="add2">+</button>':''}
  <nav>${[['discussions','💬','Discussions'],['amis','👥','Amis'],['actus','◉','Actus'],['appels','☎','Appels']].map(([k,i,l])=>`<button class="${tab===k?'on':''}" data-tab="${k}"><b>${i}</b>${l}</button>`).join('')}</nav>`;
  if($('#np'))$('#np').value=np;
  if(q&&$('#sq')){const s=$('#sq');s.focus();s.setSelectionRange(q.length,q.length)}
@@ -118,7 +131,7 @@ function render(){
 document.addEventListener('click',e=>{
  const t=e.target.closest('button,[data-chat]');if(!t||!db)return;const d=t.dataset;
  if(d.tab){tab=d.tab;render()}else if(d.f){filter=d.f;render()}
- else if(t.id==='add'||t.id==='add2')invSheet();
+ else if(t.id==='mep')profSheet();else if(t.id==='add'||t.id==='add2')invSheet();
  else if(d.chat)openChat(d.chat);
  else if(d.star){fav[d.star]=!fav[d.star];sv();render()}
  else if(d.call)startCall(d.call);
@@ -130,6 +143,10 @@ document.addEventListener('click',e=>{
 document.addEventListener('input',e=>{if(e.target.id==='sq'){q=e.target.value;render()}});
 
 function sheet(h){const s=document.createElement('div');s.className='sheet';s.innerHTML='<div>'+h+'</div>';s.onclick=e=>{if(e.target===s)s.remove()};document.body.appendChild(s);return s}
+function profSheet(){
+ const s=sheet(`<div class="nm" style="font-size:20px">Mon profil</div><div class="av" style="width:96px;height:96px;font-size:34px;align-self:center;overflow:hidden">${A(me)}</div><div class="nm" style="text-align:center">${esc(nameOf(me))}</div><input type="file" id="pf" accept="image/*" hidden><button class="opt" id="pc"><span>📷</span>Changer ma photo de profil</button>`);
+ s.querySelector('#pc').onclick=()=>s.querySelector('#pf').click();
+ s.querySelector('#pf').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,160/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);db.collection('users').doc(me).set({photo:c.toDataURL('image/jpeg',.7)},{merge:true}).then(()=>{toast('Photo mise à jour');s.remove()}).catch(er)};im.src=r.result};r.readAsDataURL(f)}}
 function invSheet(){
  const s=sheet(`<div class="nm" style="font-size:20px">Inviter des amis</div>
  <button class="opt" id="o1"><span>🟢</span>WhatsApp</button><button class="opt" id="o2"><span>📇</span>Depuis le répertoire</button>
@@ -143,12 +160,12 @@ function invSheet(){
   if(!(navigator.contacts&&navigator.contacts.select))return toast('Répertoire non supporté : utilise Chrome sur Android.');
   try{const r=await navigator.contacts.select(['name','tel'],{multiple:true});
    r.forEach(c=>{const tel=(c.tel||[])[0]||'';if(tel&&!contacts.some(x=>digits(x.tel)===digits(tel)))contacts.push({name:(c.name||[])[0]||'Contact',tel})});
-   sv();s.remove();tab='amis';render();toast('Contacts ajoutés : invite-les via WhatsApp ou SMS')}catch(e){}};
+   sv();s.remove();tab='amis';render();const dej=contacts.filter(c=>byPhone(c.tel)).length;toast(dej+' déjà sur BOUBA, les autres sont à inviter')}catch(e){}};
 }
 
 function openChat(id){
  cur=id;const o=document.createElement('div');o.className='ov';o.id='chat';
- o.innerHTML=`<header><button class="ic" id="bk">←</button><div class="av" style="width:38px;height:38px">${ini(nameOf(id))}</div><div class="grow nm">${esc(nameOf(id))}</div><button class="ic" id="cl">📞</button></header><div id="msgs"></div>
+ o.innerHTML=`<header><button class="ic" id="bk">←</button><div class="av" style="width:38px;height:38px">${A(id)}</div><div class="grow nm">${esc(nameOf(id))}</div><button class="ic" id="cl">📞</button></header><div id="msgs"></div>
  <div class="bar"><button class="ic" id="mic">🎤</button><input id="tx" placeholder="Message"><button class="ic y" id="snd" style="font-size:20px">➤</button></div>`;
  document.body.appendChild(o);drawMsgs();
  $('#bk').onclick=()=>{stopRec(true);o.remove();cur=null;render()};
@@ -173,7 +190,7 @@ let pc,ls,peer,t0,iv,dir,ui;
 const sig=(to,type,x)=>db.collection('sig').add({to,from:me,type,t:Date.now(),...x}).catch(er);
 const gathered=p=>new Promise(r=>{if(p.iceGatheringState==='complete')return r();p.onicegatheringstatechange=()=>p.iceGatheringState==='complete'&&r();setTimeout(r,3000)});
 async function mkPc(){ls=await navigator.mediaDevices.getUserMedia({audio:true});pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});ls.getTracks().forEach(t=>pc.addTrack(t,ls));pc.ontrack=e=>{$('#ra').srcObject=e.streams[0]}}
-function callUI(id,status,btns){ui&&ui.remove();ui=document.createElement('div');ui.className='ov call';ui.innerHTML=`<div class="av">${ini(nameOf(id))}</div><div class="nm" style="font-size:24px">${esc(nameOf(id))}</div><div id="ct" class="sub">${status}</div><div style="display:flex;gap:24px;margin-top:20px">${btns}</div>`;document.body.appendChild(ui)}
+function callUI(id,status,btns){ui&&ui.remove();ui=document.createElement('div');ui.className='ov call';ui.innerHTML=`<div class="av">${A(id)}</div><div class="nm" style="font-size:24px">${esc(nameOf(id))}</div><div id="ct" class="sub">${status}</div><div style="display:flex;gap:24px;margin-top:20px">${btns}</div>`;document.body.appendChild(ui)}
 const B=(i,id,bg)=>`<button class="ic" id="${id}" style="width:64px;height:64px;font-size:26px;${bg?'background:'+bg:''}">${i}</button>`;
 async function startCall(id){
  if(pc)return;if(!isOn(id))return toast(nameOf(id)+" n'est pas en ligne");
