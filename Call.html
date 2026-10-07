@@ -78,7 +78,14 @@
         const remoteVideo = document.getElementById('remoteVideo');
 
         // Générer un ID de salle unique pour cet appel
-        const callId = "appel_" + Math.random().toString(36).substring(2, 9);
+        // Lire l'ID de l'ami et le type d'appel depuis l'URL
+const urlParams = new URLSearchParams(window.location.search);
+const callId = urlParams.get('call'); // Récupère l'ID de l'ami
+const isVideo = urlParams.get('video') === 'true'; // Récupère si c'est de la vidéo (true) ou juste audio (false)
+
+if (!callId) {
+    console.error("Erreur : Aucun ID d'ami spécifié dans l'URL.");
+}
         console.log("ID de l'appel :", callId);
 
         // ==========================================
