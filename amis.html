@@ -354,10 +354,53 @@
             alert("📹 Appel vidéo vers " + (currentChatId ? "cet ami" : "l'ami") + "...\n(Fonctionnalité WebRTC à connecter)");
         };
 
-        // 9. MESSAGE VOCAL (SIMULATION)
-        window.recordVoice = () => {
-            alert("🎤 Enregistrement vocal...\n(Fonctionnalité MediaRecorder à connecter)");
-        };
+        // 9. MESSAGE VOCAL (RÉEL)
+let mediaRecorder;
+let audioChunks = [];
+let isRecording = false;
+
+window.recordVoice = async () => {
+    // Si on est déjà en train d'enregistrer, on arrête
+    if (isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+        // On change l'icône ou la couleur pour indiquer l'arrêt (optionnel)
+        document.querySelector('.fa-microphone').style.color = ""; 
+        return;
+    }
+
+    // Sinon, on démarre l'enregistrement
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+
+        mediaRecorder.addEventListener("dataavailable", event => {
+            audioChunks.push(event.data);
+        });
+
+        mediaRecorder.addEventListener("stop", async () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            
+            // --- ICI ON ENVERRA LE FICHIER PLUS TARD ---
+            // Pour l'instant, on affiche juste une alerte pour dire que c'est prêt
+            alert("Enregistrement terminé ! Prêt à être envoyé.");
+            
+            // Arrêter le micro
+            stream.getTracks().forEach(track => track.stop());
+        });
+
+        mediaRecorder.start();
+        isRecording = true;
+        // Change la couleur du micro en rouge pour indiquer l'enregistrement
+        document.querySelector('.fa-microphone').style.color = "red"; 
+        console.log("Enregistrement démarré...");
+
+    } catch (error) {
+        console.error("Erreur micro :", error);
+        alert("Impossible d'accéder au microphone. Vérifiez les permissions.");
+    }
+};
 
     </script>
 </body>
