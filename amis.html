@@ -382,13 +382,40 @@ window.recordVoice = async () => {
         mediaRecorder.addEventListener("stop", async () => {
             const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
             
-            // --- ICI ON ENVERRA LE FICHIER PLUS TARD ---
-            // Pour l'instant, on affiche juste une alerte pour dire que c'est prêt
-            alert("Enregistrement terminé ! Prêt à être envoyé.");
-            
-            // Arrêter le micro
-            stream.getTracks().forEach(track => track.stop());
+            mediaRecorder.addEventListener("stop", async () => {
+    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+    
+    // --- ENVOI VERS FIREBASE STORAGE ---
+    try {
+        // 1. Créer un nom de fichier unique
+        const fileName = `voice_messages/${Date.now()}_${currentUser.uid}.webm`;
+        
+        // 2. Référence vers Firebase Storage
+        // Assurez-vous d'avoir importé 'storage' en haut de votre script (ex: import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";)
+        const storageRef = ref(storage, fileName); 
+        
+        // 3. Uploader le fichier
+        await uploadBytes(storageRef, audioBlob);
+        const downloadURL = await getDownloadURL(storageRef);
+
+        // 4. Envoyer le lien dans Firestore (comme pour un message texte)
+        await addDoc(collection(db, "chats", currentChatId, "messages"), {
+            text: "🎤 Message vocal", // Texte par défaut
+            audioUrl: downloadURL,   // Le lien vers le fichier audio
+            senderId: currentUser ? currentUser.uid : "anonyme",
+            timestamp: serverTimestamp()
         });
+
+        console.log("Message vocal envoyé avec succès !");
+
+    } catch (error) {
+        console.error("Erreur lors de l'envoi du message vocal :", error);
+        alert("Erreur lors de l'envoi du message vocal.");
+    }
+    
+    // Arrêter le micro
+    stream.getTracks().forEach(track => track.stop());
+});
 
         mediaRecorder.start();
         isRecording = true;
