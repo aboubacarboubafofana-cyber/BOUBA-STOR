@@ -394,20 +394,28 @@ mediaRecorder.addEventListener("stop", async () => {
         await uploadBytes(storageRef, audioBlob);
         const downloadURL = await getDownloadURL(storageRef);
 
-        // 4. Envoyer le lien dans Firestore (comme pour un message texte)
+        // --- ENVOI VERS FIREBASE FIRESTORE (Méthode Base64) ---
+try {
+    // 1. Convertir l'audio en Base64 (texte)
+    const reader = new FileReader();
+    reader.readAsDataURL(audioBlob);
+    reader.onloadend = async () => {
+        const base64Audio = reader.result;
+
+        // 2. Envoyer directement dans Firestore
         await addDoc(collection(db, "chats", currentChatId, "messages"), {
-            text: "🎤 Message vocal", // Texte par défaut
-            audioUrl: downloadURL,   // Le lien vers le fichier audio
+            text: "🎤 Message vocal",
+            audioUrl: base64Audio, // On stocke l'audio directement ici
             senderId: currentUser ? currentUser.uid : "anonyme",
             timestamp: serverTimestamp()
         });
 
         console.log("Message vocal envoyé avec succès !");
-
-    } catch (error) {
-        console.error("Erreur lors de l'envoi du message vocal :", error);
-        alert("Erreur lors de l'envoi du message vocal.");
-    }
+    };
+} catch (error) {
+    console.error("Erreur lors de l'envoi du message vocal :", error);
+    alert("Erreur lors de l'envoi du message vocal.");
+}
     
     // Arrêter le micro
     stream.getTracks().forEach(track => track.stop());
