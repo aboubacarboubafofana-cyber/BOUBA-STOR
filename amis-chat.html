@@ -79,10 +79,13 @@ function handleTel(){if(!tel)return;const id=byPhone(tel);
 
 function askName(){return new Promise(r=>{const s=document.createElement('div');s.className='sheet';s.innerHTML='<div><div class="nm" style="font-size:20px">Ton prénom</div><input id="nn" placeholder="Ex : Aboubacar"><button class="pill" id="nok" style="padding:14px">Continuer</button></div>';document.body.appendChild(s);s.querySelector('#nok').onclick=()=>{const v=s.querySelector('#nn').value.trim();if(v){s.remove();r(v)}}})}
 
+let stp='début';const st=t=>{stp=t;const e=document.querySelector('#app .empty');if(e)e.textContent=t+'…'};
 async function init(){
  if(!firebaseConfig.apiKey){$('#app').innerHTML='<div class="empty">Configuration Firebase manquante.<br>Remplace <b>firebaseConfig</b> en haut du fichier.</div>';return}
- try{firebase.initializeApp(firebaseConfig);auth=firebase.auth();db=firebase.firestore();const cu=await new Promise(r=>{const un=auth.onAuthStateChanged(x=>{un();r(x)})});me=(cu||(await auth.signInAnonymously()).user).uid}
+ st('Connexion');
+ try{firebase.initializeApp(firebaseConfig);auth=firebase.auth();db=firebase.firestore();db.settings({experimentalAutoDetectLongPolling:true,merge:true});const cu=await new Promise(r=>{const un=auth.onAuthStateChanged(x=>{un();r(x)})});me=(cu||(await auth.signInAnonymously()).user).uid}
  catch(e){$('#app').innerHTML='<div class="empty">Connexion impossible : '+esc(e.code||e.message)+'<br>Active « Anonyme » dans Firebase > Authentication.</div>';return}
+ st('Profil');
  const staff=!!auth.currentUser&&!auth.currentUser.isAnonymous;
  const me0=await db.collection('users').doc(me).get();
  let bm=null;try{bm=JSON.parse(localStorage.getItem('b_me'))}catch(e){}
@@ -93,6 +96,7 @@ async function init(){
  const beat=()=>db.collection('users').doc(me).set({...ex,seen:Date.now()},{merge:true}).catch(er);
  await beat();setInterval(beat,20000);
  setInterval(()=>{if(!cur&&tab==='amis'&&document.activeElement.id!=='sq')render()},20000);
+ st('Messages');
  db.collection('users').onSnapshot(s=>{U={};s.docs.forEach(d=>U[d.id]=d.data());handleTel();if(!cur&&document.activeElement.id!=='sq'&&document.activeElement.id!=='np')render()},er);
  db.collection('msgs').where('p','array-contains',me).onSnapshot(s=>{M=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>a.t-b.t);cur?drawMsgs():render()},er);
  db.collection('news').orderBy('t','desc').limit(50).onSnapshot(s=>{N=s.docs.map(d=>({id:d.id,...d.data()}));if(tab==='actus'&&!$('#np')?.value)render()},er);
@@ -214,5 +218,6 @@ function endCall(notify){
  if(notify&&peer)sig(peer,'end');clearInterval(iv);
  if(t0){const dur=Math.floor((Date.now()-t0)/1000);db.collection('calls').add({p:[me,peer],from:dir==='out'?me:peer,to:dir==='out'?peer:me,t:t0,dur}).catch(()=>{})}
  ls&&ls.getTracks().forEach(t=>t.stop());pc&&pc.close();pc=ls=peer=t0=null;ui&&ui.remove();ui=null}
-init();
+init().catch(e=>{$('#app').innerHTML='<div class="empty">Erreur : '+esc(e.code||e.message)+'<br>(étape : '+stp+')</div>'});
+setTimeout(()=>{const e=document.querySelector('#app .empty');if(e&&e.textContent.startsWith(stp))e.innerHTML='Chargement trop long.<br>Bloqué à l\'étape : '+stp+'<br>Recharge la page.'},15000);
 </script></body></html>
