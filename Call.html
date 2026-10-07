@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appel Vidéo WebRTC - BOuba STOR</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #121212; color: white; text-align: center; margin: 0; padding: 20px; }
+        h1 { color: #FFD700; }
+        .video-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+        video { width: 300px; height: 225px; background-color: #333; border-radius: 10px; border: 2px solid #FFD700; object-fit: cover; }
+        .controls { margin-top: 20px; }
+        button { padding: 15px 30px; font-size: 16px; border: none; border-radius: 25px; cursor: pointer; margin: 5px; font-weight: bold; }
+        #callBtn { background-color: #FFD700; color: #000; }
+        #hangupBtn { background-color: #ff4444; color: white; display: none; }
+        #status { margin-top: 15px; font-style: italic; color: #aaa; }
+    </style>
+</head>
+<body>
+
+    <h1>📞 Appel Vidéo</h1>
+    <div id="status">Initialisation...</div>
+
+    <div class="video-container">
+        <div>
+            <h3>Moi (Local)</h3>
+            <video id="localVideo" autoplay playsinline muted></video>
+        </div>
+        <div>
+            <h3>L'autre (Distant)</h3>
+            <video id="remoteVideo" autoplay playsinline></video>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="callBtn">📞 Appeler</button>
+        <button id="hangupBtn">❌ Raccrocher</button>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, collection, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // ==========================================
+        // 1. CONFIGURATION FIREBASE (Remplacez ceci par vos clés)
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "VOTRE_API_KEY",
+            authDomain: "VOTRE_PROJET.firebaseapp.com",
+            projectId: "VOTRE_PROJET_ID",
+            storageBucket: "VOTRE_PROJET.appspot.com",
+            messagingSenderId: "VOTRE_SENDER_ID",
+            appId: "VOTRE_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // ==========================================
+        // 2. CONFIGURATION WEBRTC (Serveurs STUN)
+        // ==========================================
+        const rtcConfig = {
+            iceServers: [
+                { urls: "stun:stun.l.google.com:19302" },
+                { urls: "stun:stun1.l.google.com:19302" }
+            ]
+        };
+
+        // Variables globales
+        let pc = new RTCPeerConnection(rtcConfig);
+        let localStream;
+        let callDocRef;
+        const callBtn = document.getElementById('callBtn');
+        const hangupBtn = document.getElementById('hangupBtn');
+        const statusDiv = document.getElementById('status');
+        const localVideo = document.getElementById('localVideo');
+        const remoteVideo = document.getElementById('remoteVideo');
+
+        // Générer un ID de salle unique pour cet appel
+        const callId = "appel_" + Math.random().toString(36).substring(2, 9);
+        console.log("ID de l'appel :", callId);
+
+        // ==========================================
+        // 3. FONCTIONS UTILITAIRES
+        // ==========================================
+        function updateStatus(message) {
+            statusDiv.innerText = message;
+            console.log(message);
+        }
+
+        async function getMedia() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                localVideo.srcObject = localStream;
+                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+                updateStatus("Caméra et micro prêts.");
+            } catch (error) {
+                console.error("Erreur d'accès aux médias :", error);
+                updateStatus("Erreur : Impossible d'accéder à la caméra/micro.");
+            }
+        }
+
+        // Initialiser les médias au chargement
+        getMedia();
+
+        // ==========================================
+        // 4. LOGIQUE DE L'APPELANT (Caller)
+        // ==========================================
+        callBtn.onclick = async () => {
+            updateStatus("Appel en cours... En attente de réponse.");
+            callBtn.style.display = 'none';
+            hangupBtn.style.display = 'inline-block';
+
+            // Référence au document Firestore pour cet appel
+            callDocRef = doc(collection(db, "calls"), callId);
+
+            // Écouter les candidats ICE de l'autre côté
+            const calleeCandidates = collection(callDocRef, "calleeCandidates");
+            onSnapshot(calleeCandidates, (snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === "added") {
+                        pc.addIceCandidate(new RTCIceCandidate(change.doc.data()));
+                    }
+                });
+            });
+
+            // Créer l'offre
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+
+            // Envoyer l'offre à Firestore
+            await setDoc(callDocRef, { offer: { type: offer.type, sdp: offer.sdp } });
+
+            // Écouter la réponse
+            onSnapshot(callDocRef, (snapshot) => {
+                const data = snapshot.data();
+                if (data && data.answer && !pc.currentRemoteDescription) {
+                    pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+                    updateStatus("Appel connecté !");
+                }
+            });
+
+            // Envoyer nos propres candidats ICE
+            pc.onicecandidate = (event) => {
+                if (event.candidate) {
+                    addDoc(collection(callDocRef, "callerCandidates"), event.candidate.toJSON());
+                }
+            };
+        };
+
+        // ==========================================
+        // 5. LOGIQUE DU RÉCEPTEUR (Callee)
+        // ==========================================
+        // Le récepteur écoute les nouveaux appels en permanence
+        const callsCollection = collection(db, "calls");
+        onSnapshot(callsCollection, async (snapshot) => {
+            snapshot.docChanges().forEach(async (change) => {
+                if (change.type === "added") {
+                    const data = change.doc.data();
+                    
+                    // Si c'est une nouvelle offre et qu'on n'est pas déjà en appel
+                    if (data.offer && !pc.currentRemoteDescription) {
+                        updateStatus("Appel entrant... Connexion en cours.");
+                        callBtn.style.display = 'none';
+                        hangupBtn.style.display = 'inline-block';
+                        callDocRef = change.doc.ref;
+
+                        // Configurer la connexion distante
+                        await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+
+                        // Créer la réponse
+                        const answer = await pc.createAnswer();
+                        await pc.setLocalDescription(answer);
+
+                        // Envoyer la réponse à Firestore
+                        await updateDoc(callDocRef, { answer: { type: answer.type, sdp: answer.sdp } });
+
+                        // Écouter les candidats ICE de l'appelant
+                        const callerCandidates = collection(callDocRef, "callerCandidates");
+                        onSnapshot(callerCandidates, (snapshot) => {
+                            snapshot.docChanges().forEach((change) => {
+                                if (change.type === "added") {
+                                    pc.addIceCandidate(new RTCIceCandidate(change.doc.data()));
+                                }
+                            });
+                        });
+
+                        // Envoyer nos propres candidats ICE
+                        pc.onicecandidate = (event) => {
+                            if (event.candidate) {
+                                addDoc(collection(callDocRef, "calleeCandidates"), event.candidate.toJSON());
+                            }
+                        };
+                    }
+                }
+            });
+        });
+
+        // ==========================================
+        // 6. AFFICHAGE DE LA VIDÉO DISTANTE & RACCROCHER
+        // ==========================================
+        pc.ontrack = (event) => {
+            remoteVideo.srcObject = event.streams[0];
+            updateStatus("Appel connecté !");
+        };
+
+        pc.onconnectionstatechange = (event) => {
+            if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
+                hangup();
+            }
+        };
+
+        async function hangup() {
+            updateStatus("Appel terminé.");
+            if (pc) {
+                pc.close();
+                pc = new RTCPeerConnection(rtcConfig); // Réinitialiser pour le prochain appel
+            }
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            if (callDocRef) {
+                // Nettoyer Firestore (optionnel mais recommandé)
+                await deleteDoc(callDocRef);
+            }
+            callBtn.style.display = 'inline-block';
+            hangupBtn.style.display = 'none';
+            remoteVideo.srcObject = null;
+            getMedia(); // Redemander les médias
+        }
+
+        hangupBtn.onclick = hangup;
+    </script>
+</body>
+</html>
