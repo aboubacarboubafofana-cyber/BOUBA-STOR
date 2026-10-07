@@ -378,11 +378,7 @@ window.recordVoice = async () => {
         mediaRecorder.addEventListener("dataavailable", event => {
             audioChunks.push(event.data);
         });
-
-    
-        
-            
-            mediaRecorder.addEventListener("stop", async () => {
+mediaRecorder.addEventListener("stop", async () => {
     const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
     
     // --- ENVOI VERS FIREBASE STORAGE ---
