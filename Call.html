@@ -85,7 +85,9 @@ const isVideo = urlParams.get('video') === 'true'; // Récupère si c'est de la 
 
 if (!callId) {
     console.error("Erreur : Aucun ID d'ami spécifié dans l'URL.");
-}
+} else {
+    // Le code qui suit s'exécutera seulement si un ID est présent
+    // (Tout le reste de votre code doit être à l'intérieur de ce bloc else)}
         console.log("ID de l'appel :", callId);
 
         // ==========================================
