@@ -165,7 +165,10 @@ if (isCaller) {
                     addDoc(collection(callDocRef, "callerCandidates"), event.candidate.toJSON());
                 }
             };
-        };}
+        };} // Fin de la fonction startCall
+
+// On garde le bouton cliquable pour les tests manuels
+callBtn.onclick = startCall; 
 
         // ==========================================
         // 5. LOGIQUE DU RÉCEPTEUR (Callee)
