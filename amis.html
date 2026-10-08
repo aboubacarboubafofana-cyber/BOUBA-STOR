@@ -227,7 +227,68 @@
                 // Rediriger vers login.html si nécessaire
             }
         });
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+let allUsers = [];
 
+async function loadFriends(){
+  const list = document.getElementById('friendList');
+  list.innerHTML = '<p style="padding:10px">Chargement…</p>';
+  try{
+    const snap = await getDocs(collection(db,'users'));
+    allUsers = [];
+    snap.forEach(d=>{
+      if(currentUser && d.id===currentUser.uid) return;
+      const u = d.data();
+      allUsers.push({
+        id: d.id,
+        name: u.name||u.nom||u.displayName||u.email||'Inconnu',
+        tel: String(u.tel||u.phone||u.telephone||u.numero||'').replace(/\D/g,'')
+      });
+    });
+    renderFriends(allUsers);
+    openFromHash();
+  }catch(e){
+    console.error(e);
+    list.innerHTML = '<p style="color:red;padding:10px">Erreur de chargement.</p>';
+  }
+}
+
+function renderFriends(arr){
+  const list = document.getElementById('friendList');
+  list.innerHTML = arr.map(u=>`
+    <div class="friend-item" data-id="${esc(u.id)}" data-name="${esc(u.name)}">
+      <div class="avatar">${esc(u.name.slice(0,2).toUpperCase())}</div>
+      <div class="friend-info"><h4>${esc(u.name)}</h4><p>${esc(u.tel||'')}</p></div>
+      <div class="actions">
+        <i class="fas fa-star" data-act="star"></i>
+        <i class="fas fa-phone" data-act="call"></i>
+        <i class="fas fa-video" data-act="video"></i>
+      </div>
+    </div>`).join('') || '<p style="padding:10px">Aucun contact.</p>';
+}
+
+document.getElementById('friendList').addEventListener('click', e=>{
+  const item = e.target.closest('.friend-item'); if(!item) return;
+  const id = item.dataset.id, name = item.dataset.name;
+  const act = e.target.closest('[data-act]')?.dataset.act;
+  if(act==='call') location.href='Call.html?call='+encodeURIComponent(id)+'&video=false';
+  else if(act==='video') location.href='Call.html?call='+encodeURIComponent(id)+'&video=true';
+  else if(act==='star'){ const s=e.target.closest('[data-act]'); s.style.color = s.style.color ? '' : '#ffd700'; }
+  else openChat(name, name.slice(0,2).toUpperCase(), id);
+});
+
+document.getElementById('searchInput').addEventListener('input', e=>{
+  const q = e.target.value.toLowerCase();
+  renderFriends(allUsers.filter(u=>u.name.toLowerCase().includes(q)||u.tel.includes(q)));
+});
+
+function openFromHash(){
+  const m = location.hash.match(/tel=(\d+)/); if(!m) return;
+  const t = m[1].slice(-9);
+  const u = allUsers.find(x=>x.tel && x.tel.endsWith(t));
+  if(u) openChat(u.name, u.name.slice(0,2).toUpperCase(), u.id);
+  else alert("Ce client n'a pas encore de compte dans l'app.");
+}
         // 5. FONCTIONS DE L'INTERFACE
         window.openInviteModal = () => {
             document.getElementById('overlay').style.display = 'block';
