@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amis - Bouba Store</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{--bg:#0f0f0f;--card:#1a1a1a;--acc:#ffd700;--gray:#888}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',sans-serif}
+body{background:var(--bg);color:#fff;padding-bottom:70px}
+.top-bar{display:flex;justify-content:space-between;align-items:center;padding:15px;position:sticky;top:0;background:var(--bg);z-index:5}
+h2{color:var(--acc)}
+.icons i{font-size:1.3rem;margin-left:15px;color:var(--acc);cursor:pointer}
+.search{margin:0 15px 15px;background:var(--card);border-radius:20px;padding:10px 15px;display:flex;align-items:center}
+.search input{flex:1;background:transparent;border:0;color:#fff;margin-left:10px;outline:0;font-size:1rem}
+.filters{display:flex;padding:0 15px 15px;gap:10px;overflow-x:auto}
+.filters button{background:var(--card);border:1px solid #333;color:#fff;padding:8px 15px;border-radius:20px;cursor:pointer}
+.filters .on{background:var(--acc);color:#000;font-weight:bold}
+#friendList{padding:0 15px}
+.friend-item{display:flex;align-items:center;background:var(--card);margin-bottom:10px;padding:10px;border-radius:15px;cursor:pointer}
+.avatar{width:50px;height:50px;background:var(--acc);color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;margin-right:12px;flex-shrink:0}
+.friend-info{flex:1;min-width:0}
+.friend-info h4{font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.friend-info p{font-size:.8rem;color:var(--gray)}
+.actions{display:flex}
+.actions i{font-size:1.1rem;margin-left:8px;color:var(--acc);background:#252525;padding:10px;border-radius:50%}
+.note{padding:10px;color:var(--gray)}
+.fab{position:fixed;bottom:80px;right:20px;background:var(--acc);color:#000;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;cursor:pointer;z-index:6}
+.bottom-nav{position:fixed;bottom:0;width:100%;background:#111;display:flex;justify-content:space-around;padding:10px 0;z-index:8}
+.nav-item{display:flex;flex-direction:column;align-items:center;color:var(--gray);font-size:.8rem;cursor:pointer}
+.nav-item i{font-size:1.3rem;margin-bottom:5px}
+.nav-item.active{color:var(--acc)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:15}
+.modal{display:none;position:fixed;bottom:0;width:100%;background:var(--card);border-radius:20px 20px 0 0;padding:20px;z-index:20}
+.modal h3{margin-bottom:15px;color:var(--acc)}
+.opt{display:flex;align-items:center;background:#252525;padding:15px;border-radius:10px;margin-bottom:10px;cursor:pointer}
+.opt i{font-size:1.5rem;margin-right:15px;width:30px;text-align:center}
+.opt.wa i{color:#25D366}.opt.ct i{color:#4285F4}.opt.sm i{color:#FFA500}.opt.em i{color:#EA4335}
+.chat-modal{display:none;position:fixed;inset:0;background:var(--bg);flex-direction:column;z-index:30}
+.chat-header{padding:15px;background:var(--card);display:flex;align-items:center;justify-content:space-between}
+.chat-header i{color:var(--acc);font-size:1.4rem;cursor:pointer;margin-left:14px}
+.chat-header .back{margin:0 14px 0 0}
+.chat-messages{flex:1;padding:15px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:80%;padding:10px 15px;border-radius:15px;font-size:.9rem;word-wrap:break-word}
+.msg.received{background:#333;align-self:flex-start;border-bottom-left-radius:0}
+.msg.sent{background:var(--acc);color:#000;align-self:flex-end;border-bottom-right-radius:0}
+.chat-input{padding:15px;background:var(--card);display:flex;gap:10px;border-top:1px solid #333}
+.chat-input input{flex:1;padding:12px;border-radius:20px;border:1px solid #444;background:#222;color:#fff;font-size:1rem}
+.chat-input button{background:var(--acc);border:0;padding:0 20px;border-radius:20px;font-weight:bold}
+#actusBox{display:none;position:fixed;inset:0 0 62px 0;background:var(--bg);z-index:10;overflow:auto;padding:15px}
+#actusBox button{background:var(--acc);border:0;border-radius:20px;padding:12px 20px;font-weight:bold}
+.st{margin-bottom:15px}.st img{max-width:100%;border-radius:12px;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <div style="display:flex;align-items:center;gap:10px"><i class="fas fa-home" style="color:var(--acc)"></i><h2>Amis</h2></div>
+  <div class="icons"><i class="fas fa-plus-circle" data-do="invite"></i></div>
+</div>
+
+<div class="search"><i class="fas fa-search" style="color:var(--gray)"></i>
+  <input type="text" id="searchInput" placeholder="Rechercher un ami..."></div>
+
+<div class="filters">
+  <button class="on" data-do="filter" data-f="all">Tous</button>
+  <button data-do="filter" data-f="fav">Favoris</button>
+</div>
+
+<div id="friendList"></div>
+
+<div class="fab" data-do="invite"><i class="fas fa-plus"></i></div>
+
+<div class="bottom-nav">
+  <div class="nav-item" onclick="location.href='index.html'"><i class="fas fa-comment-dots"></i><span>Chats</span></div>
+  <div class="nav-item active" data-do="closeActus"><i class="fas fa-user-friends"></i><span>Amis</span></div>
+  <div class="nav-item" data-do="actus"><i class="fas fa-circle-notch"></i><span>Actus</span></div>
+  <div class="nav-item" data-do="contacts"><i class="fas fa-phone-alt"></i><span>Appels</span></div>
+</div>
+
+<div class="overlay" id="overlay" data-do="closeInvite"></div>
+<div class="modal" id="inviteModal">
+  <h3>Inviter des amis</h3>
+  <div class="opt wa" data-do="wa"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></div>
+  <div class="opt ct" data-do="contacts"><i class="fas fa-address-book"></i><span>Chercher dans mon répertoire</span></div>
+  <div class="opt sm" data-do="shareSms"><i class="fas fa-comment-sms"></i><span>SMS</span></div>
+  <div class="opt em" data-do="mail"><i class="fas fa-envelope"></i><span>E-mail</span></div>
+  <div class="opt" data-do="copy"><i class="fas fa-link" style="color:var(--acc)"></i><span>Partager / copier le lien</span></div>
+</div>
+
+<div class="chat-modal" id="chatModal">
+  <div class="chat-header">
+    <div style="display:flex;align-items:center"><i class="fas fa-arrow-left back" data-do="closeChat"></i><h3 id="chatName"></h3></div>
+    <div><i class="fas fa-phone" data-do="chatCall"></i><i class="fas fa-video" data-do="chatVideo"></i></div>
+  </div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="chat-input">
+    <input type="text" id="messageInput" placeholder="Écrire un message..." maxlength="2000">
+    <button data-do="send">Envoyer</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc, onSnapshot, query, orderBy, where, limit, serverTimestamp, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyAnLLXpUC35OleB0hCLUXnLU0lMiesY7j4",
+  authDomain: "project-f4477c80-7c55-4db7-b2e.firebaseapp.com",
+  projectId: "project-f4477c80-7c55-4db7-b2e",
+  storageBucket: "project-f4477c80-7c55-4db7-b2e.firebasestorage.app",
+  messagingSenderId: "697604298457",
+  appId: "1:697604298457:web:4f9a6d66ec6fde9c1990c8"
+});
+const db = getFirestore(app), auth = getAuth(app);
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeTel = t => String(t || '').replace(/[^\d+]/g, '');
+const safeImg = s => (typeof s === 'string' && /^data:image\/(jpeg|png|webp);base64,/.test(s)) ? s : '';
+const ini = n => String(n || '?').slice(0, 2).toUpperCase();
+const norm = n => String(n || '').replace(/\D/g, '').slice(-9);
+const appLink = location.origin;
+const inviteText = 'Rejoins-moi sur Bouba Store ! ' + appLink;
+
+let me = null, allUsers = [], prefs = { hidden: [], favs: [] };
+let onlyFavs = false, cView = null, chatId = null, friendId = null, unsub = null;
+
+const prefRef = () => doc(db, 'users', me.uid, 'private', 'prefs');
+const savePrefs = () => setDoc(prefRef(), prefs).catch(e => console.error(e));
+
+// ---------- Connexion ----------
+onAuthStateChanged(auth, async u => {
+  if (!u) return location.replace('compte.html');
+  me = u;
+  localStorage.setItem('uid', u.uid); // utilisé par d'autres fichiers
+  try {
+    const s = await getDoc(prefRef());
+    if (s.exists()) prefs = { hidden: s.data().hidden || [], favs: s.data().favs || [] };
+  } catch (e) { console.error(e); }
+  loadFriends();
+});
+
+// ---------- Amis ----------
+async function loadFriends() {
+  const list = $('friendList');
+  list.innerHTML = '<p class="note">Chargement…</p>';
+  try {
+    const snap = await getDocs(query(collection(db, 'users'), limit(300)));
+    allUsers = [];
+    snap.forEach(d => {
+      if (d.id === me.uid) return;
+      const u = d.data();
+      allUsers.push({
+        id: d.id,
+        name: u.name || u.nom || u.displayName || u.email || 'Inconnu',
+        tel: String(u.tel || u.phone || u.telephone || u.numero || '').replace(/\D/g, '')
+      });
+    });
+    render();
+    openFromHash();
+  } catch (e) {
+    console.error(e);
+    list.innerHTML = '<p class="note" style="color:#f66">Erreur de chargement.</p>';
+  }
+}
+
+function render() {
+  const q = $('searchInput').value.trim().toLowerCase();
+  let arr = allUsers.filter(u => !prefs.hidden.includes(u.id));
+  if (onlyFavs) arr = arr.filter(u => prefs.favs.includes(u.id));
+  if (cView) arr = arr.filter(u => cView.ids.has(u.id));
+  if (q) arr = arr.filter(u => u.name.toLowerCase().includes(q) || u.tel.includes(q));
+  let html = arr.map(u => `
+    <div class="friend-item" data-id="${esc(u.id)}">
+      <div class="avatar">${esc(ini(u.name))}</div>
+      <div class="friend-info"><h4>${esc(u.name)}</h4><p>${esc(u.tel)}</p></div>
+      <div class="actions">
+        <i class="fas fa-star" data-do="star" style="${prefs.favs.includes(u.id) ? 'color:#ffd700' : 'color:#888'}"></i>
+        <i class="fas fa-phone" data-do="call"></i>
+        <i class="fas fa-video" data-do="video"></i>
+        <i class="fas fa-trash" data-do="del" style="color:#e55"></i>
+      </div>
+    </div>`).join('');
+  if (cView && !q) html += cView.others.map(o => `
+    <div class="friend-item">
+      <div class="avatar">${esc(ini(o.name))}</div>
+      <div class="friend-info"><h4>${esc(o.name)}</h4><p>Pas sur l'app</p></div>
+      <div class="actions">
+        <i class="fas fa-comment-sms" data-do="sms" data-tel="${esc(safeTel(o.tel))}"></i>
+        <i class="fas fa-phone" data-do="tel" data-tel="${esc(safeTel(o.tel))}"></i>
+      </div>
+    </div>`).join('');
+  $('friendList').innerHTML = html || '<p class="note">Aucun contact.</p>';
+}
+
+$('searchInput').addEventListener('input', render);
+
+function openFromHash() {
+  const m = location.hash.match(/tel=(\d+)/);
+  if (!m) return;
+  const t = m[1].slice(-9);
+  const u = allUsers.find(x => x.tel && x.tel.endsWith(t));
+  if (u) openChat(u); else alert("Ce client n'a pas encore de compte dans l'app.");
+}
+
+// ---------- Répertoire ----------
+async function pickContacts() {
+  closeInvite();
+  if (!('contacts' in navigator && 'ContactsManager' in window))
+    return alert("Répertoire indisponible. Utilise Chrome sur Android.");
+  try {
+    const sel = await navigator.contacts.select(['name', 'tel'], { multiple: true });
+    if (!sel.length) return;
+    const ids = new Set(), others = [];
+    sel.forEach(c => {
+      const tel = (c.tel || [])[0] || '';
+      const n = norm(tel);
+      const name = (c.name || [])[0] || tel || 'Sans nom';
+      if (n.length < 8) return; // un numéro vide ne doit jamais correspondre à quelqu'un
+      const u = allUsers.find(x => x.tel && x.tel.endsWith(n));
+      if (u) ids.add(u.id); else others.push({ name, tel });
+    });
+    cView = { ids, others };
+    onlyFavs = false;
+    setFilterUI('all');
+    render();
+  } catch (e) { console.error(e); }
+}
+
+function setFilterUI(f) {
+  document.querySelectorAll('.filters button').forEach(b => b.classList.toggle('on', b.dataset.f === f));
+}
+
+// ---------- Actus (statuts) ----------
+function openActus() {
+  let box = $('actusBox');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'actusBox';
+    box.innerHTML = `<h2 style="margin-bottom:12px">Actus</h2>
+      <button id="addStatusBtn">+ Ajouter un statut</button>
+      <input type="file" id="statusFile" accept="image/*" hidden>
+      <div id="statusList" style="margin-top:15px"></div>`;
+    document.body.appendChild(box);
+    $('addStatusBtn').onclick = () => $('statusFile').click();
+    $('statusFile').onchange = async e => {
+      const f = e.target.files[0];
+      if (!f) return;
+      try {
+        const url = URL.createObjectURL(f);
+        const img = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = url; });
+        URL.revokeObjectURL(url);
+        const s = Math.min(1, 800 / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = img.width * s; c.height = img.height * s;
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        const data = c.toDataURL('image/jpeg', 0.7);
+        if (data.length > 900000) return alert('Image trop lourde.');
+        await addDoc(collection(db, 'status'), { uid: me.uid, name: me.displayName || 'Moi', img: data, t: Date.now() });
+        loadStatus();
+      } catch (err) { alert('Publication impossible.'); console.error(err); }
+      e.target.value = '';
+    };
+  }
+  box.style.display = 'block';
+  loadStatus();
+}
+function closeActus() { const b = $('actusBox'); if (b) b.style.display = 'none'; }
+
+async function loadStatus() {
+  const out = $('statusList');
+  try {
+    const snap = await getDocs(query(collection(db, 'status'), where('t', '>', Date.now() - 86400000)));
+    const arr = snap.docs.map(d => d.data()).sort((a, b) => b.t - a.t);
+    out.innerHTML = arr.map(s => `<div class="st"><b>${esc(s.name)}</b><br>${safeImg(s.img) ? `<img src="${safeImg(s.img)}">` : ''}</div>`).join('') || '<p class="note">Aucun statut.</p>';
+  } catch (e) { console.error(e); out.innerHTML = '<p class="note" style="color:#f66">Erreur de chargement.</p>'; }
+}
+
+// ---------- Invitations ----------
+function openInvite() { $('overlay').style.display = 'block'; $('inviteModal').style.display = 'block'; }
+function closeInvite() { $('overlay').style.display = 'none'; $('inviteModal').style.display = 'none'; }
+
+async function share() {
+  if (navigator.share) {
+    try { await navigator.share({ title: 'Bouba Store', text: 'Rejoins-moi sur Bouba Store !', url: appLink }); }
+    catch (e) { /* annulé */ }
+  } else {
+    try { await navigator.clipboard.writeText(appLink); alert('Lien copié !'); }
+    catch (e) { prompt('Copie ce lien :', appLink); }
+  }
+}
+
+// ---------- Chat ----------
+function openChat(u) {
+  friendId = u.id;
+  chatId = [me.uid, u.id].sort().join('_');
+  $('chatName').textContent = u.name;
+  $('chatModal').style.display = 'flex';
+  loadMessages();
+}
+function closeChat() {
+  if (unsub) { unsub(); unsub = null; }
+  $('chatModal').style.display = 'none';
+  chatId = null; friendId = null;
+}
+function loadMessages() {
+  if (unsub) unsub();
+  const box = $('chatMessages');
+  box.textContent = '';
+  const q = query(collection(db, 'chats', chatId, 'messages'), orderBy('timestamp', 'asc'), limit(200));
+  unsub = onSnapshot(q, snap => {
+    box.textContent = '';
+    snap.forEach(d => {
+      const m = d.data();
+      const div = document.createElement('div');
+      div.className = 'msg ' + (m.senderId === me.uid ? 'sent' : 'received');
+      div.textContent = m.text;
+      box.appendChild(div);
+    });
+    box.scrollTop = box.scrollHeight;
+  }, err => { console.error(err); box.textContent = 'Impossible de charger les messages.'; });
+}
+async function sendMessage() {
+  const input = $('messageInput');
+  const text = input.value.trim();
+  if (!text || !chatId) return;
+  input.value = '';
+  try {
+    await addDoc(collection(db, 'chats', chatId, 'messages'), { text, senderId: me.uid, timestamp: serverTimestamp() });
+  } catch (e) { console.error(e); input.value = text; alert("Erreur lors de l'envoi du message."); }
+}
+$('messageInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+
+const goCall = (id, video) => { if (id) location.href = 'Call.html?call=' + encodeURIComponent(id) + '&video=' + video; };
+const fid = a => a.closest('[data-id]').dataset.id;
+
+// ---------- Actions (un seul gestionnaire de clics) ----------
+const A = {
+  call: a => goCall(fid(a), false),
+  video: a => goCall(fid(a), true),
+  chatCall: () => goCall(friendId, false),
+  chatVideo: () => goCall(friendId, true),
+  star: a => {
+    const id = fid(a), i = prefs.favs.indexOf(id);
+    if (i < 0) prefs.favs.push(id); else prefs.favs.splice(i, 1);
+    savePrefs(); render();
+  },
+  del: a => {
+    if (!confirm('Retirer ce contact ?')) return;
+    prefs.hidden.push(fid(a)); savePrefs(); render();
+  },
+  sms: a => window.open('sms:' + a.dataset.tel + '?body=' + encodeURIComponent(inviteText)),
+  tel: a => { location.href = 'tel:' + a.dataset.tel; },
+  filter: a => { onlyFavs = a.dataset.f === 'fav'; cView = null; setFilterUI(a.dataset.f); render(); },
+  invite: openInvite, closeInvite,
+  wa: () => window.open('https://wa.me/?text=' + encodeURIComponent(inviteText), '_blank'),
+  shareSms: () => window.open('sms:?body=' + encodeURIComponent(inviteText)),
+  mail: () => window.open('mailto:?subject=' + encodeURIComponent('Invitation Bouba Store') + '&body=' + encodeURIComponent(inviteText)),
+  copy: () => { closeInvite(); share(); },
+  contacts: pickContacts,
+  actus: openActus, closeActus,
+  closeChat, send: sendMessage
+};
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-do]');
+  if (a) return A[a.dataset.do]?.(a);
+  const it = e.target.closest('.friend-item[data-id]');
+  if (it) { const u = allUsers.find(x => x.id === it.dataset.id); if (u) openChat(u); }
+});
+</script>
+<script type="module" src="appel-recu.js"></script>
+</body>
+</html>
