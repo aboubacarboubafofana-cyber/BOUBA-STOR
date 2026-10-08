@@ -1,257 +1,163 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Appel Vidéo WebRTC - BOuba STOR</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #121212; color: white; text-align: center; margin: 0; padding: 20px; }
-        h1 { color: #FFD700; }
-        .video-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
-        video { width: 300px; height: 225px; background-color: #333; border-radius: 10px; border: 2px solid #FFD700; object-fit: cover; }
-        .controls { margin-top: 20px; }
-        button { padding: 15px 30px; font-size: 16px; border: none; border-radius: 25px; cursor: pointer; margin: 5px; font-weight: bold; }
-        #callBtn { background-color: #FFD700; color: #000; }
-        #hangupBtn { background-color: #ff4444; color: white; display: none; }
-        #status { margin-top: 15px; font-style: italic; color: #aaa; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appel</title>
+<style>
+  html,body{margin:0;height:100%;background:#0b0b0b;color:#fff;font-family:Roboto,Arial,sans-serif;overflow:hidden}
+  #remoteVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#111}
+  #localVideo{position:absolute;top:16px;right:16px;width:96px;height:140px;object-fit:cover;border-radius:12px;border:2px solid #ffd700;background:#222;z-index:2}
+  #status{position:absolute;top:30%;left:0;right:0;text-align:center;font-size:20px;font-weight:700;color:#ffd700;text-shadow:0 2px 8px #000;z-index:2;padding:0 20px}
+  .bar{position:absolute;bottom:40px;left:0;right:0;display:flex;justify-content:center;gap:22px;z-index:3}
+  .bar button{width:64px;height:64px;border-radius:50%;border:0;font-size:26px;background:#2a2a2a;color:#ffd700}
+  #hangupBtn{background:#e53935;color:#fff}
+  .off{opacity:.45}
+</style>
 </head>
 <body>
+<video id="remoteVideo" autoplay playsinline></video>
+<video id="localVideo" autoplay playsinline muted></video>
+<div id="status">Initialisation…</div>
+<div class="bar">
+  <button id="muteBtn" title="Micro">🎤</button>
+  <button id="hangupBtn" title="Raccrocher">📞</button>
+</div>
 
-    <h1>📞 Appel Vidéo</h1>
-    <div id="status">Initialisation...</div>
+<script type="module">
+import { db, MON_ID } from "./firebase-config.js";
+import { collection, doc, addDoc, setDoc, getDoc, updateDoc, onSnapshot }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    <div class="video-container">
-        <div>
-            <h3>Moi (Local)</h3>
-            <video id="localVideo" autoplay playsinline muted></video>
-        </div>
-        <div>
-            <h3>L'autre (Distant)</h3>
-            <video id="remoteVideo" autoplay playsinline></video>
-        </div>
-    </div>
+// ---------- WebRTC ----------
+const rtcConfig = { iceServers: [
+  { urls: "stun:stun.l.google.com:19302" },
+  { urls: "stun:stun1.l.google.com:19302" },
+  // TURN public de test (nécessaire sur beaucoup de réseaux 4G). Pour la prod, prenez votre propre TURN.
+  { urls: "turn:openrelay.metered.ca:80",  username: "openrelayproject", credential: "openrelayproject" },
+  { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" }
+]};
+const pc = new RTCPeerConnection(rtcConfig);
+const remoteStream = new MediaStream();
+let localStream, callRef, ended = false, queue = [];
 
-    <div class="controls">
-        <button id="callBtn">📞 Appeler</button>
-        <button id="hangupBtn">❌ Raccrocher</button>
-    </div>
+const $ = id => document.getElementById(id);
+const setStatus = t => { $('status').textContent = t; console.log(t); };
 
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, collection, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+$('remoteVideo').srcObject = remoteStream;
+pc.ontrack = e => e.streams[0].getTracks().forEach(t => remoteStream.addTrack(t));
+pc.onconnectionstatechange = () => {
+  if (pc.connectionState === 'connected') $('status').style.display = 'none';
+  if (['failed', 'disconnected'].includes(pc.connectionState)) hangup('Connexion perdue');
+};
 
-        // ==========================================
-        // 1. CONFIGURATION FIREBASE (Remplacez ceci par vos clés)
-        // ==========================================
-        const firebaseConfig = {
-            apiKey: "VOTRE_API_KEY",
-            authDomain: "VOTRE_PROJET.firebaseapp.com",
-            projectId: "VOTRE_PROJET_ID",
-            storageBucket: "VOTRE_PROJET.appspot.com",
-            messagingSenderId: "VOTRE_SENDER_ID",
-            appId: "VOTRE_APP_ID"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // ==========================================
-        // 2. CONFIGURATION WEBRTC (Serveurs STUN)
-        // ==========================================
-        const rtcConfig = {
-            iceServers: [
-                { urls: "stun:stun.l.google.com:19302" },
-                { urls: "stun:stun1.l.google.com:19302" }
-            ]
-        };
-
-        // Variables globales
-        let pc = new RTCPeerConnection(rtcConfig);
-        let localStream;
-        let callDocRef;
-        const callBtn = document.getElementById('callBtn');
-        const hangupBtn = document.getElementById('hangupBtn');
-        const statusDiv = document.getElementById('status');
-        const localVideo = document.getElementById('localVideo');
-        const remoteVideo = document.getElementById('remoteVideo');
-
-        // Générer un ID de salle unique pour cet appel
-        // Lire l'ID de l'ami et le type d'appel depuis l'URL
-const urlParams = new URLSearchParams(window.location.search);
-const callId = urlParams.get('call'); // Récupère l'ID de l'ami
-const isVideo = urlParams.get('video') === 'true'; // Récupère si c'est de la vidéo (true) ou juste audio (false)
-
-// Si un ID d'ami est présent dans l'URL, on est l'APPELANT
-const isCaller = callId !== null; 
-
-if (isCaller) {
-    console.log("Mode : APPELANT vers l'ami", callId);
-    // Cacher le bouton d'appel car on est déjà en train d'appeler
-    callBtn.style.display = 'none'; 
-    hangupBtn.style.display = 'inline-block';
-    
-    // Déclencher l'appel immédiatement
-    startCall(); 
-} else {
-    console.log("Mode : RÉCEPTEUR (En attente d'un appel)");
-    // On ne fait rien ici, le code de la partie "Récepteur" (ligne 156) s'en chargera
+async function getMedia(video) {
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: video ? { facingMode: 'user' } : false });
+  } catch (e) {
+    setStatus("Accès micro/caméra refusé. Autorisez-les dans le navigateur.");
+    throw e;
+  }
+  $('localVideo').srcObject = localStream;
+  $('localVideo').style.display = video ? 'block' : 'none';
+  localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
 }
 
-        // ==========================================
-        // 3. FONCTIONS UTILITAIRES
-        // ==========================================
-        function updateStatus(message) {
-            statusDiv.innerText = message;
-            console.log(message);
-        }
+// Les candidats ICE sont mis en file tant que la description distante n'est pas posée
+async function addCand(c) {
+  if (pc.remoteDescription) { try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch (e) {} }
+  else queue.push(c);
+}
+async function flushCands() { for (const c of queue) await addCand(c); queue = []; }
 
-        async function getMedia() {
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                localVideo.srcObject = localStream;
-                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-                updateStatus("Caméra et micro prêts.");
-            } catch (error) {
-                console.error("Erreur d'accès aux médias :", error);
-                updateStatus("Erreur : Impossible d'accéder à la caméra/micro.");
-            async function startCall() {
-        }
+function listenCandidates(colRef) {
+  onSnapshot(colRef, snap => snap.docChanges().forEach(ch => { if (ch.type === 'added') addCand(ch.doc.data()); }));
+}
 
-        // Initialiser les médias au chargement
-        getMedia();
+// ---------- APPELANT ----------
+async function startCall(friendId, video) {
+  setStatus("Appel en cours…");
+  await getMedia(video);
+  callRef = doc(collection(db, 'calls'));
+  const offerCands = collection(callRef, 'offerCandidates');
+  const answerCands = collection(callRef, 'answerCandidates');
 
-        // ==========================================
-        // 4. LOGIQUE DE L'APPELANT (Caller)
-        // ==========================================
-        callBtn.onclick = async () => {
-            updateStatus("Appel en cours... En attente de réponse.");
-            callBtn.style.display = 'none';
-            hangupBtn.style.display = 'inline-block';
+  pc.onicecandidate = e => e.candidate && addDoc(offerCands, e.candidate.toJSON());
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+  await setDoc(callRef, {
+    from: MON_ID, to: friendId, video, status: 'ringing', createdAt: Date.now(),
+    offer: { type: offer.type, sdp: offer.sdp }
+  });
 
-            // Référence au document Firestore pour cet appel
-            callDocRef = doc(collection(db, "calls"), callId);
+  setStatus("Ça sonne…");
+  onSnapshot(callRef, async snap => {
+    const d = snap.data(); if (!d) return;
+    if (d.answer && !pc.remoteDescription) {
+      await pc.setRemoteDescription(new RTCSessionDescription(d.answer));
+      await flushCands();
+      setStatus("Connexion…");
+    }
+    if (d.status === 'declined') end("Appel refusé");
+    if (d.status === 'ended') end("Appel terminé");
+  });
+  listenCandidates(answerCands);
 
-            // Écouter les candidats ICE de l'autre côté
-            const calleeCandidates = collection(callDocRef, "calleeCandidates");
-            onSnapshot(calleeCandidates, (snapshot) => {
-                snapshot.docChanges().forEach((change) => {
-                    if (change.type === "added") {
-                        pc.addIceCandidate(new RTCIceCandidate(change.doc.data()));
-                    }
-                });
-            });
+  setTimeout(() => { if (!pc.remoteDescription) hangup("Pas de réponse"); }, 45000);
+}
 
-            // Créer l'offre
-            const offer = await pc.createOffer();
-            await pc.setLocalDescription(offer);
+// ---------- RÉCEPTEUR ----------
+async function answerCall(callId) {
+  setStatus("Connexion…");
+  callRef = doc(db, 'calls', callId);
+  const snap = await getDoc(callRef);
+  if (!snap.exists()) return end("Appel introuvable");
+  const d = snap.data();
+  await getMedia(d.video);
 
-            // Envoyer l'offre à Firestore
-            await setDoc(callDocRef, { offer: { type: offer.type, sdp: offer.sdp } });
+  const offerCands = collection(callRef, 'offerCandidates');
+  const answerCands = collection(callRef, 'answerCandidates');
+  pc.onicecandidate = e => e.candidate && addDoc(answerCands, e.candidate.toJSON());
 
-            // Écouter la réponse
-            onSnapshot(callDocRef, (snapshot) => {
-                const data = snapshot.data();
-                if (data && data.answer && !pc.currentRemoteDescription) {
-                    pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-                    updateStatus("Appel connecté !");
-                }
-            });
+  await pc.setRemoteDescription(new RTCSessionDescription(d.offer));
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+  await updateDoc(callRef, { answer: { type: answer.type, sdp: answer.sdp }, status: 'active' });
 
-            // Envoyer nos propres candidats ICE
-            pc.onicecandidate = (event) => {
-                if (event.candidate) {
-                    addDoc(collection(callDocRef, "callerCandidates"), event.candidate.toJSON());
-                }
-            };
-        };} // Fin de la fonction startCall
+  listenCandidates(offerCands);
+  await flushCands();
+  onSnapshot(callRef, s => { if (s.data()?.status === 'ended') end("Appel terminé"); });
+}
 
-// On garde le bouton cliquable pour les tests manuels
-callBtn.onclick = startCall; 
+// ---------- FIN D'APPEL ----------
+function end(msg) {
+  if (ended) return; ended = true;
+  $('status').style.display = 'block';
+  setStatus(msg || "Appel terminé");
+  localStream?.getTracks().forEach(t => t.stop());
+  pc.close();
+  setTimeout(() => location.href = 'amis.html', 1500);
+}
+async function hangup(msg) {
+  try { if (callRef) await updateDoc(callRef, { status: 'ended' }); } catch (e) {}
+  end(msg);
+}
+$('hangupBtn').onclick = () => hangup();
+$('muteBtn').onclick = e => {
+  const t = localStream?.getAudioTracks()[0]; if (!t) return;
+  t.enabled = !t.enabled; e.currentTarget.classList.toggle('off', !t.enabled);
+};
 
-        // ==========================================
-        // 5. LOGIQUE DU RÉCEPTEUR (Callee)
-        // ==========================================
-        // Le récepteur écoute les nouveaux appels en permanence
-        const callsCollection = collection(db, "calls");
-        onSnapshot(callsCollection, async (snapshot) => {
-            snapshot.docChanges().forEach(async (change) => {
-                if (change.type === "added") {
-                    const data = change.doc.data();
-                    
-                    // Si c'est une nouvelle offre et qu'on n'est pas déjà en appel
-                    if (data.offer && !pc.currentRemoteDescription) {
-                        updateStatus("Appel entrant... Connexion en cours.");
-                        callBtn.style.display = 'none';
-                        hangupBtn.style.display = 'inline-block';
-                        callDocRef = change.doc.ref;
-
-                        // Configurer la connexion distante
-                        await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-
-                        // Créer la réponse
-                        const answer = await pc.createAnswer();
-                        await pc.setLocalDescription(answer);
-
-                        // Envoyer la réponse à Firestore
-                        await updateDoc(callDocRef, { answer: { type: answer.type, sdp: answer.sdp } });
-
-                        // Écouter les candidats ICE de l'appelant
-                        const callerCandidates = collection(callDocRef, "callerCandidates");
-                        onSnapshot(callerCandidates, (snapshot) => {
-                            snapshot.docChanges().forEach((change) => {
-                                if (change.type === "added") {
-                                    pc.addIceCandidate(new RTCIceCandidate(change.doc.data()));
-                                }
-                            });
-                        });
-
-                        // Envoyer nos propres candidats ICE
-                        pc.onicecandidate = (event) => {
-                            if (event.candidate) {
-                                addDoc(collection(callDocRef, "calleeCandidates"), event.candidate.toJSON());
-                            }
-                        };
-                    }
-                }
-            });
-        });
-
-        // ==========================================
-        // 6. AFFICHAGE DE LA VIDÉO DISTANTE & RACCROCHER
-        // ==========================================
-        pc.ontrack = (event) => {
-            remoteVideo.srcObject = event.streams[0];
-            updateStatus("Appel connecté !");
-        };
-
-        pc.onconnectionstatechange = (event) => {
-            if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
-                hangup();
-            }
-        };
-
-        async function hangup() {
-            updateStatus("Appel terminé.");
-            if (pc) {
-                pc.close();
-                pc = new RTCPeerConnection(rtcConfig); // Réinitialiser pour le prochain appel
-            }
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-            }
-            if (callDocRef) {
-                // Nettoyer Firestore (optionnel mais recommandé)
-                await deleteDoc(callDocRef);
-            }
-            callBtn.style.display = 'inline-block';
-            hangupBtn.style.display = 'none';
-            remoteVideo.srcObject = null;
-            getMedia(); // Redemander les médias
-        }
-
-        hangupBtn.onclick = hangup;
-    </script>
+// ---------- DÉMARRAGE ----------
+const p = new URLSearchParams(location.search);
+(async () => {
+  try {
+    if (!MON_ID) return setStatus("Vous n'êtes pas connecté (uid manquant).");
+    if (p.get('call'))        await startCall(p.get('call'), p.get('video') === 'true');
+    else if (p.get('answer')) await answerCall(p.get('answer'));
+    else setStatus("Aucun appel à afficher.");
+  } catch (e) { console.error(e); }
+})();
+</script>
 </body>
 </html>
