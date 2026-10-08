@@ -157,7 +157,15 @@ async function hangup(msg) {
 }
 $('hangupBtn').onclick = () => hangup();
 $('muteBtn').onclick = e => {
-  const t = localStream?.getAudioTracks()[0]; if (!t) return;
+  const p = new URLSearchParams(location.search);
+(async () => {
+ try {
+  if (!MON_ID) return setStatus('Vous n\'êtes pas connecté (uid manquant).');
+  if (p.get('call')) await startCall(p.get('call'), p.get('video') === 'true');
+  else if (p.get('answer')) await answerCall(p.get('answer'));
+  else setStatus('Aucun appel à afficher.');
+ } catch (e) { console.error(e); }
+})();
   t.enabled = !t.enabled; e.currentTarget.classList.toggle('off', !t.enabled);
 };
 
