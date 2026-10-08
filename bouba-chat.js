@@ -1,31 +1,42 @@
-/* Admin : le bouton 💬 d'un client ouvre la discussion dans le site (sans WhatsApp) */
-document.addEventListener('click',function(e){
-  var b=e.target.closest('#adminPage .row button,#adminPage .row .mini');
-  if(!b||b.textContent.trim()!=='💬')return;
-  var r=b.closest('.row'),m=r&&r.textContent.match(/\+?\d[\d ]{8,}/);
-  if(!m)return;
-  e.stopPropagation();e.preventDefault();
-  location.href='amis.html#tel='+m[0].replace(/\D/g,'');
-},true);
+// bouba-chat.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 
-/* Onglet "Amis" dans la barre du bas (ajouté ici, sans dépendre des anciens fichiers amis*.js) */
-function addAmis(){
-  var nav=document.querySelector('.nav');
-  if(!nav||document.getElementById('chats'))return;
-  var kids=[].slice.call(nav.children),i;
-  for(i=0;i<kids.length;i++)if(/Amis/.test(kids[i].textContent))return;
-  if(!kids[0])return;
-  var c=kids[0].cloneNode(true);
-  c.removeAttribute('onclick');c.classList.remove('active','on');
-  [].forEach.call(c.querySelectorAll('[id]'),function(x){x.removeAttribute('id')});
-  [].forEach.call(c.querySelectorAll('[onclick]'),function(x){x.removeAttribute('onclick')});
-  c.id='chats';
-  var w=document.createTreeWalker(c,NodeFilter.SHOW_TEXT),t;
-  while((t=w.nextNode()))t.nodeValue=t.nodeValue.replace(/Accueil/,'Amis').replace(/🏠/,'💬');
-  nav.appendChild(c);
+// Initialisation (assurez-vous que firebase-config.js est chargé avant)
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// Fonction pour envoyer un message
+export async function envoyerMessage(destinataireId, texte) {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    // On crée un ID de conversation unique basé sur les deux IDs triés
+    const conversationId = [user.uid, destinataireId].sort().join("_");
+
+    await addDoc(collection(db, "conversations", conversationId, "messages"), {
+        expediteur: user.uid,
+        texte: texte,
+        timestamp: serverTimestamp()
+    });
 }
-addAmis();setInterval(addAmis,1000);
-document.addEventListener('click',function(e){
-  var n=e.target.closest('#chats');
-  if(n){e.stopPropagation();e.preventDefault();location.href='amis.html'}
-},true);
+
+// Fonction pour écouter les messages en temps réel
+export function ecouterMessages(destinataireId, callback) {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const conversationId = [user.uid, destinataireId].sort().join("_");
+    const q = query(
+        collection(db, "conversations", conversationId, "messages"),
+        orderBy("timestamp", "asc")
+    );
+
+    // onSnapshot permet de mettre à jour l'interface instantanément
+    return onSnapshot(q, (snapshot) => {
+        const messages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        callback(messages);
+    });
+}
