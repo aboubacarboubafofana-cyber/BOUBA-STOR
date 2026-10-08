@@ -279,14 +279,14 @@
         };
 
         // 7. FONCTIONS DE CHAT (TEMPS RÉEL)
-        window.openChat = (name, initials) => {
-            document.getElementById('chatModal').style.display = 'flex';
-            document.getElementById('chatName').innerText = name;
-            // Générer un ID de chat unique (ex: user1_user2)
-            // Pour l'exemple, on utilise un ID fixe. Dans la vraie vie, il faut trier les UIDs.
-            currentChatId = "chat_room_1"; 
-            loadMessages();
-        };
+        window.openChat = (name, initials, friendId) => {
+  document.getElementById('chatModal').style.display = 'flex';
+  document.getElementById('chatName').innerText = name;
+  currentFriendId = friendId || null;
+  const me = currentUser ? currentUser.uid : 'anonyme';
+  currentChatId = friendId ? [me, friendId].sort().join('_') : 'chat_room_1';
+  loadMessages();
+};
 
         window.closeChat = () => {
             document.getElementById('chatModal').style.display = 'none';
