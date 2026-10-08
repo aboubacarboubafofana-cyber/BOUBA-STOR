@@ -209,9 +209,11 @@
             if (user) {
                 currentUser = user;localStorage.setItem('uid', user.uid);
                 console.log("Utilisateur connecté :", user.email);
+                loadFriends();
                 // Charger la liste des amis ici
             } else {
                 console.log("Aucun utilisateur connecté");
+                loadFriends();
                 // Rediriger vers login.html si nécessaire
             }
         });
