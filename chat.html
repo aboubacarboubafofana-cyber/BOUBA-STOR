@@ -1,0 +1,48 @@
+// -------- VOCAL SANS STORAGE --------
+let recorder, audioChunks = [], isRecording = false;
+const vocalBtn = document.getElementById('vocalBtn');
+
+vocalBtn.onclick = async () => {
+  if (!isRecording) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      recorder = new MediaRecorder(stream);
+      audioChunks = [];
+      recorder.ondataavailable = e => audioChunks.push(e.data);
+
+      recorder.onstop = async () => {
+        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+
+        // On convertit en base64 (pas besoin de Storage)
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = async () => {
+          const base64Audio = reader.result; // data:audio/webm;base64,...
+
+          await addDoc(collection(db, 'chats', chatId, 'messages'), {
+            from: MON_ID,
+            to: friendId,
+            audio: base64Audio,
+            createdAt: Date.now(),
+            type: 'vocal'
+          });
+          console.log("Vocal envoyé ✓");
+        };
+      };
+
+      recorder.start();
+      isRecording = true;
+      vocalBtn.textContent = '⏹️';
+      vocalBtn.style.background = 'red';
+      vocalBtn.style.color = 'white';
+    } catch(e) {
+      alert("Micro refusé. Autorise dans le navigateur.");
+    }
+  } else {
+    recorder.stop();
+    recorder.stream.getTracks().forEach(t => t.stop());
+    isRecording = false;
+    vocalBtn.textContent = '🎤';
+    vocalBtn.style.background = '#FFD700';
+  }
+};
