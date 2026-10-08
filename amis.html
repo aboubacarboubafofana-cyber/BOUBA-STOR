@@ -277,7 +277,70 @@ function openFromHash(){
   if(u) openChat(u.name, u.name.slice(0,2).toUpperCase(), u.id);
   else alert("Ce client n'a pas encore de compte dans l'app.");
 }
-        // 5. FONCTIONS DE L'INTERFACE
+        // ===== APPELS : répertoire du téléphone =====
+window.pickContacts = async () => {
+  if (!('contacts' in navigator && 'ContactsManager' in window))
+    return alert("Répertoire indisponible. Utilise Chrome sur Android.");
+  try {
+    const sel = await navigator.contacts.select(['name','tel'], {multiple:true});
+    if (!sel.length) return;
+    const norm = n => String(n).replace(/\D/g,'').slice(-9);
+    const items = sel.map(c => {
+      const tel = (c.tel||[])[0]||'';
+      const u = norm(tel) && allUsers.find(x => x.tel && x.tel.endsWith(norm(tel)));
+      return {name:(c.name||[])[0]||tel, tel, u};
+    });
+    const ok = items.filter(i=>i.u).map(i=>i.u);
+    const list = document.getElementById('friendList');
+    renderFriends(ok);
+    if (!ok.length) list.innerHTML = '';
+    list.insertAdjacentHTML('beforeend', items.filter(i=>!i.u).map(i=>`
+      <div class="friend-item"><div class="avatar">${esc(i.name.slice(0,2).toUpperCase())}</div>
+      <div class="friend-info"><h4>${esc(i.name)}</h4><p>Pas sur l'app</p></div>
+      <div class="actions">
+        <i class="fas fa-comment-sms" onclick="window.open('sms:${esc(i.tel)}?body='+encodeURIComponent('Rejoins-moi sur Bouba Store ! '+appLink))"></i>
+        <i class="fas fa-phone" onclick="location.href='tel:${esc(i.tel)}'"></i>
+      </div></div>`).join(''));
+  } catch(e) { console.log(e); }
+};
+
+// ===== ACTUS : statuts photo =====
+window.closeActus = () => { const b=document.getElementById('actusBox'); if(b) b.style.display='none'; };
+window.openActus = () => {
+  let box = document.getElementById('actusBox');
+  if (!box) {
+    box = document.createElement('div'); box.id='actusBox';
+    box.style.cssText='position:fixed;top:0;left:0;right:0;bottom:70px;background:#0f0f0f;z-index:50;overflow:auto;padding:15px';
+    box.innerHTML = `<h2 style="color:#ffd700;margin-bottom:12px">Actus</h2>
+      <button id="addStatusBtn" style="background:#ffd700;border:0;border-radius:20px;padding:12px 20px;font-weight:bold">+ Ajouter un statut</button>
+      <input type="file" id="statusFile" accept="image/*" hidden>
+      <div id="statusList" style="margin-top:15px"></div>`;
+    document.body.appendChild(box);
+    box.querySelector('#addStatusBtn').onclick = () => box.querySelector('#statusFile').click();
+    box.querySelector('#statusFile').onchange = async e => {
+      const f = e.target.files[0]; if (!f) return;
+      if (!currentUser) return alert("Connecte-toi d'abord.");
+      const img = await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=URL.createObjectURL(f);});
+      const s = Math.min(1, 800/Math.max(img.width,img.height));
+      const c = document.createElement('canvas'); c.width=img.width*s; c.height=img.height*s;
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      try {
+        await addDoc(collection(db,'status'),{uid:currentUser.uid,name:currentUser.displayName||currentUser.email||'Moi',img:c.toDataURL('image/jpeg',0.6),t:Date.now()});
+        e.target.value=''; loadStatus();
+      } catch(err){ alert("Publication impossible (règles Firestore ?)"); console.error(err); }
+    };
+  }
+  box.style.display='block'; loadStatus();
+};
+async function loadStatus(){
+  const out = document.getElementById('statusList');
+  try {
+    const snap = await getDocs(collection(db,'status')); const now=Date.now(), arr=[];
+    snap.forEach(d=>{const s=d.data(); if(now-s.t<86400000) arr.push(s);});
+    arr.sort((a,b)=>b.t-a.t);
+    out.innerHTML = arr.map(s=>`<div style="margin-bottom:15px"><b>${esc(s.name)}</b><br><img src="${esc(s.img)}" style="max-width:100%;border-radius:12px;margin-top:6px"></div>`).join('') || '<p style="color:#888">Aucun statut pour le moment.</p>';
+  } catch(e){ out.innerHTML='<p style="color:red">Erreur de chargement.</p>'; }
+                                                        }// 5. FONCTIONS DE L'INTERFACE
         window.openInviteModal = () => {
             document.getElementById('overlay').style.display = 'block';
             document.getElementById('inviteModal').style.display = 'block';
