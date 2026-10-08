@@ -25,9 +25,14 @@
 </div>
 
 <script type="module">
-import { db, MON_ID } from "./firebase-config.js";
-import { collection, doc, addDoc, setDoc, getDoc, updateDoc, onSnapshot }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { db } from "./firebase-config.js";
+import { getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const auth = getAuth(getApp());
+const user = await new Promise(r => { const un = onAuthStateChanged(auth, u => { un(); r(u); }); });
+if (!user) location.replace('compte.html');
+const MON_ID = user.uid;
 
 // ---------- WebRTC ----------
 const rtcConfig = { iceServers: [
