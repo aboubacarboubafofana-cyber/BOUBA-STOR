@@ -25,12 +25,20 @@
 </div>
 
 <script type="module">
-import { db } from "./firebase-config.js";
+import { db, auth } from "./firebase-config.js";
 import { getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { doc, setDoc, getDoc, updateDoc, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const auth = getAuth(getApp());
-const user = await new Promise(r => { const un = onAuthStateChanged(auth, u => { un(); r(u); }); });
+const authInstance = auth || getAuth(getApp());
+
+const user = await new Promise(resolve => {
+  const unsub = onAuthStateChanged(authInstance, (u) => {
+    unsub();
+    resolve(u);
+  });
+});
+
 if (!user) location.replace('compte.html');
 const MON_ID = user.uid;
 
