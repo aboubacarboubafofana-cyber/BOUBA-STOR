@@ -347,12 +347,14 @@
         // 8. FONCTIONS APPELS (SIMULATION)
         // Pour du vrai WebRTC, il faut un serveur de signalisation (Socket.io)
         window.startCall = () => {
-            alert("📞 Appel vocal vers " + (currentChatId ? "cet ami" : "l'ami") + "...\n(Fonctionnalité WebRTC à connecter)");
-        };
+  if (!currentChatId) return alert("Aucun ami sélectionné");
+  location.href = 'Call.html?call=' + encodeURIComponent(currentChatId) + '&video=false';
+};
 
-        window.startVideoCall = () => {
-            alert("📹 Appel vidéo vers " + (currentChatId ? "cet ami" : "l'ami") + "...\n(Fonctionnalité WebRTC à connecter)");
-        };
+window.startVideoCall = () => {
+  if (!currentChatId) return alert("Aucun ami sélectionné");
+  location.href = 'Call.html?call=' + encodeURIComponent(currentChatId) + '&video=true';
+};
 
         // 9. MESSAGE VOCAL (SIMULATION)
         window.recordVoice = () => {
