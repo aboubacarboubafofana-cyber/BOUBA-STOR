@@ -227,7 +227,8 @@ async function loadFriends(){
   try{
     const snap = await getDocs(collection(db,'users'));
     allUsers = [];
-    snap.forEach(d=>{
+    snap.forEach(d=>{const hidden = JSON.parse(localStorage.getItem('hidden')||'[]');
+if (hidden.includes(d.id)) return;
       if(currentUser && d.id===currentUser.uid) return;
       const u = d.data();
       allUsers.push({
