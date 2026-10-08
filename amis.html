@@ -267,6 +267,12 @@ document.getElementById('friendList').addEventListener('click', e=>{
   if(act==='call') location.href='Call.html?call='+encodeURIComponent(id)+'&video=false';
   else if(act==='video') location.href='Call.html?call='+encodeURIComponent(id)+'&video=true';
   else if(act==='star'){ const s=e.target.closest('[data-act]'); s.style.color = s.style.color ? '' : '#ffd700'; }
+      else if(act==='del'){
+  if(confirm('Retirer ce contact ?')){
+    const h=JSON.parse(localStorage.getItem('hidden')||'[]'); h.push(id);
+    localStorage.setItem('hidden',JSON.stringify(h)); item.remove();
+  }
+      }
   else openChat(name, name.slice(0,2).toUpperCase(), id);
 });
 
