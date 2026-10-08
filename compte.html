@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bouba Store</title>
+<style>body{background:#0f0f0f;color:#fff;font-family:sans-serif;padding:20px}
+input,button{width:100%;padding:14px;margin:8px 0;border-radius:12px;border:1px solid #444;background:#222;color:#fff;font-size:1rem;box-sizing:border-box}
+button{background:#ffd700;color:#000;font-weight:bold;border:0}
+a{color:#ffd700}h2{color:#ffd700}</style></head><body>
+<h2 id="titre">Créer un compte</h2>
+<input id="nom" placeholder="Nom complet">
+<input id="tel" type="tel" placeholder="Numéro de téléphone">
+<input id="mdp" type="password" placeholder="Mot de passe (6 caractères min.)">
+<button id="go">S'inscrire</button>
+<p><a href="#" id="switch">J'ai déjà un compte</a></p><p id="msg" style="color:#f66"></p>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+const app = initializeApp({
+  apiKey: "AIzaSyAnLLXpUC35OleB0hCLUXnLU0lMiesY7j4",
+  authDomain: "project-f4477c80-7c55-4db7-b2e.firebaseapp.com",
+  projectId: "project-f4477c80-7c55-4db7-b2e",
+  storageBucket: "project-f4477c80-7c55-4db7-b2e.firebasestorage.app",
+  messagingSenderId: "697604298457",
+  appId: "1:697604298457:web:4f9a6d66ec6fde9c1990c8"
+});
+const auth = getAuth(app), db = getFirestore(app);
+const $ = id => document.getElementById(id);
+let inscription = true;
+$('switch').onclick = e => {
+  e.preventDefault(); inscription = !inscription;
+  $('nom').style.display = inscription ? '' : 'none';
+  $('titre').textContent = inscription ? 'Créer un compte' : 'Connexion';
+  $('go').textContent = inscription ? "S'inscrire" : 'Se connecter';
+  $('switch').textContent = inscription ? "J'ai déjà un compte" : 'Créer un compte';
+};
+$('go').onclick = async () => {
+  const nom = $('nom').value.trim(), tel = $('tel').value.replace(/\D/g,''), mdp = $('mdp').value;
+  if (tel.length < 8 || mdp.length < 6 || (inscription && nom.length < 3))
+    return $('msg').textContent = "Remplis tous les champs correctement.";
+  const email = tel + '@bouba-store.app';
+  try {
+    if (inscription) {
+      const c = await createUserWithEmailAndPassword(auth, email, mdp);
+      await updateProfile(c.user, { displayName: nom });
+      await setDoc(doc(db, 'users', c.user.uid), { name: nom, tel, createdAt: Date.now() });
+    } else {
+      await signInWithEmailAndPassword(auth, email, mdp);
+    }
+    location.href = 'amis.html';
+  } catch (e) {
+    const m = { 'auth/email-already-in-use':'Ce numéro a déjà un compte.',
+      'auth/invalid-credential':'Numéro ou mot de passe incorrect.',
+      'auth/weak-password':'Mot de passe trop court.' };
+    $('msg').textContent = m[e.code] || 'Erreur : ' + e.code;
+  }
+};
+</script></body></html>
