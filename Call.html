@@ -83,12 +83,21 @@ const urlParams = new URLSearchParams(window.location.search);
 const callId = urlParams.get('call'); // Récupère l'ID de l'ami
 const isVideo = urlParams.get('video') === 'true'; // Récupère si c'est de la vidéo (true) ou juste audio (false)
 
-if (!callId) {
-    console.error("Erreur : Aucun ID d'ami spécifié dans l'URL.");
+// Si un ID d'ami est présent dans l'URL, on est l'APPELANT
+const isCaller = callId !== null; 
+
+if (isCaller) {
+    console.log("Mode : APPELANT vers l'ami", callId);
+    // Cacher le bouton d'appel car on est déjà en train d'appeler
+    callBtn.style.display = 'none'; 
+    hangupBtn.style.display = 'inline-block';
+    
+    // Déclencher l'appel immédiatement
+    startCall(); 
 } else {
-    // Le code qui suit s'exécutera seulement si un ID est présent
-    // (Tout le reste de votre code doit être à l'intérieur de ce bloc else)}
-        console.log("ID de l'appel :", callId);
+    console.log("Mode : RÉCEPTEUR (En attente d'un appel)");
+    // On ne fait rien ici, le code de la partie "Récepteur" (ligne 156) s'en chargera
+}
 
         // ==========================================
         // 3. FONCTIONS UTILITAIRES
