@@ -219,7 +219,7 @@
         // 4. SURVEILLER L'ÉTAT DE CONNEXION
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                currentUser = user;
+                currentUser = user;localStorage.setItem('uid', user.uid);
                 console.log("Utilisateur connecté :", user.email);
                 // Charger la liste des amis ici
             } else {
