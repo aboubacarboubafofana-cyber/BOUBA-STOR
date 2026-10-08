@@ -1,61 +1,40 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { db } from "./firebase-config.js";
+import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// 1. CONFIGURATION FIREBASE (Mettez vos vraies clés ici)
-const firebaseConfig = {
-    apiKey: "VOTRE_API_KEY",
-    authDomain: "VOTRE_PROJET.firebaseapp.com",
-    projectId: "VOTRE_PROJET_ID",
-    storageBucket: "VOTRE_PROJET.appspot.com",
-    messagingSenderId: "VOTRE_SENDER_ID",
-    appId: "VOTRE_APP_ID"
-};
+const monUid = localStorage.getItem('uid') || '';
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// 2. RÉCUPÉRER LA LISTE DES AMIS DEPUIS FIRESTORE
-async function chargerAmis() {
-    const friendListDiv = document.getElementById('friendList');
-    
-    // On vide la liste statique actuelle
-    friendListDiv.innerHTML = ''; 
-
-    try {
-        // Remplacez "utilisateurs" par le nom de votre collection dans Firestore
-        const querySnapshot = await getDocs(collection(db, "utilisateurs")); 
-        
-        querySnapshot.forEach((doc) => {
-            const ami = doc.data();
-            const amiId = doc.id; // L'ID unique de l'ami dans Firestore
-            const initiales = (ami.nom || "??").substring(0, 2).toUpperCase();
-
-            // On crée le HTML pour chaque ami
-            const amiHTML = `
-                <div class="friend-item">
-                    <div class="avatar">${initiales}</div>
-                    <div class="friend-info">
-                        <h4>${ami.nom || "Inconnu"}</h4>
-                        <p>${ami.statut || "Hors ligne"}</p>
-                    </div>
-                    <div class="actions">
-                        <i class="fas fa-star"></i>
-                        <!-- Bouton Appel Vocal -->
-                        <i class="fas fa-phone" onclick="window.location.href='Call.html?call=${amiId}&video=false'"></i>
-                        <!-- Bouton Appel Vidéo -->
-                        <i class="fas fa-video" onclick="window.location.href='Call.html?call=${amiId}&video=true'"></i>
-                    </div>
-                </div>
-            `;
-            
-            // On ajoute l'ami à la liste
-            friendListDiv.innerHTML += amiHTML;
-        });
-    } catch (error) {
-        console.error("Erreur lors du chargement des amis : ", error);
-        friendListDiv.innerHTML = '<p style="color:red; padding:10px;">Erreur de chargement des amis.</p>';
-    }
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-// Lancer le chargement au démarrage
+async function chargerAmis() {
+  const list = document.getElementById('friendList');
+  list.innerHTML = '<p style="padding:10px;">Chargement…</p>';
+  try {
+    const snap = await getDocs(collection(db, 'users'));
+    let html = '';
+    snap.forEach(d => {
+      if (d.id === monUid) return;               // ne pas s'afficher soi-même
+      const u = d.data();
+      const nom = u.name || u.nom || u.displayName || u.email || 'Inconnu';
+      const ini = esc(nom.substring(0, 2).toUpperCase());
+      const id = encodeURIComponent(d.id);
+      html += `
+        <div class="friend-item">
+          <div class="avatar">${ini}</div>
+          <div class="friend-info"><h4>${esc(nom)}</h4><p>Hors ligne</p></div>
+          <div class="actions">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-phone" onclick="location.href='Call.html?call=${id}&video=false'"></i>
+            <i class="fas fa-video" onclick="location.href='Call.html?call=${id}&video=true'"></i>
+          </div>
+        </div>`;
+    });
+    list.innerHTML = html || '<p style="padding:10px;">Aucun ami trouvé.</p>';
+  } catch (e) {
+    console.error(e);
+    list.innerHTML = '<p style="color:red;padding:10px;">Erreur de chargement des amis.</p>';
+  }
+}
 chargerAmis();
