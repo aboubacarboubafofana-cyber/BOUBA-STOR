@@ -650,7 +650,7 @@ ib.onclick=async()=>{
  if(dp){dp.prompt();await dp.userChoice;dp=null;ib.style.display='none'}
  else alert("iPhone : touchez Partager, puis « Sur l'écran d'accueil ».");
 };
-
+window.addEventListener('appinstalled',()=>ib.style.display='none');
 document.addEventListener('click',function(e){
  if(!e.target.closest('#shopName'))return;
  tapN++;clearTimeout(tapT);
