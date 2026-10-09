@@ -650,8 +650,13 @@ ib.onclick=async()=>{
  if(dp){dp.prompt();await dp.userChoice;dp=null;ib.style.display='none'}
  else alert("iPhone : touchez Partager, puis « Sur l'écran d'accueil ».");
 };
-window.addEventListener('appinstalled',()=>ib.style.display='none');</script>
-</script>
+
+document.addEventListener('click',function(e){
+ if(!e.target.closest('#shopName'))return;
+ tapN++;clearTimeout(tapT);
+ tapT=setTimeout(function(){tapN=0},2000);
+ if(tapN>=5){tapN=0;openPage('adminPage');renderAdmin()}
+});</script>
  <script type="module" src="alertes.js"></script>
  <script src="amis5.js"></script>
 <script>document.addEventListener('click',function(e){var n=e.target.closest('#chats,.nav>*');if(n&&(n.id==='chats'||/Amis/.test(n.textContent))){e.stopPropagation();e.preventDefault();location.href='amis.html'}},true);</script>
