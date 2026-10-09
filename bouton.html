@@ -223,6 +223,7 @@ document.addEventListener('click', async e => {
       if (!photo) return say('Ajoutez une photo.', false);
       await put('articles', { id: uid(), shopId: shop.id, shopName: shop.name, owner: shop.owner, phone: shop.phone,
         name, price, cat: v('p_cat'), desc: v('p_desc'), img: photo, video, date: Date.now() });
+      fetch('/api/push',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({act:'new',title:'🆕 Nouvel article',body:name+' - '+price+' F chez '+shop.name})}).catch(()=>{});
       await render(); say('✅ Article publié sur l\'accueil !', true);
       if (wantShare && navigator.share) navigator.share({ title: 'BOUBA STORE', text: `${name} - ${money(price)} chez ${shop.name} sur BOUBA STORE`, url: homeUrl() }).catch(() => {});
       return;
