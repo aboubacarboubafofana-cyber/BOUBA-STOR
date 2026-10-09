@@ -652,6 +652,7 @@ ib.onclick=async()=>{
  else alert("iPhone : touchez Partager, puis « Sur l'écran d'accueil ».");
 };
 window.addEventListener('appinstalled',()=>ib.style.display='none');
+ if(location.hash==='#admin')setTimeout(function(){openPage('adminPage');renderAdmin()},800);
 document.addEventListener('click',function(e){
  if(!e.target.closest('#shopName'))return;
  tapN++;clearTimeout(tapT);
