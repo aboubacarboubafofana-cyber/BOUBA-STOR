@@ -90,6 +90,13 @@ module.exports=async(req,res)=>{
  if(req.method==='OPTIONS')return res.status(204).end();
  try{
   const b=typeof req.body==='string'?JSON.parse(req.body||'{}'):(req.body||{});
-  res.status(200).json(b.act==='sub'?await subscribe(b.token):await notify());
+  if(b.act==='new'){
+ if(Date.now()-lastNew<60000)return res.status(200).json({skip:true});
+ lastNew=Date.now();
+ const t=String(b.title||'🆕 Nouvel article').slice(0,60);
+ const x=String(b.body||'').slice(0,120);
+ return res.status(200).json(await sendAll(t,x));
+}
+res.status(200).json(b.act==='sub'?await subscribe(b.token):await notify());
  }catch(e){res.status(500).json({ok:false})}
 };
