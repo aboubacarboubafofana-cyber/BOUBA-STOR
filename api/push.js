@@ -68,7 +68,21 @@ async function notify(){
  }
  return{sent:ok,products:L.length};
 }
-
+let lastNew=0;
+async function sendAll(title,body){
+ const T=Object.entries((await db('GET','pushTokens')).data||{});
+ const at=await tok();
+ let ok=0;
+ for(let i=0;i<T.length;i+=20){
+  await Promise.all(T.slice(i,i+20).map(async([id,v])=>{
+   const tk=(v&&v.t)||v;
+   const r=await fetch('https://fcm.googleapis.com/v1/projects/'+PID+'/messages:send',{method:'POST',headers:{'Authorization':'Bearer '+at,'content-type':'application/json'},body:JSON.stringify({message:{token:tk,notification:{title,body}}})});
+   if(r.ok)ok++;
+   else if(r.status===404||r.status===400){await db('DELETE','pushTokens/'+id)}
+  }));
+ }
+ return{sent:ok};
+                         }
 module.exports=async(req,res)=>{
  res.setHeader('Access-Control-Allow-Origin','*');
  res.setHeader('Access-Control-Allow-Headers','content-type');
