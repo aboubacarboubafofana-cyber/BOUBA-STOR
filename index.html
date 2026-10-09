@@ -149,15 +149,17 @@ body{background:#000;color:#fff;font-family:Arial;padding-bottom:70px}
 <input id="aPass" class="input" type="password" placeholder="Mot de passe">
 <button class="gold" onclick="adminLogin()">Se connecter</button>
 </div>
-<div id="adminPanel" style="display:none">
-<div class="tabs" id="tabs"></div>
-<div id="adminBody"></div>
-<button class="ghost" onclick="adminLogout()" style="color:#f44;border-color:#f44">🚪 Déconnexion admin</button>
-</div>
-</div><script>
-const ADMIN_UID="7W5OEzTeTNbFLzULLO9VsuDKZFN2";
-const DEFAULT_WA="2250787619717";
-const FB_CFG={
+const seen = new Set();
+snap.forEach(d => {
+  if (d.id === me.uid) return;
+  const u = d.data();
+  const name = u.name || u.nom || u.displayName || '';
+  const tel = String(u.tel || u.phone || u.telephone || u.numero || u.p10 || '');
+  const key = norm(tel);
+  if (!name || key.length < 8 || seen.has(key)) return;
+  seen.add(key);
+  allUsers.push({ id: d.id, name, tel, photo: safeImg(u.photo) });
+});
  apiKey:"AIzaSyAnLLXpUC35OleB0hCLUXnLU0lMiesY7j4",
  authDomain:"project-f4477c80-7c55-4db7-b2e.firebaseapp.com",
  databaseURL:"https://project-f4477c80-7c55-4db7-b2e-default-rtdb.europe-west1.firebasedatabase.app",
