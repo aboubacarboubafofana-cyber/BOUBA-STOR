@@ -174,7 +174,7 @@ const SV=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){alert('M
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeImg=u=>/^(https?:|data:image\/)/.test(u||'')?esc(u):'';
 const fmt=n=>Number(n||0).toLocaleString('fr-FR');
-const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+<div class="avatar" style="overflow:hidden">${u.photo ? `<img src="${u.photo}" style="width:100%;height:100%;object-fit:cover">` : esc(ini(u.name))}</div>
 
 let S=LS('b_state',null)||{};
 S.info=S.info||{};S.products=S.products||{};S.users=S.users||{};S.orders=S.orders||{};
