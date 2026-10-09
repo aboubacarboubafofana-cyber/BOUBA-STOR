@@ -155,7 +155,7 @@ async function loadFriends() {
       allUsers.push({
         id: d.id,
         name: u.name || u.nom || u.displayName || u.email || 'Inconnu',
-        tel: String(u.tel || u.phone || u.telephone || u.numero || '').replace(/\D/g, '')
+        tel: String(u.tel || u.phone || u.telephone || u.numero || u.p10 || '')
       });
     });
     render();
