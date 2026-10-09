@@ -23,3 +23,4 @@ async function activer(){
 if(Notification.permission==='granted')activer();
 else if(Notification.permission==='default')
  document.addEventListener('click',activer,{once:true});
+window.activerAlertes=activer;
