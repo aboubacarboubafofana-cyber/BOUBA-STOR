@@ -157,7 +157,7 @@ snap.forEach(d => {
   const name = u.name || u.nom || u.displayName || '';
   const tel = String(u.tel || u.phone || u.telephone || u.numero || u.p10 || '');
   const key = norm(tel);
-  if (!name || key.length < 8 || seen.has(key)) return;
+  if (!name || seen.has(d.id)) return;
   seen.add(key);
   allUsers.push({ id: d.id, name, tel, photo: safeImg(u.photo) });
 });
