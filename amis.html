@@ -306,7 +306,7 @@ function openStatus(i) {
   v.innerHTML = `<img src="${safeImg(s.img)}"><p>${esc(s.name)}</p>`;
   v.style.display = 'flex';
 }
-
+window.openStatus = openStatus;
 // ---------- Invitations ----------
 function openInvite() { $('overlay').style.display = 'block'; $('inviteModal').style.display = 'block'; }
 function closeInvite() { $('overlay').style.display = 'none'; $('inviteModal').style.display = 'none'; }
