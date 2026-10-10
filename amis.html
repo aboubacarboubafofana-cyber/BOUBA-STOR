@@ -174,7 +174,7 @@ function render() {
   const q = $('searchInput').value.trim().toLowerCase();
   let arr = allUsers.filter(u => !prefs.hidden.includes(u.id));
   if (onlyFavs) arr = arr.filter(u => prefs.favs.includes(u.id));
-  <div class="avatar" style="overflow:hidden">${u.photo ? `<img src="${u.photo}" style="width:100%;height:100%;object-fit:cover">` : esc(ini(u.name))}</div>
+  
   if (q) arr = arr.filter(u => u.name.toLowerCase().includes(q) || u.tel.includes(q));
   <div class="avatar" style="overflow:hidden">${u.photo ? `<img src="${u.photo}" style="width:100%;height:100%;object-fit:cover">` : esc(ini(u.name))}</div>
     <div class="friend-item" data-id="${esc(u.id)}">
