@@ -299,6 +299,9 @@ async function share() {
 
 // ---------- Chat ----------
 async function setMyPhoto(f) {
+  const avatar = u => safeImg(u.photo)
+  ? `<img class="avatar" src="${safeImg(u.photo)}" alt="">`
+  : `<div class="avatar">${esc(ini(u.name))}</div>`;
   const url = URL.createObjectURL(f);
   const img = await new Promise((res, rej) => {
     const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = url;
