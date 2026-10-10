@@ -374,6 +374,31 @@ document.addEventListener('click', e => {
   const it = e.target.closest('.friend-item[data-id]');
   if (it) { const u = allUsers.find(x => x.id === it.dataset.id); if (u) openChat(u); }
 });
+  let rec = null, chunks = [], recTimer = null;
+$('micBtn').addEventListener('click', async () => {
+  if (!chatId) return;
+  if (rec) { rec.stop(); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    rec = new MediaRecorder(stream, { audioBitsPerSecond: 24000 });
+    chunks = [];
+    rec.ondataavailable = e => chunks.push(e.data);
+    rec.onstop = async () => {
+      clearTimeout(recTimer);
+      stream.getTracks().forEach(t => t.stop());
+      $('micBtn').textContent = '🎤';
+      const blob = new Blob(chunks, { type: rec.mimeType });
+      rec = null;
+      const audio = await new Promise(ok => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(blob); });
+      if (audio.length > 650000) return alert('Vocal trop long');
+      try { await addDoc(collection(db, 'chats', chatId, 'messages'), { audio, senderId: me.uid, timestamp: serverTimestamp() }); }
+      catch (e) { console.error(e); alert("Erreur d'envoi du vocal."); }
+    };
+    rec.start();
+    $('micBtn').textContent = '⏹️';
+    recTimer = setTimeout(() => rec && rec.stop(), 60000);
+  } catch (e) { alert('Autorisez le micro dans Chrome.'); }
+});
 </script>
 <script type="module" src="appel-recu.js"></script>
 </body>
