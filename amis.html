@@ -322,6 +322,18 @@ function loadMessages() {
       const div = document.createElement('div');
       div.className = 'msg ' + (m.senderId === me.uid ? 'sent' : 'received');
       if (m.audio) { div.innerHTML = '<audio controls src="' + m.audio + '" style="max-width:100%"></audio>'; } else { div.textContent = m.text; }
+      if (m.senderId === me.uid) {
+  const x = document.createElement('span');
+  x.textContent = '🗑️';
+  x.style.cssText = 'cursor:pointer;font-size:.9rem;display:block;text-align:right;margin-top:4px';
+  const mid = d.id, cid = chatId;
+  x.onclick = async () => {
+    if (!confirm('Supprimer ce message ?')) return;
+    try { await deleteDoc(doc(db, 'chats', cid, 'messages', mid)); }
+    catch (e) { console.error(e); alert('Suppression impossible'); }
+  };
+  div.appendChild(x);
+  }
       box.appendChild(div);
     });
     box.scrollTop = box.scrollHeight;
