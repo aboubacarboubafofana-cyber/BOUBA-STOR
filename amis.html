@@ -298,6 +298,13 @@ async function loadStatus() {
     out.innerHTML = arr.map(s => `<div class="stitem"><div class="string">${safeImg(s.img) ? `<img src="${safeImg(s.img)}">` : ''}</div><div class="stinfo"><b>${esc(s.name)}</b><span>${new Date(s.t).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</span></div></div>`).join('') || '<p class="note">Aucun statut.</p>';
   } catch (e) { console.error(e); out.innerHTML = '<p class="note" style="color:#f66">Erreur de chargement.</p>'; }
 }
+  let statusArr = [];
+function openStatus(i) {
+  const s = statusArr[i]; if (!s) return;
+  const v = $('viewer');
+  v.innerHTML = `<img src="${safeImg(s.img)}"><p>${esc(s.name)}</p>`;
+  v.style.display = 'flex';
+}
 
 // ---------- Invitations ----------
 function openInvite() { $('overlay').style.display = 'block'; $('inviteModal').style.display = 'block'; }
