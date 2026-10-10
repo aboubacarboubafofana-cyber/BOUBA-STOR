@@ -176,7 +176,7 @@ function render() {
   if (onlyFavs) arr = arr.filter(u => prefs.favs.includes(u.id));
   
   if (q) arr = arr.filter(u => u.name.toLowerCase().includes(q) || u.tel.includes(q));
-  <div class="avatar" style="overflow:hidden">${u.photo ? `<img src="${u.photo}" style="width:100%;height:100%;object-fit:cover">` : esc(ini(u.name))}</div>
+  let html = arr.map(u => `
     <div class="friend-item" data-id="${esc(u.id)}">
       <div class="avatar">${esc(ini(u.name))}</div>
       <div class="friend-info"><h4>${esc(u.name)}</h4><p>${esc(u.tel)}</p></div>
