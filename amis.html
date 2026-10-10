@@ -221,6 +221,17 @@ async function pickContacts() {
     sel.forEach(c => {
       const tel = (c.tel || [])[0] || '';
       const n = norm(tel);
+      if (m.senderId === me.uid) {
+  const x = document.createElement('span');
+  x.textContent = '🗑️';
+  x.style.cssText = 'cursor:pointer;font-size:.9rem;display:block;text-align:right;margin-top:4px';
+  x.onclick = async () => {
+    if (!confirm('Supprimer ce message ?')) return;
+    try { await deleteDoc(doc(db, 'chats', chatId, 'messages', d.id)); }
+    catch (e) { console.error(e); alert('Suppression impossible'); }
+  };
+  div.appendChild(x);
+  }
       const name = (c.name || [])[0] || tel || 'Sans nom';
       if (n.length < 8) return; // un numéro vide ne doit jamais correspondre à quelqu'un
       const u = allUsers.find(x => x.tel && x.tel.endsWith(n));
