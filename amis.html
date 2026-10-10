@@ -164,6 +164,11 @@ snap.forEach(d => {
 });
   
     render();
+    const meDoc = await getDoc(doc(db, 'users', me.uid));
+const md = meDoc.exists() ? meDoc.data() : {};
+$('myAvatar').innerHTML = safeImg(md.photo)
+  ? `<img src="${safeImg(md.photo)}" style="width:100%;height:100%;object-fit:cover">`
+  : esc(ini(md.name || md.nom || md.displayName || me.displayName));
     openFromHash();
   } catch (e) {
     console.error(e);
