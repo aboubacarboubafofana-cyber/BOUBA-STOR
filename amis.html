@@ -178,7 +178,7 @@ function render() {
   if (q) arr = arr.filter(u => u.name.toLowerCase().includes(q) || u.tel.includes(q));
   let html = arr.map(u => `
     <div class="friend-item" data-id="${esc(u.id)}">
-      <div class="avatar">${esc(ini(u.name))}</div>
+      <div class="avatar" style="overflow:hidden">${u.photo ? `<img src="${u.photo}" style="width:100%;height:100%;object-fit:cover">` : esc(ini(u.name))}</div>
       <div class="friend-info"><h4>${esc(u.name)}</h4><p>${esc(u.tel)}</p></div>
       <div class="actions">
         <i class="fas fa-star" data-do="star" style="${prefs.favs.includes(u.id) ? 'color:#ffd700' : 'color:#888'}"></i>
