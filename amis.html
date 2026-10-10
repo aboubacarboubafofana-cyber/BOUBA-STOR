@@ -320,7 +320,7 @@ function loadMessages() {
       const m = d.data();
       const div = document.createElement('div');
       div.className = 'msg ' + (m.senderId === me.uid ? 'sent' : 'received');
-      div.textContent = m.text;
+      if (m.audio) { div.innerHTML = '<audio controls src="' + m.audio + '" style="max-width:100%"></audio>'; } else { div.textContent = m.text; }
       box.appendChild(div);
     });
     box.scrollTop = box.scrollHeight;
