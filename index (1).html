@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="fr"><head> 
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#000000">
+<title>BOUBA STORE</title><link rel="manifest" href="manifest.json">
+<style>
+*{margin:0;box-sizing:border-box;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#shopName{user-select:none;-webkit-user-select:none}
+body{background:#000;color:#fff;font-family:Arial;padding-bottom:70px}
+.header{border:2px solid #d4af37;padding:10px;position:sticky;top:0;background:#000;z-index:100}
+.top{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.logo{width:42px;height:42px;border-radius:50%;border:2px solid gold;object-fit:cover;background:#0a331a}
+.search{margin-top:10px;border:1px solid #d4af37;border-radius:30px;padding:10px 15px}
+.search input{background:transparent;border:0;outline:0;color:#fff;width:100%}
+.cats{display:flex;gap:6px;margin-top:10px;overflow-x:auto}
+.cat{padding:8px 16px;border-radius:20px;border:1px solid #d4af37;background:transparent;color:#d4af37;font-size:13px;white-space:nowrap}
+.cat.active{background:#d4af37;color:#000;font-weight:700}
+.banner{background:linear-gradient(90deg,#8B5A2B,#D4AF37);color:#000;text-align:center;padding:8px;font-size:11px;font-weight:900}
+#net{text-align:center;font-size:11px;padding:4px;font-weight:700;background:#111}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px}
+.card{background:#111;border:1px solid #d4af37;border-radius:12px;overflow:hidden;position:relative}
+.card img{width:100%;aspect-ratio:1/1;object-fit:cover;background:#111}
+.info{padding:7px;font-size:13px}
+.btn{width:100%;background:linear-gradient(gold,#b8860b);border:0;padding:9px;border-radius:7px;font-weight:800;font-size:12px;margin-top:5px}
+.btn:disabled{background:#444;color:#999}
+.nav{position:fixed;bottom:0;width:100%;background:#000;border-top:1px solid #d4af37;display:flex;justify-content:space-around;padding:8px 0;font-size:11px;text-align:center;z-index:100}
+.page{display:none;position:fixed;inset:0;background:#000;z-index:200;overflow-y:auto;padding:15px;padding-bottom:90px}
+.page.active{display:block}
+.input{width:100%;padding:12px;border-radius:8px;border:1px solid #d4af37;background:#111;color:#fff;margin-bottom:10px}
+.gold{width:100%;padding:12px;background:gold;border:0;border-radius:8px;font-weight:900;color:#000;margin-top:4px}
+.ghost{width:100%;padding:12px;background:transparent;border:1px solid #555;color:#fff;border-radius:8px;margin-top:8px}
+.ctrl{border:1px solid #333;border-radius:10px;padding:10px;margin-bottom:10px;background:#0f0f0f}
+.row{display:flex;gap:8px;align-items:center;background:#111;padding:8px;border-radius:8px;margin-bottom:6px;font-size:12px}
+.row img{width:46px;height:46px;border-radius:8px;object-fit:cover}
+.row .g{flex:1}
+.mini{padding:6px 10px;border-radius:6px;border:1px solid gold;background:#000;color:gold;font-size:11px;font-weight:700}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin:10px 0}
+.tabs button{padding:9px 14px;border-radius:20px;border:1px solid gold;background:#000;color:gold;white-space:nowrap;font-weight:700}
+.tabs button.on{background:gold;color:#000}
+.stat{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat div{background:#111;border:1px solid gold;border-radius:10px;padding:14px;text-align:center}
+.stat b{display:block;font-size:22px;color:gold}
+.badge{position:absolute;top:6px;left:6px;background:#c00;color:#fff;font-size:10px;padding:3px 7px;border-radius:10px}
+#gate{position:fixed;inset:0;background:#000;z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
+.gateBox{background:#0f0f0f;border:2px solid gold;border-radius:20px;padding:20px;width:100%;max-width:380px;text-align:center}
+#toast{position:fixed;top:70px;left:10px;right:10px;background:gold;color:#000;padding:10px;border-radius:10px;font-weight:700;display:none;z-index:1000;text-align:center}
+.fab{position:fixed;right:15px;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;z-index:90;border:0}
+#shBtn{bottom:75px;background:#25D366}
+#iaBtn{bottom:135px;background:gold}
+#iaChat{position:fixed;bottom:200px;right:10px;width:92%;max-width:360px;height:380px;background:#111;border:2px solid gold;border-radius:15px;z-index:400;display:none;flex-direction:column;overflow:hidden}
+#iaChat.open{display:flex}
+.iaHead{background:gold;color:#000;padding:10px;font-weight:900;display:flex;justify-content:space-between}
+#iaMsgs{flex:1;overflow-y:auto;padding:8px}
+.msg{padding:8px 10px;border-radius:10px;margin-bottom:6px;font-size:13px;max-width:90%}
+.msg.bot{background:#222}
+.msg.user{background:gold;color:#000;margin-left:auto}
+.iaCard{display:flex;gap:8px;background:#000;border:1px solid #333;border-radius:8px;padding:6px;margin-top:6px}
+.iaCard img{width:50px;height:50px;border-radius:6px;object-fit:cover}
+.iaIn{display:flex;gap:6px;padding:8px;border-top:1px solid #333}
+.iaIn input{flex:1;padding:10px;border-radius:8px;border:1px solid gold;background:#000;color:#fff}
+.iaIn button{padding:0 14px;background:gold;border:0;border-radius:8px;font-weight:900}
+.shb{width:100%;background:#25D366;border:0;padding:6px;border-radius:6px;color:#fff;font-size:11px;font-weight:700;margin-top:4px}
+.net4{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.net4 button{padding:18px 8px;border-radius:14px;border:0;font-weight:900;font-size:14px;color:#fff}
+ .nav{font-size:15px;padding:10px 0}
+.nav div{font-size:15px}
+.card .btn,.card button{font-size:15px;padding:12px}
+.info{font-size:15px}
+.cat{font-size:15px;padding:10px 18px}
+.gold{font-size:16px}
+</style></head><body><div id="gate"><div class="gateBox">
+<h2 style="color:gold">👑 BOUBA STORE</h2>
+<p style="font-size:12px;color:#aaa;margin:8px 0">Crée ton compte pour commander</p>
+<input id="uName" class="input" placeholder="Nom complet">
+<input id="uPhone" class="input" placeholder="N° WhatsApp (ex: 07...)" type="tel">
+<input id="uCity" class="input" placeholder="Ville / Quartier">
+<button class="gold" onclick="register()">✅ Entrer</button>
+ </div></div>
+
+ <div style="background:#000;padding:10px;text-align:center;border-bottom:2px solid gold">
+  <a href="bouton.html" target="_blank" style="display:inline-block;background:gold;color:#000;padding:14px 25px;border-radius:25px;font-weight:900;text-decoration:none;width:90%">🏪 + CRÉER MA BOUTIQUE</a>
+ </div>
+
+<div class="header">
+<div class="top"><img id="logo" class="logo" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+<b id="shopName" style="color:gold;font-size:18px">BOUBA STORE</b>
+<span onclick="openPage('profilePage')" style="font-size:22px">👤</span></div>
+<div class="search"><input id="qIn" placeholder="🔍 Chercher un article..." oninput="q=this.value;renderStore()"></div>
+<div class="cats" id="cats"></div>
+</div>
+<div class="banner" id="bannerText">LIVRAISON 24H ABIDJAN • WAVE • ORANGE MONEY</div>
+<div id="net">⏳ Connexion...</div>
+ <button id="installBtn" class="gold" style="display:none;margin:10px;width:calc(100% - 20px)">📲 Installer l'application</button>
+ <button class="gold" style="margin:10px;width:calc(100% - 20px)" onclick="activerAlertes()">🔔 Activer les notifications</button>
+<div class="grid" id="grid"></div>
+<div id="toast"></div>
+<button class="fab" id="shBtn" onclick="openPage('sharePage')">📤</button>
+<button class="fab" id="iaBtn" onclick="toggleIA()">🤖</button>
+
+<div id="iaChat">
+<div class="iaHead"><span>🤖 Assistante BOUBA</span><span onclick="toggleIA()">✕</span></div>
+<div id="iaMsgs"></div>
+<div class="iaIn"><input id="iaInput" placeholder="Ex: ensemble homme" onkeypress="if(event.key==='Enter')sendIA()"><button onclick="sendIA()">➤</button></div>
+</div>
+
+<div id="sharePage" class="page">
+<button class="mini" onclick="closeAll()">← Retour</button>
+<h2 style="color:gold;margin:10px 0">📤 PARTAGER LE CATALOGUE</h2>
+<div class="net4">
+<button style="background:#25D366" onclick="shareNet('whatsapp')">💬 WhatsApp</button>
+<button style="background:#1877F2" onclick="shareNet('facebook')">📘 Facebook</button>
+<button style="background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)" onclick="shareNet('instagram')">📸 Instagram</button>
+<button style="background:#222;border:1px solid #555" onclick="shareNet('tiktok')">🎵 TikTok</button>
+</div>
+<button class="gold" onclick="copyLink()">🔗 Copier le lien</button>
+<button class="ghost" onclick="shareNative()">📲 Autres applications</button>
+</div>
+
+<div class="nav">
+<div onclick="closeAll()">🏠<br>Accueil</div>
+<div onclick="openPage('cartPage')">👜<br>Panier <b id="cartN" style="color:gold"></b></div>
+ <div onclick="location.href='amis.html'">💬<br>Chat</div>
+<div id="navAdmin" style="display:none" onclick="openPage('adminPage');renderAdmin()">⚙️<br>Contrôle</div>
+</div>
+
+<div id="cartPage" class="page">
+<button class="mini" onclick="closeAll()">← Retour</button>
+<h2 style="color:gold;margin:10px 0">👜 MON PANIER</h2>
+<div id="cartList"></div>
+<h3 id="cartTotal" style="color:gold;margin:10px 0"></h3>
+<button class="gold" onclick="commander()">📲 Commander sur WhatsApp</button>
+</div>
+
+<div id="profilePage" class="page">
+<button class="mini" onclick="closeAll()">← Retour</button>
+<h2 style="color:gold;margin:10px 0">👤 MON COMPTE</h2>
+<div class="ctrl"><input id="eName" class="input" placeholder="Nom"><input id="ePhone" class="input" placeholder="WhatsApp"><input id="eCity" class="input" placeholder="Ville">
+<button class="gold" onclick="saveProfile()">✅ Sauver</button></div>
+<button class="ghost" onclick="logout()" style="color:#f44;border-color:#f44">🚪 Déconnexion</button>
+</div>
+
+<div id="adminPage" class="page">
+<button class="mini" onclick="closeAll()">← Retour</button>
+<h2 style="color:gold;margin:10px 0">⚙️ CONTRÔLE TOTAL</h2>
+<div id="adminLogin" class="ctrl">
+<h4 style="color:gold;margin-bottom:8px">🔐 Connexion admin</h4>
+<input id="aMail" class="input" type="email" placeholder="Email admin">
+<input id="aPass" class="input" type="password" placeholder="Mot de passe">
+<button class="gold" onclick="adminLogin()">Se connecter</button>
+</div>
+<div id="adminPanel" style="display:none">
+<div class="tabs" id="tabs"></div>
+<div id="adminBody"></div>
+<button class="ghost" onclick="adminLogout()" style="color:#f44;border-color:#f44">🚪 Déconnexion admin</button>
+</div>
+</div><script>
+const ADMIN_UID="7W5OEzTeTNbFLzULLO9VsuDKZFN2";
+const DEFAULT_WA="2250787619717";
+const FB_CFG={
+ apiKey:"AIzaSyAnLLXpUC35OleB0hCLUXnLU0lMiesY7j4",
+ authDomain:"project-f4477c80-7c55-4db7-b2e.firebaseapp.com",
+ databaseURL:"https://project-f4477c80-7c55-4db7-b2e-default-rtdb.europe-west1.firebasedatabase.app",
+ projectId:"project-f4477c80-7c55-4db7-b2e",
+ storageBucket:"project-f4477c80-7c55-4db7-b2e.firebasestorage.app",
+ messagingSenderId:"697604298457",
+ appId:"1:697604298457:web:4f9a6d66ec6fde9c1990c8"
+};
+const $=id=>document.getElementById(id);
+const LS=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}};
+const SV=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){alert('Mémoire pleine')}};
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeImg=u=>/^(https?:|data:image\/)/.test(u||'')?esc(u):'';
+const fmt=n=>Number(n||0).toLocaleString('fr-FR');
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+
+let S=LS('b_state',null)||{};
+S.info=S.info||{};S.products=S.products||{};S.users=S.users||{};S.orders=S.orders||{};
+let outbox=LS('b_out',[]),cart=LS('b_cart',[]),me=LS('b_me',null);
+let isAdmin=false,cat='all',q='',online=false,fb=null,flushing=false,adminSub=false,tab='stats';
+
+function save(){SV('b_state',S);SV('b_out',outbox)}
+function setLocal(path,val){
+ const p=path.split('/');let o=S;
+ for(let i=0;i<p.length-1;i++)o=o[p[i]]=o[p[i]]||{};
+ const k=p[p.length-1];
+ if(val===null)delete o[k];else o[k]=val;
+}
+function write(path,val){setLocal(path,val);outbox.push({path,val});save();renderAll();flush()}
+async function flush(){
+ if(!fb||!online||flushing)return;flushing=true;
+ try{
+  while(outbox.length){
+   const o=outbox[0];
+   try{const r=fb.D.ref(fb.db,o.path);
+    if(o.val===null)await fb.D.remove(r);else await fb.D.set(r,o.val);
+   }catch(e){if(!/permission/i.test(String(e.code)+String(e.message)))throw e}
+   outbox.shift();save();setNet();
+  }
+ }catch(e){console.log('flush',e)}
+ flushing=false;setNet();
+}
+async function initFB(){
+ try{
+  const B="https://www.gstatic.com/firebasejs/12.19.0/";
+  const A=await import(B+"firebase-app.js"),D=await import(B+"firebase-database.js"),AU=await import(B+"firebase-auth.js");
+  const app=A.initializeApp(FB_CFG);
+  fb={db:D.getDatabase(app),D,AU,auth:AU.getAuth(app)};
+  D.onValue(D.ref(fb.db,'.info/connected'),s=>{online=!!s.val();setNet();if(online)flush()});
+  sub('info');sub('products');
+  AU.onAuthStateChanged(fb.auth,u=>{
+   isAdmin=!!u&&u.uid===ADMIN_UID;
+   $('adminLogin').style.display=isAdmin?'none':'block';
+   $('adminPanel').style.display=isAdmin?'block':'none';
+   if(isAdmin)subAdmin();
+   renderAll();
+  });
+ }catch(e){console.log('Mode local',e);setNet()}
+}
+function sub(root){
+ fb.D.onValue(fb.D.ref(fb.db,root),s=>{
+  S[root]=s.val()||{};
+  outbox.filter(o=>o.path.split('/')[0]===root).forEach(o=>setLocal(o.path,o.val));
+  save();renderAll();
+ },err=>console.log('sub',root,err));
+}
+function subAdmin(){if(!fb||adminSub)return;adminSub=true;sub('users');sub('orders')}
+function setNet(){
+ const n=outbox.length;
+ $('net').innerHTML=online?'<span style="color:#25D366">🟢 EN DIRECT</span>'+(n?' • envoi de '+n+'…':''):'<span style="color:orange">🟠 HORS LIGNE</span>'+(n?' • '+n+' en attente':'');
+}
+window.addEventListener('online',()=>setTimeout(flush,1500));
+window.addEventListener('offline',()=>{online=false;setNet()});
+
+function compress(file,max,cb){
+ if(!file)return;const r=new FileReader();
+ r.onload=e=>{const i=new Image();i.onload=()=>{
+  const k=Math.min(1,max/Math.max(i.width,i.height));
+  const c=document.createElement('canvas');c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);
+  c.getContext('2d').drawImage(i,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',0.6));
+ };i.src=e.target.result};r.readAsDataURL(file);
+}
+function toast(m){const e=$('toast');e.textContent=m;e.style.display='block';clearTimeout(window._tz);window._tz=setTimeout(()=>e.style.display='none',4000)}
+function openPage(id){closeAll();$(id).classList.add('active')}
+function closeAll(){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))}
+
+/* ----- boutique ----- */
+const prods=()=>Object.values(S.products||{}).filter(p=>p&&p.id).sort((a,b)=>(b.date||0)-(a.date||0));
+function renderStore(){
+ const info=S.info||{};
+ $('shopName').textContent=info.name||'BOUBA STORE';
+ if(info.banner)$('bannerText').textContent=info.banner;
+ if(info.logo)$('logo').src=info.logo;
+ const cs=['all',...new Set(prods().map(p=>p.cat).filter(Boolean))];
+ $('cats').innerHTML=cs.map(c=>'<button class="cat'+(c===cat?' active':'')+'" onclick="cat=\''+esc(c)+'\';renderStore()">'+(c==='all'?'Tout':esc(c))+'</button>').join('');
+ const t=q.toLowerCase();
+ const l=prods().filter(p=>(cat==='all'||p.cat===cat)&&(p.name||'').toLowerCase().includes(t));
+ $('grid').innerHTML=l.length?l.map(p=>'<div class="card">'+(p.stock===false?'<span class="badge">ÉPUISÉ</span>':'')+'<img src="'+safeImg(p.img)+'"><div class="info"><b>'+esc(p.name)+'</b><br><span style="color:gold">'+fmt(p.price)+' F</span><button class="btn" '+(p.stock===false?'disabled':'')+' onclick="addCart(\''+p.id+'\')">🛒 Ajouter</button></div></div>').join(''):'<p style="grid-column:1/3;text-align:center;color:#888;padding:30px">Aucun article</p>';
+}
+function addCart(id){
+ const c=cart.find(x=>x.id===id);if(c)c.qty++;else cart.push({id,qty:1});
+ SV('b_cart',cart);renderCart();toast('✅ Ajouté au panier');
+}
+function qty(id,d){
+ const c=cart.find(x=>x.id===id);if(!c)return;c.qty+=d;
+ if(c.qty<=0)cart=cart.filter(x=>x.id!==id);
+ SV('b_cart',cart);renderCart();
+}
+function cartItems(){return cart.map(c=>({p:(S.products||{})[c.id],qty:c.qty})).filter(x=>x.p)}
+function cartSum(){return cartItems().reduce((s,x)=>s+x.p.price*x.qty,0)}
+function renderCart(){
+ const l=cartItems();
+ $('cartN').textContent=cart.length?'('+cart.length+')':'';
+ $('cartList').innerHTML=l.length?l.map(x=>'<div class="row"><img src="'+safeImg(x.p.img)+'"><div class="g"><b>'+esc(x.p.name)+'</b><br><span style="color:gold">'+fmt(x.p.price)+' F</span></div><button class="mini" onclick="qty(\''+x.p.id+'\',-1)">−</button><b>'+x.qty+'</b><button class="mini" onclick="qty(\''+x.p.id+'\',1)">+</button></div>').join(''):'<p style="color:#888">Panier vide</p>';
+ $('cartTotal').textContent=l.length?'Total : '+fmt(cartSum())+' F':'';
+}
+function commander(){
+ const l=cartItems();if(!l.length){alert('Panier vide');return}
+ const id=uid();
+ const o={id,date:Date.now(),status:'en attente',total:cartSum(),name:me.name,phone:me.phone,city:me.city,
+  items:l.map(x=>({name:x.p.name,price:x.p.price,qty:x.qty}))};
+ write('orders/'+id,o);
+ const wa=((S.info||{}).whatsapp||DEFAULT_WA).replace(/\D/g,'');
+ const msg='Commande #'+id+'\n'+l.map(x=>'• '+x.p.name+' x'+x.qty+' = '+fmt(x.p.price*x.qty)+' F').join('\n')+'\nTotal : '+fmt(o.total)+' F\nClient : '+me.name+' / '+me.phone+' / '+me.city;
+ cart=[];SV('b_cart',cart);renderCart();closeAll();
+ window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg),'_blank');
+}
+
+/* ----- compte client ----- */
+function checkGate(){if(me){$('gate').style.display='none';loadProfile()}else $('gate').style.display='flex'}
+function register(){
+ const n=$('uName').value.trim(),ph=$('uPhone').value.trim(),city=$('uCity').value.trim();
+ const key=ph.replace(/\D/g,'');
+ if(!n||!ph||!city){alert('Remplis tout BOSS !');return}
+ if(key.length<8){alert('Numéro invalide');return}
+ me={key,name:n,phone:ph,city,date:Date.now()};SV('b_me',me);
+ write('users/'+key,me);checkGate();
+}
+function loadProfile(){$('eName').value=me.name;$('ePhone').value=me.phone;$('eCity').value=me.city}
+function saveProfile(){
+ me.name=$('eName').value.trim()||me.name;me.phone=$('ePhone').value.trim()||me.phone;me.city=$('eCity').value.trim()||me.city;
+ SV('b_me',me);write('users/'+me.key,me);toast('✅ Profil sauvé');
+}
+function logout(){me=null;localStorage.removeItem('b_me');closeAll();checkGate()}
+</script><script>
+/* ----- ADMIN ----- */
+let tmpImg='',editId='';
+async function adminLogin(){
+ if(!fb){alert('Hors ligne : connexion impossible');return}
+ try{await fb.AU.signInWithEmailAndPassword(fb.auth,$('aMail').value.trim(),$('aPass').value)}
+ catch(e){alert('Email ou mot de passe incorrect')}
+}
+function adminLogout(){fb.AU.signOut(fb.auth);closeAll()}
+function setTab(t){tab=t;renderAdmin()}
+const TABS=[['stats','📊 Stats'],['orders','🧾 Commandes'],['prods','🛍️ Produits'],['clients','👥 Clients'],['set','⚙️ Réglages']];
+const STAT=['en attente','confirmée','livrée','annulée'];
+const orders=()=>Object.values(S.orders||{}).filter(o=>o&&o.id).sort((a,b)=>b.date-a.date);
+
+function renderAdmin(){
+ if(!isAdmin)return;
+ $('tabs').innerHTML=TABS.map(t=>'<button class="'+(t[0]===tab?'on':'')+'" onclick="setTab(\''+t[0]+'\')">'+t[1]+'</button>').join('');
+ const b=$('adminBody');
+ if(tab==='stats'){
+  const os=orders(),ok=os.filter(o=>o.status!=='annulée'),ca=ok.reduce((s,o)=>s+o.total,0);
+  const liv=os.filter(o=>o.status==='livrée').reduce((s,o)=>s+o.total,0);
+  b.innerHTML='<div class="stat"><div><b>'+fmt(ca)+' F</b>Chiffre d\'affaires</div><div><b>'+fmt(liv)+' F</b>Encaissé (livré)</div><div><b>'+os.length+'</b>Commandes</div><div><b>'+os.filter(o=>o.status==='en attente').length+'</b>À traiter</div><div><b>'+Object.keys(S.users||{}).length+'</b>Clients</div><div><b>'+prods().length+'</b>Produits</div></div>';
+ }
+ else if(tab==='orders'){
+  b.innerHTML=orders().map(o=>'<div class="ctrl"><b style="color:gold">#'+esc(o.id)+'</b> • '+new Date(o.date).toLocaleString('fr-FR')+'<br>'+esc(o.name)+' • '+esc(o.phone)+' • '+esc(o.city)+'<br>'+(o.items||[]).map(i=>'• '+esc(i.name)+' x'+i.qty).join('<br>')+'<br><b>'+fmt(o.total)+' F</b><br><select class="input" style="margin:6px 0" onchange="setStatus(\''+o.id+'\',this.value)">'+STAT.map(s=>'<option '+(s===o.status?'selected':'')+'>'+s+'</option>').join('')+'</select><a class="mini" style="text-decoration:none" href="https://wa.me/'+String(o.phone).replace(/\D/g,'')+'" target="_blank">💬 WhatsApp</a> <button class="mini" style="color:#f44;border-color:#f44" onclick="delOrder(\''+o.id+'\')">🗑️</button></div>').join('')||'<p style="color:#888">Aucune commande</p>';
+ }
+ else if(tab==='prods'){
+  const e=(S.products||{})[editId]||{};
+  b.innerHTML='<div class="ctrl"><h4 style="color:gold;margin-bottom:8px">'+(editId?'✏️ Modifier':'➕ Nouveau produit')+'</h4><input id="pName" class="input" placeholder="Nom" value="'+esc(e.name)+'"><input id="pPrice" class="input" type="number" placeholder="Prix (F)" value="'+esc(e.price)+'"><input id="pCat" class="input" placeholder="Catégorie (ex: Homme)" value="'+esc(e.cat)+'"><input type="file" accept="image/*" class="input" onchange="compress(this.files[0],600,d=>{tmpImg=d;$(\'pPrev\').src=d})"><img id="pPrev" src="'+safeImg(tmpImg||e.img)+'" style="width:80px;border-radius:8px;margin-bottom:8px"><button class="gold" onclick="saveProd()">✅ Enregistrer</button>'+(editId?'<button class="ghost" onclick="editId=\'\';tmpImg=\'\';renderAdmin()">Annuler</button>':'')+'</div>'+
+  prods().map(p=>'<div class="row"><img src="'+safeImg(p.img)+'"><div class="g"><b>'+esc(p.name)+'</b><br>'+fmt(p.price)+' F • '+esc(p.cat)+'</div><button class="mini" onclick="toggleStock(\''+p.id+'\')">'+(p.stock===false?'❌':'✅')+'</button><button class="mini" onclick="editId=\''+p.id+'\';tmpImg=\'\';renderAdmin()">✏️</button><button class="mini" style="color:#f44;border-color:#f44" onclick="delProd(\''+p.id+'\')">🗑️</button></div>').join('');
+ }
+ else if(tab==='clients'){
+  const t=(window._cq||'').toLowerCase();
+  const l=Object.values(S.users||{}).filter(u=>u&&(u.name+u.phone+u.city).toLowerCase().includes(t));
+  b.innerHTML='<div style="color:gold;font-weight:900;margin-bottom:6px">'+l.length+' client(s)</div><input class="input" placeholder="🔍 Chercher..." value="'+esc(window._cq||'')+'" oninput="window._cq=this.value;renderAdmin();this.focus()">'+l.map(u=>'<div class="row"><div class="g"><b>'+esc(u.name)+'</b><br>'+esc(u.phone)+' • '+esc(u.city)+'</div><a class="mini" style="text-decoration:none" href="https://wa.me/'+String(u.phone).replace(/\D/g,'')+'" target="_blank">💬</a><button class="mini" style="color:#f44;border-color:#f44" onclick="delClient(\''+u.key+'\')">🗑️</button></div>').join('');
+ }
+ else if(tab==='set'){
+  const i=S.info||{};
+  b.innerHTML='<div class="ctrl"><input id="sName" class="input" placeholder="Nom boutique" value="'+esc(i.name)+'"><input id="sWa" class="input" placeholder="WhatsApp (225...)" value="'+esc(i.whatsapp||DEFAULT_WA)+'"><input id="sBan" class="input" placeholder="Texte bannière" value="'+esc(i.banner)+'"><p style="font-size:12px;color:#aaa;margin-bottom:6px">🏆 Logo</p><input type="file" accept="image/*" class="input" onchange="compress(this.files[0],200,d=>{tmpImg=d;$(\'lPrev\').src=d})"><img id="lPrev" src="'+safeImg(i.logo)+'" style="width:60px;border-radius:50%"><button class="gold" onclick="saveInfo()">✅ Sauver</button></div>';
+ }
+}
+function setStatus(id,s){write('orders/'+id+'/status',s);toast('Statut : '+s)}
+function delOrder(id){if(confirm('Supprimer la commande ?'))write('orders/'+id,null)}
+function delClient(k){if(confirm('Supprimer ce client ?'))write('users/'+k,null)}
+function delProd(id){if(confirm('Supprimer ce produit ?'))write('products/'+id,null)}
+function toggleStock(id){const p=S.products[id];write('products/'+id+'/stock',p.stock===false)}
+function saveProd(){
+ const n=$('pName').value.trim(),pr=+$('pPrice').value,c=$('pCat').value.trim();
+ const old=(S.products||{})[editId]||{};
+ const img=tmpImg||old.img||'';
+ if(!n||!pr||!img){alert('Nom, prix et photo obligatoires');return}
+ const id=editId||uid();
+ write('products/'+id,{id,name:n,price:pr,cat:c,img,stock:old.stock!==false,date:old.date||Date.now()});
+ editId='';tmpImg='';toast('✅ Produit enregistré');
+}
+function saveInfo(){
+ const i=S.info||{};
+ write('info',{name:$('sName').value.trim(),whatsapp:$('sWa').value.trim(),banner:$('sBan').value.trim(),logo:tmpImg||i.logo||''});
+ tmpImg='';toast('✅ Réglages sauvés');
+}
+/* ----- PARTAGE ----- */
+const siteUrl=()=>location.href.split('?')[0].split('#')[0];
+const shopN=()=>(S.info||{}).name||'BOUBA STORE';
+function copyLink(txt){
+ const t=typeof txt==='string'?txt:siteUrl();
+ try{navigator.clipboard.writeText(t)}catch(e){}
+ toast('🔗 Lien copié');
+}
+function shareNet(n){
+ const url=siteUrl(),msg='Découvre '+shopN()+' 👑 '+url;
+ if(n==='whatsapp')window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+ else if(n==='facebook')window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(url),'_blank');
+ else{copyLink(msg);toast('🔗 Lien copié, colle-le dans '+(n==='instagram'?'Instagram':'TikTok'));
+  setTimeout(()=>window.open(n==='instagram'?'https://www.instagram.com/':'https://www.tiktok.com/','_blank'),1200)}
+}
+function shareNative(){
+ if(navigator.share)navigator.share({title:shopN(),text:'Découvre '+shopN()+' 👑',url:siteUrl()}).catch(()=>{});
+ else copyLink();
+}
+function shareProd(id){
+ const p=(S.products||{})[id];if(!p)return;
+ const msg=p.name+' — '+fmt(p.price)+' F 👑 '+shopN()+'\n'+siteUrl();
+ if(navigator.share)navigator.share({title:p.name,text:msg}).catch(()=>{});
+ else window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+function addShare(){
+ document.querySelectorAll('#grid .card').forEach(c=>{
+  if(c.querySelector('.shb'))return;
+  const b=c.querySelector('.btn');if(!b)return;
+  const m=(b.getAttribute('onclick')||'').match(/'(.+?)'/);if(!m)return;
+  const s=document.createElement('button');
+  s.className='shb';s.textContent='📤 Partager';
+  s.onclick=()=>shareProd(m[1]);
+  c.querySelector('.info').appendChild(s);
+ });
+}
+const _rs=renderStore;
+renderStore=function(){_rs();addShare()};
+
+/* ----- ASSISTANTE ----- */
+function toggleIA(){
+ const c=$('iaChat');c.classList.toggle('open');
+ if(c.classList.contains('open')&&!$('iaMsgs').children.length)
+  iaSay('Salam ! 👋 Bienvenue chez '+esc(shopN())+'. Dis-moi ce que tu cherches (ex: "ensemble", "jogging") ou tape "nouveautés".');
+}
+function iaSay(h,u){const d=document.createElement('div');d.className='msg '+(u?'user':'bot');d.innerHTML=h;$('iaMsgs').appendChild(d);$('iaMsgs').scrollTop=1e6}
+function iaCards(l){return l.slice(0,5).map(p=>'<div class="iaCard" onclick="addCart(\''+p.id+'\')"><img src="'+safeImg(p.img)+'"><div><b>'+esc(p.name)+'</b><br><span style="color:gold">'+fmt(p.price)+' F</span><br><small>👆 Touche pour ajouter</small></div></div>').join('')}
+function sendIA(){
+ const raw=$('iaInput').value.trim();if(!raw)return;$('iaInput').value='';
+ iaSay(esc(raw),true);
+ const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+ const t=norm(raw),all=prods();
+ const wa=((S.info||{}).whatsapp||DEFAULT_WA).replace(/\D/g,'');
+ const stop=['je','cherche','veux','voir','un','une','des','les','pour','moi','avec','svp','stp','vous','avez','est','quel','prix','moins','plus','que'];
+ const words=t.split(/[^a-z0-9]+/).filter(w=>w.length>2&&!/^\d+$/.test(w)&&!stop.includes(w)).map(w=>w.replace(/s$/,''));
+ const pm=t.replace(/\s/g,'').match(/(?:moinsde|max|budget)(\d+)/);
+ let r;
+ if(/livraison|livrer/.test(t))r='🚚 Livraison en 24H à Abidjan.';
+ else if(/paiement|payer|wave|orange|money/.test(t))r='💳 Paiement par Wave ou Orange Money.';
+ else if(/panier|commander|commande/.test(t))r='🛒 Ajoute tes articles, ouvre 👜 Panier puis touche "Commander sur WhatsApp".';
+ else if(/contact|whatsapp|appeler|numero/.test(t))r='📞 Écris-nous sur <a href="https://wa.me/'+wa+'" target="_blank" style="color:gold">WhatsApp</a>.';
+ else if(/merci/.test(t))r='Avec plaisir ! 👑';
+ else if(/nouveau|nouveaute|catalogue|tout|derniere/.test(t))r=all.length?'✨ Nos dernières nouveautés :'+iaCards(all):'Aucun produit pour le moment.';
+ else if(/^(salam|bonjour|bonsoir|salut|hello|coucou)/.test(t))r='Salam ! 👋 Que cherches-tu aujourd\'hui ?';
+ else if(words.length||pm){
+  let h=all.filter(p=>(!pm||p.price<=+pm[1])&&words.every(w=>norm(p.name+' '+p.cat).includes(w)));
+  if(!h.length&&words.length)h=all.filter(p=>(!pm||p.price<=+pm[1])&&words.some(w=>norm(p.name+' '+p.cat).includes(w)));
+  r=h.length?'Voici ce que j\'ai trouvé 👇'+iaCards(h):'Je n\'ai pas trouvé 😕. Voici nos nouveautés :'+iaCards(all);
+ }else r='Je peux chercher un article, ou te donner les infos livraison, paiement et contact.';
+ setTimeout(()=>iaSay(r),300);
+}
+/* ===== ASSISTANTE V2 ===== */
+const IA_INFO={
+ livraison:'🚚 Livraison en 24H à Abidjan. Indique ton quartier en commandant, on te confirme le tarif sur WhatsApp.',
+ paiement:'💳 Paiement par Wave ou Orange Money.',
+ retour:'🔄 Pour un échange ou un souci avec ta commande, écris-nous sur WhatsApp avec ta photo et ton numéro de commande.',
+ horaires:'🕘 Écris-nous quand tu veux sur WhatsApp, on te répond dès qu\'on est disponible.'
+};
+const iaMem={last:[],offer:null,miss:0};
+(function(){const s=document.createElement('style');s.textContent='.chip{display:inline-block;background:#222;border:1px solid gold;color:gold;border-radius:14px;padding:5px 10px;margin:4px 4px 0 0;font-size:12px;font-weight:700;cursor:pointer}#iaChat{height:460px}';document.head.appendChild(s)})();
+
+const iaN=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim();
+const iaFirst=()=>((me&&me.name)||'').trim().split(' ')[0];
+const iaHi=()=>{const h=new Date().getHours();return h<12?'Bonjour':h<18?'Bon après-midi':'Bonsoir'};
+const iaWa=()=>((S.info||{}).whatsapp||DEFAULT_WA).replace(/\D/g,'');
+const iaLink=(txt,label)=>'<a href="https://wa.me/'+iaWa()+'?text='+encodeURIComponent(txt)+'" target="_blank" style="color:gold;font-weight:700">'+label+'</a>';
+const iaChips=a=>'<div>'+a.map(x=>'<span class="chip" onclick="iaQuick(\''+x+'\')">'+x+'</span>').join('')+'</div>';
+const IA_SYN=[
+ ['jogging','survet','survetement','jog','training'],
+ ['ensemble','tenue','set','piece'],
+ ['pull','sweat','pullover','hoodie'],
+ ['chemise','chemisette'],
+ ['pantalon','jean','pant'],
+ ['tshirt','tee','polo','maillot'],
+ ['basket','sneaker','chaussure','soulier'],
+ ['short','bermuda'],
+ ['casquette','bonnet','chapeau'],
+ ['sac','sacoche','pochette']
+];
+const IA_STOP=new Set('je tu il on nous vous de du des le la les un une et ou a au aux en pour par sur avec sans dans moi toi mon ma mes ton ta tes ce cet cette ces qui que quoi est es suis cherche chercher veux voudrais voir montre montrer donne donner avez avoir as ai ya y faut svp stp please sil plait quel quels quelle quelles prix coute combien fait faire article articles produit produits moins plus max maximum budget entre pas cher vendez vendre ajoute ajouter mets mettre prends prendre panier commander taille tailles disponible dispo stock reste encore aussi bien tres trop comme ca cela ici celui celle ceux celles premier deuxieme troisieme dernier numero besoin quelque chose genre type modele salam salut bonjour bonsoir hello hey coucou slt bjr cc yo assalam wesh frere boss patron grand monsieur madame merci oui non ok'.split(' '));
+
+function iaLev(a,b){
+ if(a===b)return 0;if(Math.abs(a.length-b.length)>2)return 9;
+ const d=[];for(let i=0;i<=a.length;i++)d[i]=[i];for(let j=1;j<=b.length;j++)d[0][j]=j;
+ for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+ return d[a.length][b.length];
+}
+function iaSim(w,t){
+ if(w===t)return 1;
+ if(w.length>=3&&t.startsWith(w))return .9;
+ if(t.length>=4&&w.startsWith(t))return .85;
+ if(w.length>=4){const l=iaLev(w,t);if(l<=1)return .8;if(l<=2&&w.length>=7)return .7}
+ return 0;
+}
+const iaTok=p=>iaN((p.name||'')+' '+(p.cat||'')).split(' ').filter(Boolean).map(x=>x.length>3?x.replace(/s$/,''):x);
+function iaScore(p,kws,sizes){
+ const tk=iaTok(p);let m=0,s=0;
+ kws.forEach(alts=>{let b=0;alts.forEach(a=>tk.forEach(x=>{const v=iaSim(a,x);if(v>b)b=v}));if(b>0){m++;s+=b}});
+ sizes.forEach(z=>{if(tk.includes(z))s+=.5});
+ return {m,s};
+}
+function iaPrice(raw){
+ let t=raw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+ t=t.replace(/(\d)[ .,](?=\d{3}(?!\d))/g,'$1').replace(/(\d+)\s*(?:k|mille)\b/g,(m,a)=>a*1000);
+ const r={};let m;
+ if(m=t.match(/entre\s*(\d+)\s*(?:et|a|-)\s*(\d+)/)){r.min=+m[1];r.max=+m[2];return r}
+ if(m=t.match(/(?:moins\s*de|max(?:imum)?|budget(?:\s*de)?|jusqu\s*a|pas\s*plus\s*de|en dessous de|<)\s*(\d+)/))r.max=+m[1];
+ if(m=t.match(/(?:plus\s*de|min(?:imum)?|a\s*partir\s*de|au\s*dessus\s*de|>)\s*(\d+)/))r.min=+m[1];
+ return r;
+}
+
+/* affichage */
+function iaBot(h){
+ const box=$('iaMsgs'),t=document.createElement('div');
+ t.className='msg bot';t.textContent='✍️ …';box.appendChild(t);box.scrollTop=1e6;
+ setTimeout(()=>{t.innerHTML=h;box.scrollTop=1e6},Math.min(900,350+h.length*2));
+}
+function iaCards(l){
+ return l.slice(0,5).map((p,i)=>'<div class="iaCard"><img src="'+safeImg(p.img)+'"><div style="flex:1"><b>'+(i+1)+'. '+esc(p.name)+'</b><br><span style="color:gold">'+fmt(p.price)+' F</span>'+(p.stock===false?' <span style="color:#f66">• épuisé</span>':' <span style="color:#25D366">• disponible</span>')+'<br>'+(p.stock===false?'':'<span class="chip" onclick="iaAdd(\''+esc(p.id)+'\')">🛒 Ajouter</span>')+'<span class="chip" onclick="iaAsk(\''+esc(p.id)+'\')">📲 WhatsApp</span></div></div>').join('');
+}
+function iaShow(list,intro,outro){
+ iaMem.last=list.slice(0,5);iaMem.offer=list.length===1&&list[0].stock!==false?list[0].id:null;iaMem.miss=0;
+ iaBot(intro+iaCards(list)+(list.length>5?'<br><small>+ '+(list.length-5)+' autres, précise ta recherche pour les voir.</small>':'')+(outro||''));
+}
+function iaAsk(id){const p=(S.products||{})[id];if(!p)return;window.open('https://wa.me/'+iaWa()+'?text='+encodeURIComponent('Bonjour, je suis intéressé par : '+p.name+' ('+fmt(p.price)+' F)'),'_blank')}
+function iaAdd(id){
+ const p=(S.products||{})[id];if(!p)return;
+ if(p.stock===false){iaBot('😕 Cet article est épuisé pour le moment. Je peux te proposer autre chose ?'+iaChips(['Nouveautés']));return}
+ addCart(id);iaMem.last=[p];iaMem.offer=null;
+ iaBot('✅ <b>'+esc(p.name)+'</b> ajouté au panier. Total : <b>'+fmt(cartSum())+' F</b>.'+iaChips(['Mon panier','Commander','Nouveautés']));
+}
+function iaCartMsg(){
+ const l=cartItems();
+ if(!l.length)return '🛒 Ton panier est vide pour le moment. Dis-moi ce que tu cherches 😉'+iaChips(['Nouveautés']);
+ return '🛒 <b>Ton panier</b><br>'+l.map(x=>'• '+esc(x.p.name)+' x'+x.qty+' = '+fmt(x.p.price*x.qty)+' F').join('<br>')+'<br><b>Total : '+fmt(cartSum())+' F</b><br><span class="chip" onclick="commander()">📲 Commander sur WhatsApp</span>';
+}
+
+function toggleIA(){
+ const c=$('iaChat');c.classList.toggle('open');
+ if(c.classList.contains('open')&&!$('iaMsgs').children.length){
+  const f=iaFirst();
+  iaSay(iaHi()+(f?' '+esc(f):'')+` ! 👋 Je suis l'assistante de <b>${esc(shopN())}</b>. Écris-moi comme tu parles : un article, une taille, un budget, ou une question sur la livraison et le paiement.`+iaChips(['Nouveautés','Livraison','Paiement','Mon panier']));
+ }
+}
+function sendIA(){const raw=$('iaInput').value.trim();if(!raw)return;$('iaInput').value='';iaSay(esc(raw),true);iaHandle(raw)}
+function iaQuick(x){iaSay(esc(x),true);iaHandle(x)}
+
+/* cerveau */
+function iaHandle(raw){
+ const t=iaN(raw),all=prods(),f=iaFirst(),nm=f?' '+esc(f):'',say=iaBot,has=r=>r.test(t),wc=t.split(' ').length;
+ const pr=iaPrice(raw);
+ const cheap=has(/(pas cher|moins cher|bon marche|economique|petit prix|abordable)/),dear=has(/(plus cher|luxe|haut de gamme|premium)/);
+ const sizes=(t.match(/\b(xxxl|xxl|xl|xs|2xl|3xl|4xl)\b/g)||[]);
+ const tm=t.match(/\btaille (s|m|l|\d{2})\b/);if(tm)sizes.push(tm[1]);
+
+ /* conversation */
+ if(has(/\b(merci|thanks|barka)\b/))return say(`Avec plaisir${nm} ! 👑 Je reste là si tu as besoin d'autre chose.`+iaChips(['Nouveautés','Mon panier']));
+ if(has(/\b(au revoir|a plus|a bientot|bye|bonne nuit|a demain|bonne soiree)\b/))return say(`À très bientôt${nm} ! 👋 Merci de ta visite chez ${esc(shopN())}.`);
+ if(wc<=3&&has(/^(salam|salut|bonjour|bonsoir|hello|hey|coucou|slt|bjr|cc|yo|assalam)/))return say(iaHi()+nm+` ! 👋 Bienvenue chez <b>${esc(shopN())}</b>. Qu'est-ce que je peux faire pour toi ?`+iaChips(['Nouveautés','Livraison','Paiement']));
+ if(has(/(ca va|comment vas|comment tu vas|tu vas bien|la forme)/))return say(`Ça va très bien, merci 🙏 Et toi${nm} ? Dis-moi ce que tu cherches aujourd'hui.`);
+ if(has(/(qui es tu|tu es qui|ton nom|t es qui|tu es un robot|es tu un robot|tu es humain)/))return say(`Je suis l'assistante virtuelle de ${esc(shopN())} 🤖. Je t'aide à trouver un article, à connaître les prix et à passer commande. Pour parler à l'équipe : `+iaLink('Bonjour','WhatsApp'));
+ if(wc<=5&&has(/(bravo|super|genial|j adore|belle boutique|bon travail|excellent)/))return say('Merci beaucoup, ça fait plaisir ! 🙏👑 Je suis là pour t\'aider.');
+ if(has(/\b(idiot|stupide|debile|merde|nul)\b/))return say('Je suis désolée si je t\'ai déçu 🙏 Dis-moi ce que tu cherches, ou écris à l\'équipe : '+iaLink('Bonjour','WhatsApp'));
+
+ /* infos boutique */
+ if(has(/\b(livraison|livrer|livrez|delai|expedition|frais)\b/))return say(IA_INFO.livraison+iaChips(['Paiement','Contact']));
+ if(has(/(paiement|payer|payement|wave|orange money|mobile money|cash)/))return say(IA_INFO.paiement+iaChips(['Livraison']));
+ if(has(/(ma commande|suivi|colis|statut)/))return say('📦 Pour le suivi, envoie ton numéro de commande (#...) à l\'équipe : '+iaLink('Bonjour, je voudrais le suivi de ma commande','📲 WhatsApp'));
+ if(has(/(retour|echange|rembours|defectueux|garantie)/))return say(IA_INFO.retour+'<br>'+iaLink('Bonjour, j\'ai une question sur ma commande','📲 Écrire sur WhatsApp'));
+ if(has(/(horaire|heure d ouverture|ouvert|vous repondez)/))return say(IA_INFO.horaires);
+ if(has(/(adresse|ou etes vous|ou se trouve|localisation|magasin)/))return say('📍 Pour l\'adresse exacte et les retraits, écris-nous : '+iaLink('Bonjour, quelle est votre adresse ?','📲 WhatsApp')+'. Livraison à Abidjan en 24H.');
+ if(has(/(contact|whatsapp|appeler|numero|joindre|telephone|parler a|conseiller|responsable)/))return say('📞 Tu peux écrire directement à l\'équipe : '+iaLink('Bonjour','📲 WhatsApp'));
+ if(has(/(reduction|remise|promo|dernier prix|negoci|solde|rabais)/))return say('💬 Les prix affichés sont nos prix. Pour une remise (par exemple si tu prends plusieurs articles), demande directement à l\'équipe : '+iaLink('Bonjour, je voudrais une remise','📲 WhatsApp'));
+
+ /* mots-clés produit */
+ const kws=[];
+ t.split(' ').forEach(w=>{
+  if(!w||/^\d+$/.test(w)||IA_STOP.has(w)||sizes.includes(w)||w.length<2)return;
+  const k=w.length>3?w.replace(/s$/,''):w;if(IA_STOP.has(k))return;
+  const alts=[k];IA_SYN.forEach(g=>{if(g.some(x=>iaSim(k,x)>=.8))g.forEach(x=>{if(!alts.includes(x))alts.push(x)})});
+  kws.push(alts);
+ });
+ const add=has(/(ajoute|ajouter|mets|mettre|je prends|prends|je le prends|je le veux|je veux ce|je veux celui|ok pour)/);
+
+ /* panier / commande */
+ if(has(/\bpanier\b/)&&!add)return say(iaCartMsg());
+ if(has(/(commander|valider|finaliser|passer commande)/)&&!kws.length)return say(iaCartMsg());
+
+ /* réponse courte "oui" */
+ if(has(/^(oui|ok|d accord|dac|yes|vas y|go|volontiers)$/)&&iaMem.offer){const id=iaMem.offer;return iaAdd(id)}
+
+ /* référence au résultat précédent */
+ const hasRef=has(/(premier|1er|deuxieme|second|troisieme|dernier|\ble [1-5]\b|\bn [1-5]\b)/);
+ if(!kws.length&&!sizes.length&&iaMem.last.length&&(add||hasRef||has(/(celui|ce modele)/))){
+  if(iaMem.last.length>1&&!hasRef)return say('Lequel ? Dis-moi « le 1 », « le 2 »… 😉');
+  const i=has(/(deuxieme|second|\b2\b)/)?1:has(/(troisieme|\b3\b)/)?2:has(/\b4\b/)?3:has(/\b5\b/)?4:has(/dernier/)?iaMem.last.length-1:0;
+  const p=iaMem.last[i];
+  if(p)return add?iaAdd(p.id):iaShow([p],'Voici cet article 👇','<br>Je l\'ajoute au panier ?');
+ }
+
+ /* catalogue complet */
+ if(!kws.length&&has(/(nouveaute|nouveau|catalogue|tout voir|tous les|montre moi tout|liste|qu avez vous|vous vendez|quoi comme|derniere)/)){
+  if(!all.length)return say('Le catalogue est vide pour le moment, repasse bientôt ! 🙏');
+  return iaShow(all,'✨ Nos dernières nouveautés :');
+ }
+
+ /* recherche produit */
+ const priced=pr.min!=null||pr.max!=null;
+ if(kws.length||sizes.length||priced||cheap||dear){
+  let base=all;
+  if(!kws.length&&!sizes.length&&!priced&&iaMem.last.length>1&&(cheap||dear))base=iaMem.last;
+  let list=base.slice(),partial=false;
+  if(kws.length){
+   const sc=list.map(p=>Object.assign({p},iaScore(p,kws,sizes)));
+   const best=Math.max(0,...sc.map(x=>x.m));
+   partial=best>0&&best<kws.length;
+   list=best>0?sc.filter(x=>x.m===best).sort((a,b)=>b.s-a.s).map(x=>x.p):[];
+  }
+  const before=list.slice();let sizeMiss=false;
+  if(sizes.length&&list.length){const sz=list.filter(p=>sizes.some(z=>iaTok(p).includes(z)));if(sz.length)list=sz;else sizeMiss=true}
+  if(pr.min!=null)list=list.filter(p=>p.price>=pr.min);
+  if(pr.max!=null)list=list.filter(p=>p.price<=pr.max);
+  if(cheap)list.sort((a,b)=>a.price-b.price);else if(dear)list.sort((a,b)=>b.price-a.price);
+
+  if(list.length){
+   let intro=list.length===1?'Voilà ce qu\'il te faut 👇':'J\'ai trouvé <b>'+list.length+'</b> articles 👇';
+   if(partial)intro='Je n\'ai pas exactement ça, mais voici ce qui s\'en approche 👇';
+   if(sizeMiss)intro+='<br><small>Je ne vois pas cette taille dans le nom, demande à l\'équipe pour confirmer.</small>';
+   if(cheap&&!kws.length)intro='💰 Nos articles les moins chers :';
+   if(dear&&!kws.length)intro='💎 Nos articles les plus chers :';
+   return iaShow(list,intro,list.length===1?'<br>Je l\'ajoute au panier ?':'<br><small>Dis « le 2 » pour choisir, ou précise (taille, budget).</small>');
+  }
+  if(before.length&&priced){
+   const c=before.slice().sort((a,b)=>a.price-b.price);
+   return iaShow(c,'Je n\'ai rien dans ce budget pour ça 😕 Voici le moins cher que j\'ai :');
+  }
+ }
+
+ /* pas compris */
+ iaMem.miss++;
+ let r=wc<=2?`Peux-tu préciser${nm} ? Par exemple : « jogging homme », « ensemble moins de 10000 » ou « livraison ».`:'Je n\'ai pas trouvé exactement ça 😕 Voici nos nouveautés, ou précise ta recherche.';
+ if(iaMem.miss>=2)r+='<br>'+iaLink('Bonjour, je cherche : '+raw,'📲 Demander à l\'équipe sur WhatsApp');
+ say(r+(all.length&&wc>2?iaCards(all.slice(0,3)):'')+iaChips(['Nouveautés','Contact']));
+}
+/* ----- démarrage ----- */
+function renderAll(){
+ renderStore();renderCart();
+ if($('adminPage').classList.contains('active')&&!/INPUT|SELECT/.test((document.activeElement||{}).tagName))renderAdmin();
+}
+checkGate();renderAll();setNet();initFB();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+<script>
+setInterval(function(){
+  var n=document.getElementById('navAdmin');
+  if(n)n.style.display=(typeof isAdmin!=='undefined'&&isAdmin)?'':'none';
+},1000);
+var tapN=0,tapT;
+document.getElementById('shopName').addEventListener('click',function(){
+  tapN++;clearTimeout(tapT);
+  tapT=setTimeout(function(){tapN=0},2000);
+  if(tapN>=5){tapN=0;openPage('adminPage');renderAdmin();}
+});
+let dp=null;
+const ib=document.getElementById('installBtn');
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+const isApp=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
+if(!isApp){
+ if(isIOS)ib.style.display='block';
+ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;ib.style.display='block'});
+}
+ib.onclick=async()=>{
+ if(dp){dp.prompt();await dp.userChoice;dp=null;ib.style.display='none'}
+ else alert("iPhone : touchez Partager, puis « Sur l'écran d'accueil ».");
+};
+window.addEventListener('appinstalled',()=>ib.style.display='none');
+ if(location.hash==='#admin')setTimeout(function(){openPage('adminPage');renderAdmin()},800);
+document.addEventListener('click',function(e){
+ if(!e.target.closest('#shopName'))return;
+ tapN++;clearTimeout(tapT);
+ tapT=setTimeout(function(){tapN=0},2000);
+ if(tapN>=5){tapN=0;openPage('adminPage');renderAdmin()}
+});</script>
+ <script type="module" src="alertes.js"></script>
+ <script src="amis5.js"></script>
+<script>document.addEventListener('click',function(e){var n=e.target.closest('#chats,.nav>*');if(n&&(n.id==='chats'||/Amis/.test(n.textContent))){e.stopPropagation();e.preventDefault();location.href='amis.html'}},true);</script>
+<script src="bouba-chat.js"></script>
+</body></html>
+ <script src="maj.js"></script>
+</body></html><script type="module" src="articles-accueil.js"></script>
+</body></html>
