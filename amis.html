@@ -295,6 +295,7 @@ async function loadStatus() {
   try {
     const snap = await getDocs(query(collection(db, 'status'), where('t', '>', Date.now() - 86400000)));
     const arr = snap.docs.map(d => d.data()).sort((a, b) => b.t - a.t);
+    statusArr = arr;
     out.innerHTML = arr.map(s => `<div class="stitem"><div class="string">${safeImg(s.img) ? `<img src="${safeImg(s.img)}">` : ''}</div><div class="stinfo"><b>${esc(s.name)}</b><span>${new Date(s.t).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</span></div></div>`).join('') || '<p class="note">Aucun statut.</p>';
   } catch (e) { console.error(e); out.innerHTML = '<p class="note" style="color:#f66">Erreur de chargement.</p>'; }
 }
