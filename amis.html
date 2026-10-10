@@ -358,13 +358,14 @@ async function sendMessage() {
   const input = $('messageInput');
   const text = input.value.trim();
   if (!text || !chatId) return;
-  $('photoFile').onchange = e => { const f = e.target.files[0]; if (f) setMyPhoto(f); };
+
   input.value = '';
   try {
     await addDoc(collection(db, 'chats', chatId, 'messages'), { text, senderId: me.uid, timestamp: serverTimestamp() });
   } catch (e) { console.error(e); input.value = text; alert("Erreur lors de l'envoi du message."); }
 }
 $('messageInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+    $('photoFile').onchange = e => { const f = e.target.files[0]; if (f) setMyPhoto(f); };
 
 const goCall = (id, video) => { if (id) location.href = 'Call.html?call=' + encodeURIComponent(id) + '&video=' + video; };
 const fid = a => a.closest('[data-id]').dataset.id;
