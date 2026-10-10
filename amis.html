@@ -298,7 +298,18 @@ async function share() {
 }
 
 // ---------- Chat ----------
-function openChat(u) {
+async function setMyPhoto(f) {
+  const url = URL.createObjectURL(f);
+  const img = await new Promise((res, rej) => {
+    const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = url;
+  });
+  URL.revokeObjectURL(url);
+  const c = document.createElement('canvas'); c.width = c.height = 200;
+  const s = Math.max(200 / img.width, 200 / img.height);
+  c.getContext('2d').drawImage(img, (200 - img.width * s) / 2, (200 - img.height * s) / 2, img.width * s, img.height * s);
+  await updateDoc(doc(db, 'users', me.uid), { photo: c.toDataURL('image/jpeg', 0.7) });
+  }
+  function openChat(u) {
   friendId = u.id;
   chatId = [me.uid, u.id].sort().join('_');
   $('chatName').textContent = u.name;
