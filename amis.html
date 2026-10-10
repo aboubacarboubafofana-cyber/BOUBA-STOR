@@ -378,6 +378,10 @@ const fid = a => a.closest('[data-id]').dataset.id;
 // ---------- Actions (un seul gestionnaire de clics) ----------
 const A = {
   call: a => goCall(fid(a), false),
+  const A = {
+  call: a => goCall(fid(a), false),
+  myPhoto: () => $('photoFile').click(),
+  video: a => goCall(fid(a), true),
   video: a => goCall(fid(a), true),
   chatCall: () => goCall(friendId, false),
   chatVideo: () => goCall(friendId, true),
