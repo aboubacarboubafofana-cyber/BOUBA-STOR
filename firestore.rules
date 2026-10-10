@@ -27,11 +27,13 @@ service cloud.firestore {
     // chatId = uidA_uidB
     match /chats/{chatId}/messages/{m} {
       allow read: if request.auth != null && request.auth.uid in chatId.split('_');
-      allow create: if request.auth != null
-        && request.auth.uid in chatId.split('_')
-        && request.resource.data.senderId == request.auth.uid
-        && request.resource.data.text is string
-        && request.resource.data.text.size() <= 2000;
+              allow create: if request.auth != null
+          && request.auth.uid in chatId.split('_')
+          && request.resource.data.senderId == request.auth.uid
+          && ((request.resource.data.text is string
+               && request.resource.data.text.size() <= 2000)
+           || (request.resource.data.audio is string
+               && request.resource.data.audio.size() < 700000));
       allow update, delete: if false;
     }
 
