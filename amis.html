@@ -160,6 +160,8 @@ snap.forEach(d => {
   seen.add(key);
   allUsers.push({ id: d.id, name, tel, photo: safeImg(u.photo) });
 });
+  allUsers.push({ id: d.id, name, tel, photo: safeImg(u.photo) });
+});
     render();
     openFromHash();
   } catch (e) {
