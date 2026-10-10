@@ -120,6 +120,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const safeTel = t => String(t || '').replace(/[^\d+]/g, '');
 const safeImg = s => (typeof s === 'string' && /^data:image\/(jpeg|png|webp);base64,/.test(s)) ? s : '';
 const ini = n => String(n || '?').slice(0, 2).toUpperCase();
+  <div onclick="location.href='amis.html'">💬<br>Chat</div>
 const norm = n => String(n || '').replace(/\D/g, '').slice(-9);
 const appLink = location.origin;
 const inviteText = 'Rejoins-moi sur Bouba Store ! ' + appLink;
