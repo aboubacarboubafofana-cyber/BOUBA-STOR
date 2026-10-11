@@ -1,0 +1,28 @@
+{
+  "_IMPORTANT": "Ne remplacez PAS vos règles actuelles. Copiez seulement les blocs loyalty, referrals, contest et photos dans votre section rules existante (Firebase > Realtime Database > Règles). Le bloc info/flash doit rester modifiable par l'admin comme le reste de info.",
+  "rules": {
+    "loyalty": {
+      "$k": { ".read": true, ".write": true }
+    },
+    "referrals": {
+      "$code": {
+        ".read": true,
+        ".write": "!data.exists()",
+        ".validate": "newData.hasChildren(['owner'])"
+      }
+    },
+    "contest": {
+      "$month": {
+        ".read": "auth.uid === '7W5OEzTeTNbFLzULLO9VsuDKZFN2'",
+        "$k": { ".write": true }
+      }
+    },
+    "photos": {
+      ".read": true,
+      "$id": {
+        ".write": "auth.uid === '7W5OEzTeTNbFLzULLO9VsuDKZFN2' || !data.exists()",
+        ".validate": "auth.uid === '7W5OEzTeTNbFLzULLO9VsuDKZFN2' || newData.child('ok').val() === false"
+      }
+    }
+  }
+}
