@@ -1,0 +1,18 @@
+const C='bouba-v4';
+self.addEventListener('install',()=>self.skipWaiting());
+self.addEventListener('activate',e=>e.waitUntil((async()=>{
+ const ks=await caches.keys(),old=ks.some(k=>k!==C);
+ await Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)));
+ await self.clients.claim();
+ if(old)for(const c of await self.clients.matchAll({type:'window'}))c.navigate(c.url).catch(()=>{});
+})()));
+self.addEventListener('fetch',e=>{
+ const r=e.request;
+ if(r.method!=='GET'||!r.url.startsWith(self.location.origin))return;
+ e.respondWith(fetch(r,{cache:'no-store'}).then(res=>{
+  if(res.ok){const k=res.clone();caches.open(C).then(c=>c.put(r,k))}
+  return res;
+ }).catch(()=>caches.match(r).then(x=>x||caches.match('./index.html'))));
+});
+self.addEventListener('push',e=>{let d={};try{const j=e.data.json();d=Object.assign({},j,j.notification||{},j.data||{})}catch(_){}e.waitUntil(self.registration.showNotification(d.title||'BOUBA STORE',{body:d.body||'',icon:'icon-192.png',badge:'icon-192.png',tag:d.tag||'bouba-new',data:{url:d.url||'./'}}))});
+self.addEventListener('notificationclick',e=>{e.notification.close();const u=(e.notification.data&&e.notification.data.url)||'./';e.waitUntil(self.clients.matchAll({type:'window'}).then(l=>{for(const c of l)if('focus' in c)return c.focus();return self.clients.openWindow(u)}))});
