@@ -49,7 +49,28 @@ $('go').onclick = async () => {
     if (inscription) {
       const c = await createUserWithEmailAndPassword(auth, email, mdp);
       await updateProfile(c.user, { displayName: nom });
-      await setDoc(doc(db, 'users', c.user.uid), { name: nom, tel, createdAt: Date.now() });
+      let photo = '';
+const f = $('photo').files[0];
+if (f) {
+  photo = await new Promise(ok => {
+    const r = new FileReader();
+    r.onload = () => {
+      const im = new Image();
+      im.onload = () => {
+        const k = Math.min(1, 240 / Math.max(im.width, im.height));
+        const cv = document.createElement('canvas');
+        cv.width = im.width * k; cv.height = im.height * k;
+        cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+        ok(cv.toDataURL('image/jpeg', 0.7));
+      };
+      im.onerror = () => ok('');
+      im.src = r.result;
+    };
+    r.onerror = () => ok('');
+    r.readAsDataURL(f);
+  });
+}
+await setDoc(doc(db, 'users', c.user.uid), { name: nom, tel, photo, createdAt: Date.now() });
     } else {
       await signInWithEmailAndPassword(auth, email, mdp);
     }
