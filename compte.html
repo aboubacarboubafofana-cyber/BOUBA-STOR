@@ -52,24 +52,32 @@ $('go').onclick = async () => {
       let photo = '';
 const f = $('photo').files[0];
 if (f) {
-  photo = await new Promise(ok => {
-    const r = new FileReader();
-    r.onload = () => {
-      const im = new Image();
-      im.onload = () => {
-        const k = Math.min(1, 240 / Math.max(im.width, im.height));
-        const cv = document.createElement('canvas');
-        cv.width = im.width * k; cv.height = im.height * k;
-        cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
-        ok(cv.toDataURL('image/jpeg', 0.7));
+  let photo = '';
+const f = $('photo').files[0];
+if (f) {
+  try {
+    photo = await new Promise((ok, ko) => {
+      const r = new FileReader();
+      r.onload = () => {
+        const im = new Image();
+        im.onload = () => {
+          const k = Math.min(1, 240 / Math.max(im.naturalWidth, im.naturalHeight));
+          const cv = document.createElement('canvas');
+          cv.width = Math.max(1, Math.round(im.naturalWidth * k));
+          cv.height = Math.max(1, Math.round(im.naturalHeight * k));
+          cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+          ok(cv.toDataURL('image/jpeg', 0.7));
+        };
+        im.onerror = () => ko(new Error('image'));
+        im.src = r.result;
       };
-      im.onerror = () => ok('');
-      im.src = r.result;
-    };
-    r.onerror = () => ok('');
-    r.readAsDataURL(f);
-  });
-}
+      r.onerror = () => ko(new Error('lecture'));
+      r.readAsDataURL(f);
+    });
+  } catch (err) {
+    $('msg').textContent = 'Photo illisible : ' + err.message;
+  }
+  }
 await setDoc(doc(db, 'users', c.user.uid), { name: nom, tel, photo, createdAt: Date.now() });
     } else {
       await signInWithEmailAndPassword(auth, email, mdp);
