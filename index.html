@@ -673,4 +673,21 @@ document.addEventListener('click',function(e){
 </body></html>
  <script src="maj.js"></script>
 </body></html><script type="module" src="articles-accueil.js"></script>
+<div id="imgViewer" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:99999;align-items:center;justify-content:center;flex-direction:column">
+  <img id="imgViewerPic" alt="" style="max-width:100%;max-height:88%;object-fit:contain">
+  <div style="color:#ffd700;padding:14px;font-weight:bold">✕ Fermer</div>
+</div>
+<style>img{cursor:pointer}</style>
+<script>
+document.addEventListener('click',function(e){
+  var t=e.target;
+  if(!t||t.tagName!=='IMG')return;
+  var v=document.getElementById('imgViewer');
+  if(v.contains(t)){v.style.display='none';return;}
+  e.preventDefault();e.stopPropagation();
+  document.getElementById('imgViewerPic').src=t.src;
+  v.style.display='flex';
+},true);
+document.getElementById('imgViewer').addEventListener('click',function(){this.style.display='none';});
+                          </script>
 </body></html>
