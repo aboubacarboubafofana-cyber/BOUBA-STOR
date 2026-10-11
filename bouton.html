@@ -205,14 +205,15 @@ document.addEventListener('click', async e => {
       if (phone.replace(/\D/g, '').length < 8) return say('Le téléphone doit être un numéro (chiffres), ex : 0102030405.', false);
       if (pass.length < 4) return say('Mot de passe : 4 caractères minimum.', false);
       const shops = await list('boutiques');
-      if (shops.some(s => s.phone === phone)) return say('Ce numéro a déjà une boutique. Utilisez « Connexion ».', false);
+      if (shops.some(s => String(s.phone || '').replace(/\D/g, '').slice(-10) === phone.replace(/\D/g, '').slice(-10))) return say('Ce numéro a déjà une boutique. Utilisez « Connexion ».', false);
       if (shops.some(s => s.name.toLowerCase() === name.toLowerCase())) return say('Ce nom de boutique existe déjà.', false);
       const shop = { id: uid(), name, owner, phone, password: pass, desc, avatar, status: 'open', createdAt: Date.now() };
       await put('boutiques', shop); setSession(shop.id); return render();
     }
     if (act === 'login') {
       const shops = await list('boutiques');
-      const s = shops.find(x => x.phone === v('l_phone') && x.password === v('l_pass'));
+      const nph = p => String(p || '').replace(/\D/g, '').slice(-10);
+      const s = shops.find(x => nph(x.phone) === nph(v('l_phone')) && x.password === v('l_pass'));
       if (!s) return say('Téléphone ou mot de passe incorrect.', false);
       setSession(s.id); return render();
     }
