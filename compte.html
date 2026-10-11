@@ -41,7 +41,7 @@ $('switch').onclick = e => {
   $('switch').textContent = inscription ? "J'ai déjà un compte" : 'Créer un compte';
 };
 $('go').onclick = async () => {
-  const nom = $('nom').value.trim(), tel = $('tel').value.replace(/\D/g,''), mdp = $('mdp').value;
+  const nom = $('nom').value.trim(), tel = $('ind').value + $('tel').value.replace(/\D/g,'').replace(/^0+/,''), mdp = $('mdp').value;
   if (tel.length < 8 || mdp.length < 6 || (inscription && nom.length < 3))
     return $('msg').textContent = "Remplis tous les champs correctement.";
   const email = tel + '@bouba-store.app';
