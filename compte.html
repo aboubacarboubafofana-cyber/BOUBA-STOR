@@ -49,10 +49,7 @@ $('go').onclick = async () => {
     if (inscription) {
       const c = await createUserWithEmailAndPassword(auth, email, mdp);
       await updateProfile(c.user, { displayName: nom });
-      let photo = '';
-const f = $('photo').files[0];
-if (f) {
-  let photo = '';
+let photo = '';
 const f = $('photo').files[0];
 if (f) {
   try {
