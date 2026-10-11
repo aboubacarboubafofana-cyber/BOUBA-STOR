@@ -66,17 +66,18 @@ const setAdmin = v => { try { v ? sessionStorage.setItem('bouba_admin', '1') : s
 const say = (t, ok) => { const m = $('msg'); if (m) { m.textContent = t; m.className = 'msg ' + (ok ? 'ok' : 'err'); } };
 
 async function render() {
+  if (isAdmin()) { await mode(); return renderAdmin(); }
+  const sid = getSession();
+  if (!sid) renderAuth();
   const m = await mode();
   $('mode').textContent = m === 'online' ? '🟢 En ligne' : '📱 Local';
-  if (isAdmin()) return renderAdmin();
-  const sid = getSession();
   if (sid) {
     const shops = await list('boutiques');
     const shop = shops.find(s => s.id === sid);
     if (shop) return renderShop(shop);
     setSession(null);
+    renderAuth();
   }
-  renderAuth();
 }
 
 function renderAuth() {
