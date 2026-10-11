@@ -336,7 +336,7 @@ function renderAdmin(){
  else if(tab==='clients'){
   const t=(window._cq||'').toLowerCase();
   const l=Object.values(S.users||{}).filter(u=>u&&(u.name+u.phone+u.city).toLowerCase().includes(t));
-  b.innerHTML='<div style="color:gold;font-weight:900;margin-bottom:6px">'+l.length+' client(s)</div><input class="input" placeholder="🔍 Chercher..." value="'+esc(window._cq||'')+'" oninput="window._cq=this.value;renderAdmin();this.focus()">'+l.map(u=>'<div class="row"><div class="g"><b>'+esc(u.name)+'</b><br>'+esc(u.phone)+' • '+esc(u.city)+'</div><a class="mini" style="text-decoration:none" href="https://wa.me/'+String(u.phone).replace(/\D/g,'')+'" target="_blank">💬</a><button class="mini" style="color:#f44;border-color:#f44" onclick="delClient(\''+u.key+'\')">🗑️</button></div>').join('');
+  b.innerHTML='<div style="color:gold;font-weight:900;margin-bottom:6px">'+l.length+' client(s)</div><input class="input" placeholder="🔍 Chercher..." value="'+esc(window._cq||'')+'" oninput="window._cq=this.value;renderAdmin();this.focus()">'+l.map(u=>'<div class="row"><div class="g"><b>'+esc(u.name)+'</b><br>'+esc(u.phone)+' • '+esc(u.city)+'</div><a class="mini" style="text-decoration:none" href="https://wa.me/'+String(u.phone).replace(/\D/g,'')+'" target="_blank">💬</a><a class="mini" style="text-decoration:none" href="amis.html#tel='+String(u.phone).replace(/\D/g,'')+'">🗨️</a><button class="mini" style="color:#f44;border-color:#f44" onclick="delClient(\''+u.key+'\')">🗑️</button></div>').join('');
  }
  else if(tab==='set'){
   const i=S.info||{};
