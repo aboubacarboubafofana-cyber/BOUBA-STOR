@@ -83,7 +83,7 @@ function renderAuth() {
   const tabs = `<div class="tabs">
     <button class="btn ${tab === 'create' ? 'on' : ''}" data-act="tab" data-v="create">Créer</button>
     <button class="btn ${tab === 'login' ? 'on' : ''}" data-act="tab" data-v="login">Connexion</button>
-    
+      </div>`;
   let f = '';
   if (tab === 'create') f = `<h2>Créer ma boutique</h2>
     <label>Photo de profil de la boutique</label><input id="f_avatar" type="file" accept="image/*">
