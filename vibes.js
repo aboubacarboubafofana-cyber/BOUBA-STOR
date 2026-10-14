@@ -349,5 +349,53 @@ function boot(){
  start();
  headIcon();
 }
+   /* ---------- ONGLES DES STARS ---------- */
+VIBES.openStars=function(){
+  var old=document.getElementById('onglesStarsPage');
+  if(old)old.remove();
+
+  var page=document.createElement('div');
+  page.id='onglesStarsPage';
+  page.style.cssText='position:fixed;inset:0;z-index:99999;background:#080808;color:#fff;overflow:auto;font-family:Arial,sans-serif;padding:18px';
+
+  page.innerHTML=
+    '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #d4af37;padding-bottom:12px">'+
+      '<h2 style="color:#d4af37;margin:0">⭐ ONGLES DES STARS</h2>'+
+      '<button id="closeStarsPage" style="background:#d4af37;color:#000;border:0;border-radius:8px;padding:10px">✕ Fermer</button>'+
+    '</div>'+
+    '<p style="color:#ddd">🎵 Découvre les artistes, leurs chansons et leurs albums.</p>'+
+    '<div style="border:1px solid #d4af37;border-radius:12px;padding:14px;margin-top:18px">'+
+      '<h3 style="color:#d4af37">🎤 Espace artistes</h3>'+
+      '<p>Publie tes chansons, présente tes albums et fixe tes prix.</p>'+
+      '<p style="color:#bbb">Les achats, les téléchargements et les paiements sécurisés seront ajoutés dans les prochaines étapes.</p>'+
+    '</div>'+
+    '<div id="starsCatalog" style="margin-top:18px">'+
+      '<p style="text-align:center;color:#bbb">Chargement du catalogue…</p>'+
+    '</div>';
+
+  document.body.appendChild(page);
+  document.getElementById('closeStarsPage').onclick=function(){page.remove()};
+
+  var catalog=document.getElementById('starsCatalog');
+  if(window.fb&&typeof fb.ref==='function'){
+    fb.ref('stars').once('value').then(function(snapshot){
+      var data=snapshot.val()||{};
+      var html='';
+      Object.keys(data).forEach(function(id){
+        var a=data[id]||{};
+        html+='<div style="border:1px solid #333;border-radius:12px;padding:14px;margin-bottom:12px">'+
+          '<h3>'+String(a.title||a.artist||'Artiste').replace(/[&<>"]/g,'')+'</h3>'+
+          '<p>'+String(a.description||'Musique et albums').replace(/[&<>"]/g,'')+'</p>'+
+          '<p style="color:#d4af37">Prix : '+Number(a.price||0)+' FCFA</p>'+
+        '</div>';
+      });
+      catalog.innerHTML=html||'<p>Aucun artiste publié pour le moment.</p>';
+    }).catch(function(){
+      catalog.innerHTML='<p>Le catalogue sera disponible lorsque Firebase sera connecté.</p>';
+    });
+  }else{
+    catalog.innerHTML='<p>Le catalogue sera disponible lorsque Firebase sera connecté.</p>';
+  }
+};
 setInterval(boot,1200);
 })();
