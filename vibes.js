@@ -344,8 +344,24 @@ VIBES.payInfo=function(c){var r=(window._mreq||{})[c];if(!r){alert('Infos indisp
 /* ---------- nav + démarrage ---------- */
 function boot(){
  var nav=document.querySelector('.nav');
- if(nav&&!nav.dataset.v){nav.dataset.v=1;var d=document.createElement('div');d.innerHTML='🎬<br>Vibes';d.onclick=function(){VIBES.open()};nav.insertBefore(d,nav.children[2]||null)}
+
+ if(nav&&!nav.dataset.v){
+   nav.dataset.v=1;
+
+   var d=document.createElement('div');
+   d.innerHTML='🎬<br>Vibes';
+   d.onclick=function(){VIBES.open()};
+   nav.insertBefore(d,nav.children[2]||null);
+
+   var stars=document.createElement('div');
+   stars.innerHTML='⭐<br>Stars';
+   stars.style.cursor='pointer';
+   stars.onclick=function(){VIBES.openStars()};
+   nav.appendChild(stars);
+ }
+
  if(!fab.parentNode)document.body.appendChild(fab);
+
  start();
  headIcon();
 }
