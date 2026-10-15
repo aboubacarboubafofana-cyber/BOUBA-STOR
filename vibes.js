@@ -63,6 +63,7 @@ function start(){
   else{if(!cidv){cidv='c'+nid()}SV('v_id',cidv);write('loyalty/'+k10()+'/vid',cidv)}
  }).catch(function(){if(!cidv){cidv='c'+nid();SV('v_id',cidv)}}).then(function(){
   unsubP=listenLast('posts','posts',LIM);
+    listen('works','works');
   listenLast('stories','stories',60);
   ['monet','postviews','postlikes','postcomments','followers','creatorviews'].forEach(function(p,i){listen(p,['monet','views','likes','cm','fol','cv'][i])});
   if(isAdmin)listen('payouts','payAll');else listen('payouts/'+cidv,'pay');
