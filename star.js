@@ -192,12 +192,9 @@ function silentCheck(){
 }
 })();
 // ============================================================
-// UPLOAD DE FICHIER DANS L'ESPACE ARTISTE (Cloudinary)
+// UPLOAD DE FICHIER VIA LE WIDGET CLOUDINARY
 // ============================================================
 (function() {
-    const CLOUD_NAME = "vtcgahib";
-    const UPLOAD_PRESET = "bouba_upload";
-
     function injecterBoutonUpload() {
         const inputs = document.querySelectorAll('input[placeholder]');
         let urlInput = null;
@@ -206,7 +203,6 @@ function silentCheck(){
                 urlInput = inp;
             }
         });
-        
         if (!urlInput) return;
         urlInput.dataset.uploadReady = '1';
 
@@ -215,99 +211,47 @@ function silentCheck(){
         btn.className = 'gold';
         btn.style.cssText = 'margin-top:8px; margin-bottom:6px; width:100%; font-size:14px; font-weight:bold;';
         btn.innerHTML = '📁 OU ENVOYER UN FICHIER DEPUIS MON TÉLÉPHONE';
-        
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'audio/*,video/*,image/*';
-        fileInput.style.display = 'none';
-        
-        const prog = document.createElement('div');
-        prog.style.cssText = 'width:100%;height:6px;background:#333;border-radius:3px;overflow:hidden;display:none;margin-bottom:8px;';
-        const progBar = document.createElement('div');
-        progBar.style.cssText = 'height:100%;background:linear-gradient(90deg,#FFD700,#FF8C00);width:0%;transition:width 0.3s;';
-        prog.appendChild(progBar);
 
-        urlInput.parentNode.insertBefore(fileInput, urlInput);
         urlInput.parentNode.insertBefore(btn, urlInput.nextSibling);
-        urlInput.parentNode.insertBefore(prog, btn.nextSibling);
 
-        btn.onclick = () => fileInput.click();
-
-        fileInput.onchange = () => {
-            const file = fileInput.files[0];
-            if (!file) return;
-            if (file.size > 100 * 1024 * 1024) {
-                alert('Fichier trop lourd ! Maximum 100 Mo.');
+        btn.onclick = () => {
+            if (typeof cloudinary === 'undefined') {
+                alert("Le module d'upload n'est pas encore chargé. Réessaie dans quelques secondes.");
                 return;
             }
-
-            btn.disabled = true;
-            btn.innerHTML = '⏳ Envoi en cours... 0%';
-            prog.style.display = 'block';
-
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', UPLOAD_PRESET);
-            formData.append('folder', 'oeuvres');
-
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', 'https://api.cloudinary.com/v1_1/' + CLOUD_NAME + '/auto/upload', true);
-
-            xhr.upload.onprogress = (e) => {
-                if (e.lengthComputable) {
-                    const p = Math.round(e.loaded / e.total * 100);
-                    progBar.style.width = p + '%';
-                    btn.innerHTML = '⏳ Envoi en cours... ' + p + '%';
-                }
-            };
-
-            xhr.onload = () => {
-                if (xhr.status === 200) {
-                    try {
-                        const data = JSON.parse(xhr.responseText);
-                        urlInput.value = data.secure_url;
-                        btn.innerHTML = '✅ Fichier envoyé ! Lien rempli automatiquement.';
-                        btn.style.background = '#25D366';
-                        btn.style.color = '#fff';
-                        setTimeout(() => {
-                            btn.disabled = false;
-                            btn.innerHTML = '📁 OU ENVOYER UN FICHIER DEPUIS MON TÉLÉPHONE';
-                            btn.style.background = '';
-                            btn.style.color = '';
-                            prog.style.display = 'none';
-                            progBar.style.width = '0%';
-                        }, 3000);
-                    } catch(e) {
-                        alert('Erreur de lecture de la réponse.');
-                        btn.disabled = false;
+            
+            const myWidget = cloudinary.createUploadWidget({
+                cloudName: 'vtcgahib', // Ton nom de nuage Cloudinary
+                uploadPreset: 'bouba_upload', // Ton preset
+                folder: 'oeuvres',
+                sources: ['local', 'camera'], // Permet de choisir un fichier ou prendre une photo
+                multiple: false,
+                maxFileSize: 100000000 // 100 Mo
+            }, (error, result) => {
+                if (!error && result && result.event === "success") {
+                    // Remplir le champ avec le lien de Cloudinary
+                    urlInput.value = result.info.secure_url;
+                    btn.innerHTML = '✅ Fichier envoyé ! Lien rempli automatiquement.';
+                    btn.style.background = '#25D366';
+                    btn.style.color = '#fff';
+                    setTimeout(() => {
                         btn.innerHTML = '📁 OU ENVOYER UN FICHIER DEPUIS MON TÉLÉPHONE';
-                        prog.style.display = 'none';
-                    }
-                } else {
-                    let msg = 'Erreur ' + xhr.status;
-                    try { msg += ' : ' + JSON.parse(xhr.responseText).error.message; } catch(e){}
-                    alert('Erreur upload : ' + msg);
-                    btn.disabled = false;
-                    btn.innerHTML = '📁 OU ENVOYER UN FICHIER DEPUIS MON TÉLÉPHONE';
-                    prog.style.display = 'none';
+                        btn.style.background = '';
+                        btn.style.color = '';
+                    }, 3000);
+                } else if (error) {
+                    console.error("Erreur Cloudinary:", error);
+                    alert("Erreur d'upload : " + error.message);
                 }
-            };
-
-            xhr.onerror = () => {
-                alert('Erreur réseau.');
-                btn.disabled = false;
-                btn.innerHTML = '📁 OU ENVOYER UN FICHIER DEPUIS MON TÉLÉPHONE';
-                prog.style.display = 'none';
-            };
-
-            xhr.send(formData);
+            });
+            myWidget.open();
         };
     }
 
+    // Observer les changements pour injecter le bouton quand l'espace artiste s'ouvre
     const observer = new MutationObserver(() => {
         setTimeout(injecterBoutonUpload, 200);
     });
     observer.observe(document.body, { childList: true, subtree: true });
-
     setTimeout(injecterBoutonUpload, 1000);
 })();
