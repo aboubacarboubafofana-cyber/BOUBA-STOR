@@ -296,7 +296,7 @@ window.VIBES={
   write('monet/'+cidv,{status:'pending',name:n,date:Date.now()});
   SV('v_req',o);
   wa('Bonjour BOUBA STORE, je demande la monétisation de mon compte BOUBA VIBES.\n\nNom : '+n+'\nVille : '+c+'\nTéléphone : '+me.phone+'\nPaiement : '+m+' '+pn+'\nRéseaux : '+(sn||'-')+'\nContenus : '+b+'\nIdentifiant créateur : '+cidv);
-  toast('✅ Demande envoyée');setTimeout(renderMon,500);
+  notifyAdmin('👑 Nouvelle demande de monétisation\n\nNom : '+n+'\nVille : '+c+'\nTéléphone : '+me.phone+'\nPaiement : '+m+' '+pn+'\nRéseaux : '+(sn||'-')+'\nContenus : '+b+'\nIdentifiant créateur : '+cidv,{type:'monet_request',cid:cidv});
  },
  payReq:function(due){
   var r=LS('v_req',{});
