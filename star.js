@@ -191,67 +191,119 @@ function silentCheck(){
  });
 }
 })();
+
 // ============================================================
-// UPLOAD DE FICHIER VIA LE WIDGET CLOUDINARY
+// UPLOAD DE FICHIER VERS CLOUDINARY
 // ============================================================
 (function() {
-    function injecterBoutonUpload() {
+    const CLOUD_NAME = "vtcgahib";
+    const UPLOAD_PRESET = "bouba_upload";
+    const UPLOAD_URL = "https://api.cloudinary.com/v1_1/" + CLOUD_NAME + "/auto/upload";
+
+    function injecterBouton() {
         const inputs = document.querySelectorAll('input[placeholder]');
         let urlInput = null;
         inputs.forEach(inp => {
-            if (inp.placeholder.includes("Lien de l'œuvre") && !inp.dataset.uploadReady) {
+            if (inp.placeholder && inp.placeholder.indexOf("Lien de l'œuvre") !== -1 && !inp.dataset.upReady) {
                 urlInput = inp;
             }
         });
         if (!urlInput) return;
-        urlInput.dataset.uploadReady = '1';
+        urlInput.dataset.upReady = '1';
 
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'gold';
-        btn.style.cssText = 'margin-top:8px; margin-bottom:6px; width:100%; font-size:14px; font-weight:bold;';
+        btn.style.cssText = 'margin-top:8px;margin-bottom:6px;width:100%;font-size:14px;font-weight:bold;';
         btn.innerHTML = '📁 OU ENVOYER UN FICHIER DEPUIS MON TÉLÉPHONE';
-
         urlInput.parentNode.insertBefore(btn, urlInput.nextSibling);
 
-        btn.onclick = () => {
-            if (typeof cloudinary === 'undefined') {
-                alert("Le module d'upload n'est pas encore chargé. Réessaie dans quelques secondes.");
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'audio/*,video/*,image/*';
+        fileInput.style.display = 'none';
+        urlInput.parentNode.insertBefore(fileInput, btn.nextSibling);
+
+        const prog = document.createElement('div');
+        prog.style.cssText = 'width:100%;height:6px;background:#333;border-radius:3px;overflow:hidden;display:none;margin-bottom:8px;';
+        const progBar = document.createElement('div');
+        progBar.style.cssText = 'height:100%;background:linear-gradient(90deg,#FFD700,#FF8C00);width:0%;transition:width 0.3s;';
+        prog.appendChild(progBar);
+        urlInput.parentNode.insertBefore(prog, fileInput.nextSibling);
+
+        btn.onclick = function() { fileInput.click(); };
+
+        fileInput.onchange = function() {
+            const file = fileInput.files[0];
+            if (!file) return;
+            if (file.size > 100 * 1024 * 1024) {
+                alert('Fichier trop lourd ! Maximum 100 Mo.');
                 return;
             }
-            
-            const myWidget = cloudinary.createUploadWidget({
-                cloudName: 'vtcgahib', // Ton nom de nuage Cloudinary
-                uploadPreset: 'bouba_upload', // Ton preset
-                folder: 'oeuvres',
-                sources: ['local', 'camera'], // Permet de choisir un fichier ou prendre une photo
-                multiple: false,
-                maxFileSize: 100000000 // 100 Mo
-            }, (error, result) => {
-                if (!error && result && result.event === "success") {
-                    // Remplir le champ avec le lien de Cloudinary
-                    urlInput.value = result.info.secure_url;
-                    btn.innerHTML = '✅ Fichier envoyé ! Lien rempli automatiquement.';
-                    btn.style.background = '#25D366';
-                    btn.style.color = '#fff';
-                    setTimeout(() => {
-                        btn.innerHTML = '📁 OU ENVOYER UN FICHIER DEPUIS MON TÉLÉPHONE';
-                        btn.style.background = '';
-                        btn.style.color = '';
-                    }, 3000);
-                } else if (error) {
-                    console.error("Erreur Cloudinary:", error);
-                    alert("Erreur d'upload : " + error.message);
+
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Envoi en cours... 0%';
+            prog.style.display = 'block';
+
+            const fd = new FormData();
+            fd.append('file', file);
+            fd.append('upload_preset', UPLOAD_PRESET);
+            fd.append('folder', 'oeuvres');
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', UPLOAD_URL, true);
+
+            xhr.upload.onprogress = function(e) {
+                if (e.lengthComputable) {
+                    const p = Math.round(e.loaded / e.total * 100);
+                    progBar.style.width = p + '%';
+                    btn.innerHTML = '⏳ Envoi en cours... ' + p + '%';
                 }
-            });
-            myWidget.open();
+            };
+
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        urlInput.value = data.secure_url;
+                        btn.innerHTML = '✅ Fichier envoyé ! Lien rempli automatiquement.';
+                        btn.style.background = '#25D366';
+                        btn.style.color = '#fff';
+                        setTimeout(function() {
+                            btn.disabled = false;
+                            btn.innerHTML = '📁 OU ENVOYER UN FICHIER DEPUIS MON TÉLÉPHONE';
+                            btn.style.background = '';
+                            btn.style.color = '';
+                            prog.style.display = 'none';
+                        }, 3000);
+                    } catch(e) {
+                        alert('Erreur de réponse.');
+                        btn.disabled = false;
+                        btn.innerHTML = '📁 RÉESSAYER';
+                        prog.style.display = 'none';
+                    }
+                } else {
+                    let msg = 'Erreur ' + xhr.status;
+                    try { msg += ' : ' + JSON.parse(xhr.responseText).error.message; } catch(e){}
+                    alert('Erreur : ' + msg);
+                    btn.disabled = false;
+                    btn.innerHTML = '📁 OU ENVOYER UN FICHIER DEPUIS MON TÉLÉPHONE';
+                    prog.style.display = 'none';
+                }
+            };
+
+            xhr.onerror = function() {
+                alert('Erreur réseau.');
+                btn.disabled = false;
+                btn.innerHTML = '📁 OU ENVOYER UN FICHIER DEPUIS MON TÉLÉPHONE';
+                prog.style.display = 'none';
+            };
+
+            xhr.send(fd);
         };
     }
 
-    // Observer les changements pour injecter le bouton quand l'espace artiste s'ouvre
-    const observer = new MutationObserver(() => {
-        setTimeout(injecterBoutonUpload, 200);
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-    setTimeout(injecterBoutonUpload, 1000);
+    const obs = new MutationObserver(function() { setTimeout(injecterBouton, 200); });
+    obs.observe(document.body, { childList: true, subtree: true });
+    setTimeout(injecterBouton, 1000);
 })();
