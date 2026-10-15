@@ -98,7 +98,7 @@ function card(p){
  h+='</div>';
  if(p.text)h+='<div class="vt">'+esc(p.text)+'</div>';
  if(p.img)h+='<div class="vm"><img loading="lazy" src="'+safeImg(p.img)+'" alt=""></div>';
- if(p.work)h+='<div style="padding:6px 12px"><button class="gold" style="width:100%" onclick="STAR.work(\''+p.work+'\')">⭐ Écouter / Acheter</button></div>';
+ //if(p.work)h+='<div style="padding:6px 12px"><button class="gold" style="width:100%" onclick="STAR.work(\''+p.work+'\')">⭐ Écouter / Acheter</button></div>';
  if(p.isWork&&p.work){
   h+='<div style="padding:6px 12px">';
   if(p.price>0)h+='<button class="gold" style="width:100%;background:#ffd700;color:#000;font-weight:900" onclick="STAR.work(\''+p.work+'\')">💰 Acheter pour '+fmt(p.price)+' F</button>';
