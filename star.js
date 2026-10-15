@@ -195,7 +195,7 @@ function silentCheck(){
 // UPLOAD DE FICHIER VERS CLOUDINARY
 // ============================================================
 (function() {
-    const CLOUD_NAME = "vtcgahib";
+    const CLOUD_NAME = "vtcqahlb";
     const UPLOAD_PRESET = "bouba_upload";
     const UPLOAD_URL = "https://api.cloudinary.com/v1_1/" + CLOUD_NAME + "/auto/upload";
 
