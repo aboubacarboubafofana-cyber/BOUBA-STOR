@@ -300,7 +300,7 @@ window.VIBES={
  },
  payReq:function(due){
   var r=LS('v_req',{});
-  wa('Bonjour BOUBA STORE, je demande mon paiement BOUBA VIBES.\nMontant disponible : '+fmt(due)+' F\nPaiement : '+(r.method||'')+' '+(r.payNumber||'')+'\nNom : '+(r.name||(me&&me.name)||'')+'\nIdentifiant créateur : '+cidv);
+  notifyAdmin('💰 Demande de paiement BOUBA VIBES\n\nMontant disponible : '+fmt(due)+' F\nPaiement : '+(r.method||'')+' '+(r.payNumber||'')+'\nNom : '+(r.name||(me&&me.name)||'')+'\nIdentifiant créateur : '+cidv,{type:'payout_request',cid:cidv,amount:due});
  },
  act:function(c){
   fb.D.get(fb.D.ref(fb.db,'creatorviews/'+c)).then(function(s){
