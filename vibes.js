@@ -9,6 +9,7 @@ var key=function(){return me&&me.key};
 var k10=function(){return String(key()||'').replace(/\D/g,'').slice(-10)};
 var rate=function(){return +((S.info||{}).monetRate)||DEF_RATE};
 var wa=function(t){window.open('https://wa.me/2250787619717?text='+encodeURIComponent(t),'_blank')};
+  var wa=function(t){window.open('https://wa.me/2250787619717?text='+encodeURIComponent(t),'_blank')}; 
 var link=function(id){return location.origin+'/?vibe='+id};
 function nid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 function ago(t){var s=Math.floor((Date.now()-t)/1000);if(s<60)return 'à l\'instant';if(s<3600)return Math.floor(s/60)+' min';if(s<86400)return Math.floor(s/3600)+' h';return Math.floor(s/86400)+' j'}
