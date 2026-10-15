@@ -279,16 +279,43 @@ function renderCart(){
  $('cartTotal').textContent=l.length?'Total : '+fmt(cartSum())+' F':'';
 }
 function commander(){
+ function commander(){
  const l=cartItems();if(!l.length){alert('Panier vide');return}
  const id=uid();
  const o={id,date:Date.now(),status:'en attente',total:cartSum(),name:me.name,phone:me.phone,city:me.city,
   items:l.map(x=>({name:x.p.name,price:x.p.price,qty:x.qty}))};
  write('orders/'+id,o);
- const wa=((S.info||{}).whatsapp||DEFAULT_WA).replace(/\D/g,'');
- const msg='Commande #'+id+'\n'+l.map(x=>'• '+x.p.name+' x'+x.qty+' = '+fmt(x.p.price*x.qty)+' F').join('\n')+'\nTotal : '+fmt(o.total)+' F\nClient : '+me.name+' / '+me.phone+' / '+me.city;
+ 
+ if(fb && fb.auth && fb.auth.currentUser){
+   const uidUser=fb.auth.currentUser.uid;
+   const chatId=[uidUser,ADMIN_UID].sort().join('_');
+   const msg='🛒 Nouvelle commande #'+id+'\n'+
+     l.map(x=>'• '+x.p.name+' x'+x.qty+' = '+fmt(x.p.price*x.qty)+' F').join('\n')+
+     '\nTotal : '+fmt(o.total)+' F'+
+     '\nClient : '+me.name+' / '+me.phone+' / '+me.city;
+   
+   fb.D.push(fb.D.ref(fb.db,'chats/'+chatId+'/messages'),{
+     text:msg,
+     senderId:uidUser,
+     senderName:me.name,
+     timestamp:Date.now(),
+     type:'commande',
+     orderId:id,
+     total:o.total
+   }).then(function(){
+     toast('✅ Commande envoyée');
+   }).catch(function(e){
+     console.error(e);
+     toast('❌ Erreur d\'envoi');
+   });
+ } else {
+   const wa=((S.info||{}).whatsapp||DEFAULT_WA).replace(/\D/g,'');
+   const msg='Commande #'+id+'\n'+l.map(x=>'• '+x.p.name+' x'+x.qty+' = '+fmt(x.p.price*x.qty)+' F').join('\n')+'\nTotal : '+fmt(o.total)+' F\nClient : '+me.name+' / '+me.phone+' / '+me.city;
+   window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg),'_blank');
+ }
+ 
  cart=[];SV('b_cart',cart);renderCart();closeAll();
- window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg),'_blank');
-}
+ }
 
 /* ----- compte client ----- */
 function checkGate(){if(me){$('gate').style.display='none';loadProfile()}else $('gate').style.display='flex'}
