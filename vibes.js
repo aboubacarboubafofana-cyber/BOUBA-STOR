@@ -77,7 +77,15 @@ function liked(id){return LS('v_like',[]).indexOf(id)>-1}
 function follows(c){return LS('v_fol',[]).indexOf(c)>-1}
 function pts(){var d=new Date().toISOString().slice(0,10),o=LS('v_pts',{d:'',n:0});if(o.d!==d)o={d:d,n:0};return o}
 function sortPosts(){
- var l=Object.values(V.posts).filter(function(p){return p&&p.id}).sort(function(a,b){return b.date-a.date});
+ var posts=Object.values(V.posts).filter(function(p){return p&&p.id});
+ var works=Object.values(V.works).filter(function(w){return w&&w.id}).map(function(w){
+  return {
+   id: w.id, by: w.cid, name: w.an || 'Artiste', date: w.date,
+   text: (w.title ? '🎵 ' + w.title : '') + (w.desc ? '\n' + w.desc : ''),
+   img: w.cover || '', work: w.id, price: w.price, isWork: true
+  };
+ });
+ var l = posts.concat(works).sort(function(a,b){return b.date-a.date});
  if(filt)l=l.filter(function(p){return p.by===filt});
  else if(tab==='fol'){var f=LS('v_fol',[]);l=l.filter(function(p){return f.indexOf(p.by)>-1})}
  else if(tab==='cc'){var c0=LS('v_cc','');l=l.filter(function(p){return c0&&p.cc===c0})}
