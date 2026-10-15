@@ -3,7 +3,7 @@
    Dépend de index.html (me, S, fb, write, compress, toast, esc, safeImg, fmt, openPage, closeAll, addCart, isAdmin) et promos.js (PROMO.addPts). */
 (function(){
 var DEF_RATE=0.2,MIN_PAY=5000,STEP=10,LIM=STEP;
-var V={posts:{},stories:{},monet:{},views:{},likes:{},cm:{},fol:{},cv:{},pay:{},payAll:{}};
+var V={posts:{},works:{},stories:{},monet:{},views:{},likes:{},cm:{},fol:{},cv:{},pay:{},payAll:{}};
 var started='',unsubP=null,cidv='',tab='all',filt='',openC={},cImg='',cVidFile=null,timer=0,rt=0;
 var key=function(){return me&&me.key};
 var k10=function(){return String(key()||'').replace(/\D/g,'').slice(-10)};
