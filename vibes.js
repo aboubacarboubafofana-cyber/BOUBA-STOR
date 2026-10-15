@@ -100,8 +100,12 @@ function card(p){
  if(p.img)h+='<div class="vm"><img loading="lazy" src="'+safeImg(p.img)+'" alt=""></div>';
  if(p.vid||p.vm)h+='<div class="vm" id="vv_'+p.id+'" style="padding:10px"><button class="gold" style="width:100%;padding:16px" onclick="VIBES.play(\''+p.id+'\')">▶ Lire la vidéo</button></div>';
  if(p.work)h+='<div style="padding:6px 12px"><button class="gold" style="width:100%" onclick="STAR.work(\''+p.work+'\')">⭐ Écouter / Acheter</button></div>';
- if(pr)h+='<div style="padding:6px 12px"><button class="gold" style="width:100%" onclick="addCart(\''+pr.id+'\')">🛒 '+esc(pr.name)+' • '+fmt(pr.price)+' F</button></div>';
- h+='<div class="va"><button class="'+(lk?'on':'')+'" onclick="VIBES.like(\''+p.id+'\')">'+(lk?'❤️':'🤍')+' '+(+V.likes[p.id]||0)+'</button><button onclick="VIBES.cmt(\''+p.id+'\')">💬 '+(+V.cm[p.id]||0)+'</button><button disabled>👁 '+(+V.views[p.id]||0)+'</button><button onclick="VIBES.share(\''+p.id+'\')">📤</button><button onclick="VIBES.more(\''+p.id+'\',\''+p.by+'\')">⋯</button></div><div id="vc_'+p.id+'"></div></div>';
+ if(p.isWork&&p.work){
+  h+='<div style="padding:6px 12px">';
+  if(p.price>0)h+='<button class="gold" style="width:100%;background:#ffd700;color:#000;font-weight:900" onclick="STAR.work(\''+p.work+'\')">💰 Acheter pour '+fmt(p.price)+' F</button>';
+  else h+='<button class="gold" style="width:100%;background:#25D366;color:#fff" onclick="STAR.work(\''+p.work+'\')">▶️ Écouter / Voir (Gratuit)</button>';
+  h+='</div>';
+} else if(p.work)h+='<div style="padding:6px 12px"><button class="gold" style="width:100%" onclick="STAR.work(\''+p.work+'\')">⭐ Écouter / Acheter</button></div>';
  return h;
 }
 function storiesRow(){
