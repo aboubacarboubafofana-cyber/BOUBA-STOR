@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uploader une œuvre - Super Star</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{--bg:#0f0f0f;--card:#1a1a1a;--acc:#ffd700;--gray:#888}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',sans-serif}
+body{background:var(--bg);color:#fff;padding:15px;padding-bottom:90px}
+h2{color:var(--acc);margin-bottom:15px;text-align:center}
+.form-group{margin-bottom:15px}
+label{display:block;color:var(--acc);font-size:14px;margin-bottom:6px;font-weight:bold}
+input,select,textarea{width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:var(--card);color:#fff;font-size:15px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc)}
+.file-box{background:var(--card);border:2px dashed var(--acc);border-radius:10px;padding:20px;text-align:center;cursor:pointer;margin-bottom:15px}
+.file-box i{font-size:2.5rem;color:var(--acc);margin-bottom:10px;display:block}
+.file-box p{color:#aaa;font-size:14px}
+.file-box.has-file{border-style:solid;background:#1a2e1a}
+.file-box.has-file p{color:#25D366;font-weight:bold}
+.btn{width:100%;padding:15px;background:linear-gradient(90deg,#FFD700,#FF8C00);color:#000;border:none;border-radius:10px;font-size:16px;font-weight:bold;cursor:pointer;margin-top:10px}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+.progress{width:100%;height:8px;background:#333;border-radius:4px;overflow:hidden;margin-top:10px;display:none}
+.progress-bar{height:100%;background:linear-gradient(90deg,#FFD700,#FF8C00);width:0%;transition:width 0.3s}
+.info{background:#1a1a1a;border-left:4px solid var(--acc);padding:12px;border-radius:5px;margin-bottom:15px;font-size:13px;color:#ccc}
+.retour{position:fixed;top:15px;left:15px;color:var(--acc);font-size:1.5rem;cursor:pointer;z-index:10}
+</style>
+</head>
+<body>
+
+<a href="superstar.html" class="retour"><i class="fas fa-arrow-left"></i></a>
+
+<h2>🎤 Uploader une œuvre</h2>
+
+<div class="info">
+  <i class="fas fa-info-circle" style="color:var(--acc)"></i>
+  Envoyez directement vos fichiers (MP3, MP4, JPG) depuis votre téléphone. 
+  <b>Taille max : 100 Mo.</b>
+</div>
+
+<div class="form-group">
+  <label>Titre de l'œuvre *</label>
+  <input type="text" id="title" placeholder="Ex: Mon nouveau son" maxlength="100">
+</div>
+
+<div class="form-group">
+  <label>Type d'œuvre *</label>
+  <select id="type">
+    <option value="musique">🎵 Musique</option>
+    <option value="clip">🎬 Clip vidéo</option>
+    <option value="album">💿 Album</option>
+    <option value="photo">📸 Photo</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label>Prix (en FCFA) *</label>
+  <input type="number" id="price" placeholder="Ex: 500" min="0" step="50" value="500">
+</div>
+
+<div class="form-group">
+  <label>Description (optionnel)</label>
+  <textarea id="description" rows="3" placeholder="Parlez de votre œuvre..." maxlength="300"></textarea>
+</div>
+
+<div class="file-box" id="fileBox" onclick="document.getElementById('fileInput').click()">
+  <i class="fas fa-cloud-upload-alt"></i>
+  <p id="fileLabel">Appuyez pour choisir un fichier</p>
+</div>
+<input type="file" id="fileInput" accept="audio/*,video/*,image/*" hidden>
+
+<div class="progress" id="progress">
+  <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<button class="btn" id="uploadBtn" disabled>
+  <i class="fas fa-upload"></i> Publier mon œuvre
+</button>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyAnLLXpUC35OleB0hCLUXnLU0lMiesY7j4",
+  authDomain: "project-f4477c80-7c55-4db7-b2e.firebaseapp.com",
+  projectId: "project-f4477c80-7c55-4db7-b2e",
+  storageBucket: "project-f4477c80-7c55-4db7-b2e.firebasestorage.app",
+  messagingSenderId: "697604298457",
+  appId: "1:697604298457:web:4f9a6d66ec6fde9c1990c8"
+});
+
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// ============================================================
+// CONFIGURATION CLOUDINARY
+// ============================================================
+const CLOUD_NAME = "vtcgahib";
+const UPLOAD_PRESET = "bouba_upload";
+
+let me = null;
+let selectedFile = null;
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    alert("Connectez-vous d'abord.");
+    location.href = 'compte.html';
+    return;
+  }
+  me = user;
+  const userDoc = await getDoc(doc(db, 'users', me.uid));
+  const userData = userDoc.exists() ? userDoc.data() : {};
+  if (userData.role !== 'artist') {
+    alert("Vous devez d'abord créer un compte Artiste.");
+    location.href = 'create-artist.html';
+  }
+});
+
+document.getElementById('fileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 100 * 1024 * 1024) {
+    alert("⚠️ Fichier trop lourd ! Maximum 100 Mo.");
+    e.target.value = '';
+    return;
+  }
+  selectedFile = file;
+  const box = document.getElementById('fileBox');
+  const label = document.getElementById('fileLabel');
+  box.classList.add('has-file');
+  label.textContent = `✅ ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} Mo)`;
+  document.getElementById('uploadBtn').disabled = false;
+});
+
+// --- Upload vers Cloudinary (méthode alternative) ---
+async function uploadToCloudinary(file) {
+  return new Promise((resolve, reject) => {
+    const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', UPLOAD_PRESET);
+    formData.append('folder', 'oeuvres');
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url, true);
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const percent = (e.loaded / e.total) * 100;
+        document.getElementById('progressBar').style.width = percent + '%';
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        const data = JSON.parse(xhr.responseText);
+        resolve(data.secure_url);
+      } else {
+        try {
+          const err = JSON.parse(xhr.responseText);
+          reject(new Error(err.error?.message || 'Erreur Cloudinary'));
+        } catch {
+          reject(new Error('Erreur Cloudinary : ' + xhr.responseText));
+        }
+      }
+    };
+
+    xhr.onerror = () => reject(new Error('Erreur réseau'));
+    xhr.send(formData);
+  });
+}
+
+document.getElementById('uploadBtn').addEventListener('click', async () => {
+  const title = document.getElementById('title').value.trim();
+  const type = document.getElementById('type').value;
+  const price = parseInt(document.getElementById('price').value);
+  const description = document.getElementById('description').value.trim();
+
+  if (!title) return alert("Entrez un titre.");
+  if (!selectedFile) return alert("Choisissez un fichier.");
+  if (isNaN(price) || price < 0) return alert("Prix invalide.");
+
+  const btn = document.getElementById('uploadBtn');
+  const progressDiv = document.getElementById('progress');
+  const progressBar = document.getElementById('progressBar');
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Envoi en cours...';
+  progressDiv.style.display = 'block';
+  progressBar.style.width = '0%';
+
+  try {
+    const downloadUrl = await uploadToCloudinary(selectedFile);
+    const userDoc = await getDoc(doc(db, 'users', me.uid));
+    const userData = userDoc.data();
+
+    await addDoc(collection(db, 'media'), {
+      artistId: me.uid,
+      artistName: userData.name || 'Artiste',
+      title: title,
+      type: type,
+      price: price,
+      description: description,
+      downloadUrl: downloadUrl,
+      createdAt: serverTimestamp(),
+      status: 'published'
+    });
+
+    alert("🎉 Félicitations ! Votre œuvre est publiée.");
+    location.href = 'superstar.html';
+
+  } catch (error) {
+    console.error("Erreur:", error);
+    alert("Erreur : " + error.message + "\n\nVérifiez que le preset 'bouba_upload' est bien en mode 'Non signé' dans Cloudinary.");
+    btn.disabled = false;
+    btn.textContent = '📤 Publier mon œuvre';
+    progressDiv.style.display = 'none';
+  }
+});
+</script>
+</body>
+</html>
