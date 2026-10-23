@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diagnostic BOUBA STORE</title>
+<style>
+body{margin:0;background:#000;color:#eee;font-family:Roboto,Arial,sans-serif;padding:16px;max-width:560px;margin-inline:auto}
+h1{color:#ffd700;font-size:22px}.l{background:#111;border:1px solid #333;border-radius:10px;padding:10px;margin:8px 0;font-size:14px;line-height:1.4;word-break:break-word}
+.ok{border-color:#25d366}.ko{border-color:#ff5a5a;background:#200}.wa{border-color:#ffd700}
+button{width:100%;padding:14px;border-radius:12px;border:0;background:#ffd700;color:#000;font-weight:800;font-size:16px;margin:6px 0}
+button.g{background:#000;color:#ffd700;border:1px solid #d4af37}a{color:#8ec0ff}small{color:#aaa}
+</style></head><body>
+<h1>🩺 Diagnostic du chat et des appels</h1>
+<p><small>Cette page teste votre connexion, votre compte et la base de données. Elle n'envoie rien à vos amis. Faites une capture de l'écran complet et envoyez-la.</small></p>
+<button id="go">▶ Lancer le test</button>
+<div id="out"></div>
+<button class="g" id="cp">📋 Copier le rapport</button>
+<button class="g" id="rs">🧹 Réinitialiser l'enveloppe de l'appli (cache)</button>
+<p><a href="index.html">← Retour à l'accueil</a> • <a href="amis.html">Ouvrir le chat</a></p>
+<script type="module">
+const out=document.getElementById('out');let rep='';
+const add=(t,c)=>{const d=document.createElement('div');d.className='l '+(c||'');d.textContent=t;out.appendChild(d);rep+=t+'\n'};
+const run=async(nom,f)=>{const t0=performance.now();try{const r=await f();add('✅ '+nom+(r?' : '+r:'')+' ('+Math.round(performance.now()-t0)+' ms)','ok');return true}catch(e){add('❌ '+nom+' : '+(e.code||e.name||'erreur')+' — '+(e.message||'').slice(0,140),'ko');return false}};
+document.getElementById('cp').onclick=()=>{try{navigator.clipboard.writeText(rep);alert('Rapport copié')}catch(e){alert(rep)}};
+document.getElementById('rs').onclick=async()=>{
+ if(!confirm('Supprimer le cache et l\'enveloppe de l\'appli ? Rien n\'est perdu, tout se recharge.'))return;
+ try{const r=await navigator.serviceWorker.getRegistrations();for(const x of r)await x.unregister();for(const k of await caches.keys())await caches.delete(k)}catch(e){}
+ alert('Fait. L\'appli va se recharger.');location.href='index.html';
+};
+document.getElementById('go').onclick=async()=>{
+ out.innerHTML='';rep='';
+ add('Heure : '+new Date().toLocaleString('fr-FR')+' • Réseau : '+(navigator.onLine?'connecté':'HORS LIGNE'),navigator.onLine?'':'ko');
+ add('Enveloppe (service worker) : '+(navigator.serviceWorker&&navigator.serviceWorker.controller?'active':'aucune')+' • Origine : '+location.origin,'wa');
+ let cfg;
+ if(!await run('Fichier firebase-config.js',async()=>{cfg=await import('./firebase-config.js');return 'db='+!!cfg.db+', auth='+!!cfg.auth})){return}
+ const F=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+ const A=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+ const AP=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+ const db=cfg.db,auth=cfg.auth||A.getAuth(AP.getApp());
+ let user=null;
+ await run('Compte connecté (Firebase Auth)',async()=>{user=await new Promise(r=>{const u=A.onAuthStateChanged(auth,x=>{u();r(x)});setTimeout(()=>r(null),4000)});if(!user)throw Object.assign(new Error('Aucun compte connecté. Ouvrez compte.html et connectez-vous.'),{code:'pas-connecte'});return user.email||user.uid.slice(0,8)+'…'});
+ await run('Lecture des profils (users)',async()=>{const s=await F.getDocs(F.query(F.collection(db,'users'),F.limit(300)));return s.size+' profil(s)'});
+ if(user){
+  await run('Envoi + lecture d\'un message test',async()=>{
+   const c=F.collection(db,'chats',user.uid+'_diag','messages');
+   const r=await F.addDoc(c,{text:'test',senderId:user.uid,timestamp:F.serverTimestamp()});
+   const s=await F.getDocs(F.query(c,F.limit(5)));
+   await F.deleteDoc(r);return 'envoyé, relu ('+s.size+') et supprimé'});
+  await run('Lecture des appels qui vous sont destinés',async()=>{const s=await F.getDocs(F.query(F.collection(db,'calls'),F.where('to','==',user.uid),F.where('status','==','ringing')));return s.size+' appel(s) en attente'});
+  await run('Préférences privées (favoris)',async()=>{const s=await F.getDoc(F.doc(db,'users',user.uid,'private','prefs'));return s.exists()?'trouvées':'aucune (normal)'});
+ }
+ await run('Boutiques des vendeurs',async()=>{const s=await F.getDocs(F.collection(db,'boutiques'));return s.size+' boutique(s)'});
+ await run('Articles des vendeurs',async()=>{const s=await F.getDocs(F.collection(db,'articles'));return s.size+' article(s)'});
+ add('FIN DU TEST. Un ❌ avec « permission-denied » = règles Firestore. « unavailable » = réseau ou blocage. « pas-connecte » = compte non connecté.','wa');
+};
+</script></body></html>
