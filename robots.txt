@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://bouba-stor.vercel.app/sitemap.xml
