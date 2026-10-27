@@ -13,4 +13,8 @@
     <loc>https://bouba-stor.vercel.app/upload_artiste.html</loc>
     <changefreq>weekly</changefreq>
   </url>
-</urlset>
+</urlset><url>
+  <loc>https://bouba-stor.vercel.app/conseils.html</loc>
+  <changefreq>weekly</changefreq>
+  <priority>0.8</priority>
+</url>
