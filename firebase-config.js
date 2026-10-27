@@ -14,4 +14,13 @@ export const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+import { enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+enableIndexedDbPersistence(db).catch((err) => {
+    if (err.code == 'failed-precondition') {
+        console.log("Cache inactif : plusieurs onglets ouverts.");
+    } else if (err.code == 'unimplemented') {
+        console.log("Navigateur non supporté.");
+    }
+});
 export const auth = getAuth(app);
