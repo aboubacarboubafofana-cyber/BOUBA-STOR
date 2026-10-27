@@ -2,6 +2,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
+import { enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
 export const firebaseConfig = {
   apiKey: "AIzaSyAnLLXpUC35OleB0hCLUXnLU0lMiesY7j4",
   authDomain: "project-f4477c80-7c55-4db7-b2e.firebaseapp.com",
@@ -14,7 +16,6 @@ export const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
-import { enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 enableIndexedDbPersistence(db).catch((err) => {
     if (err.code == 'failed-precondition') {
