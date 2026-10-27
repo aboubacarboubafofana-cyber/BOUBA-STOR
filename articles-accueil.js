@@ -43,6 +43,15 @@ function box() {
 }
 
 async function show() {
+  const el = box();
+  
+  // 1. AFFICHAGE INSTANTANÉ DU SQUELETTE (Effet 0 seconde perçu)
+  if (!el.innerHTML.trim() || el.innerHTML.includes('ba-card')) {
+    el.innerHTML = '<h3>🏪 Boutiques</h3><div class="ba-grid">' + 
+      Array(3).fill('<div class="ba-card" style="height:350px;"><div style="height:190px;background:#222;"></div><div class="ba-info"><div style="height:15px;width:80%;background:#333;margin-bottom:8px;border-radius:4px;"></div><div style="height:15px;width:40%;background:#333;border-radius:4px;"></div></div></div>').join('') + 
+      '</div>';
+  }
+
   try {
     const [shops, arts] = [await list('boutiques'), await list('articles')];
     const md = await mode(), adm0 = (typeof isAdmin !== 'undefined' && isAdmin);
@@ -53,15 +62,19 @@ async function show() {
     const visible = all.filter(a => open.has(a.shopId)), hidden = all.filter(a => !open.has(a.shopId));
     const adm = (typeof isAdmin !== 'undefined' && isAdmin);
     const items = (adm && window.__baHidden) ? all : visible;
-    const el = box();
     const note = (adm && hidden.length) ? '<div style="background:#2a2200;border:1px solid #ffd700;border-radius:10px;color:#ffd700;font-size:12px;padding:8px;margin:0 0 10px;text-align:center">⚠️ ' + hidden.length + ' article(s) masqué(s) : leur boutique est fermée ou supprimée.<br><button class="ba-b" style="margin-top:6px;flex:none;padding:6px 12px" onclick="window.__baHidden=!window.__baHidden;window.__baShow()">' + (window.__baHidden ? 'Les cacher' : 'Les afficher') + '</button></div>' : '';
+    
     if (!items.length) { el.innerHTML = diag + note; return; }
+    
+    // Image par défaut transparente pour éviter l'icône cassée
+    const blankImg = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
     el.innerHTML = '<h3>🏪 Boutiques ➜ glisse (' + items.length + ')</h3>' + diag + note + '<div class="ba-grid">' + items.map(a => {
       const text = `${a.name} - ${money(a.price)} chez ${a.shopName} sur BOUBA STORE`;
       const s = shareLinks(text, homeUrl()), p = intl(a.phone), sh = byId[a.shopId] || {};
       const av = sh.avatar ? `<img src="${sh.avatar}" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #ffd700">` : '';
       const off = !open.has(a.shopId) ? '<div style="background:#a00;color:#fff;font-size:11px;text-align:center;padding:3px">Boutique fermée ou supprimée</div>' : '';
-      return `<div class="ba-card">${off}${a.video ? `<video src="${a.video}" poster="${a.img}" controls playsinline preload="metadata"></video>` : `<img class="ba-m" src="${a.img}" alt="${esc(a.name)}">`}
+      return `<div class="ba-card">${off}${a.video ? `<video src="${a.video}" poster="${a.img || blankImg}" controls playsinline preload="metadata"></video>` : `<img class="ba-m" src="${a.img || blankImg}" alt="${esc(a.name)}" loading="lazy">`}
         <div class="ba-info">
           <div class="ba-name">${esc(a.name)}</div>
           <div class="ba-price">${money(a.price)}</div>
@@ -82,7 +95,7 @@ async function show() {
           </div>
         </div></div>`;
     }).join('') + '</div>';
-  } catch (e) { console.error('articles-accueil:', e); box().innerHTML = '<div style="color:#888;font-size:11px;padding:6px;text-align:center">Articles boutiques : ' + String(e.message || e) + '</div>'; }
+  } catch (e) { console.error('articles-accueil:', e); el.innerHTML = '<div style="color:#888;font-size:11px;padding:6px;text-align:center">Articles boutiques : ' + String(e.message || e) + '</div>'; }
 }
 
 document.addEventListener('click', e => {
