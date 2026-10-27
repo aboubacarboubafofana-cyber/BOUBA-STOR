@@ -743,6 +743,10 @@ if(document.readyState==='complete')setTimeout(core,200);else window.addEventLis
 })();
 </script>
 <script>
+ <style>
+body { animation: fadeIn 0.3s ease-in-out; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
 /* Bandeau « Nouvelle version prête » */
 (function(){if(!('serviceWorker' in navigator))return;
 navigator.serviceWorker.addEventListener('message',function(e){if(e.data&&e.data.type==='update')bar()});
