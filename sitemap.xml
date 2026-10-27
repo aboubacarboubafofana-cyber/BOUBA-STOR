@@ -14,7 +14,8 @@
     <changefreq>weekly</changefreq>
   </url>
   <url>
-  <loc>https://bouba-stor.vercel.app/conseils.html</loc>
-  <changefreq>weekly</changefreq>
-  <priority>0.8</priority>
-</url>
+    <loc>https://bouba-stor.vercel.app/conseils.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>
