@@ -110,3 +110,30 @@ window.__baShow = show;
 show();
 setInterval(() => { if (!document.hidden) show(); }, 120000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) show(); });
+window.genererFluxGoogle = async function() {
+  try {
+    const [shops, arts] = [await list('boutiques'), await list('articles')];
+    const open = new Set(shops.filter(s => s.status !== 'closed').map(s => s.id));
+    const visibles = arts.filter(a => open.has(a.shopId));
+    
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">\n<channel>\n<title>BOuba STOR</title>\n<link>https://bouba-stor.vercel.app/</link>\n<description>Boutique en ligne</description>\n`;
+    
+    visibles.forEach(a => {
+      xml += `<item>\n`;
+      xml += `<g:id>${a.id}</g:id>\n`;
+      xml += `<g:title>${a.name}</g:title>\n`;
+      xml += `<g:description>${a.desc || a.name}</g:description>\n`;
+      xml += `<g:link>https://bouba-stor.vercel.app/</g:link>\n`;
+      xml += `<g:image_link>${a.img}</g:image_link>\n`;
+      xml += `<g:price>${a.price} XOF</g:price>\n`;
+      xml += `<g:availability>in stock</g:availability>\n`;
+      xml += `<g:condition>new</g:condition>\n`;
+      xml += `</item>\n`;
+    });
+    
+    xml += `</channel>\n</rss>`;
+    alert("FLUX PRÊT ! Copie ce texte et colle-le dans ton fichier produits.xml sur GitHub :\n\n" + xml);
+  } catch (e) {
+    alert("Erreur : " + e.message);
+  }
+};
