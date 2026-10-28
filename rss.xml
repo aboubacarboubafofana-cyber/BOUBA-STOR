@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>BOuba-STOR - Le serveur hypersensible</title>
+    <link>https://bouba-stor.vercel.app/</link>
+    <description>La plateforme ultime et rapide pour vos vidéos et contenus.</description>
+    <language>fr</language>
+    <item>
+      <title>Le Guide du Style : Comment bien choisir son Pull Chicago ?</title>
+      <link>https://bouba-stor.vercel.app/conseils.html</link>
+      <description>Découvrez nos conseils pour choisir la bonne taille et privilégier la qualité.</description>
+      <pubDate>Wed, 28 Oct 2026 10:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Nouveautés sur BOuba-STOR</title>
+      <link>https://bouba-stor.vercel.app/</link>
+      <description>Découvrez les derniers articles ajoutés sur notre boutique.</description>
+      <pubDate>Wed, 28 Oct 2026 09:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>
