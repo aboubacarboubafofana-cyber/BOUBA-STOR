@@ -6,16 +6,22 @@
     <description>La plateforme ultime et rapide pour vos vidéos et contenus.</description>
     <language>fr</language>
     <item>
-      <title>Le Guide du Style : Comment bien choisir son Pull Chicago ?</title>
+      <title>Comment entretenir ses vêtements pour qu'ils durent longtemps</title>
       <link>https://bouba-stor.vercel.app/conseils.html</link>
-      <description>Découvrez nos conseils pour choisir la bonne taille et privilégier la qualité.</description>
-      <pubDate>Wed, 28 Oct 2026 10:00:00 GMT</pubDate>
+      <description>Découvrez nos astuces pour laver et sécher vos vêtements sans les abîmer.</description>
+      <pubDate>Wed, 28 Oct 2026 12:00:00 GMT</pubDate>
     </item>
     <item>
-      <title>Nouveautés sur BOuba-STOR</title>
-      <link>https://bouba-stor.vercel.app/</link>
-      <description>Découvrez les derniers articles ajoutés sur notre boutique.</description>
-      <pubDate>Wed, 28 Oct 2026 09:00:00 GMT</pubDate>
+      <title>Les erreurs à éviter quand on choisit sa taille</title>
+      <link>https://bouba-stor.vercel.app/conseils.html</link>
+      <description>Prenez vos mesures et comparez avec le guide des tailles pour un look parfait.</description>
+      <pubDate>Wed, 28 Oct 2026 13:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Comment bien choisir son Pull Chicago ?</title>
+      <link>https://bouba-stor.vercel.app/conseils.html</link>
+      <description>Le guide ultime pour choisir la bonne taille et la bonne couleur.</description>
+      <pubDate>Wed, 28 Oct 2026 10:00:00 GMT</pubDate>
     </item>
   </channel>
 </rss>
