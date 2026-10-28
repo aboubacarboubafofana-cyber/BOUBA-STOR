@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">
+  <channel>
+    <title>BOuba STOR</title>
+    <link>https://bouba-stor.vercel.app/</link>
+    <description>Boutique en ligne de vêtements et accessoires</description>
+    
+    <item>
+      <g:id>pull-chicago-noir</g:id>
+      <g:title>Pull Chicago 23 xxl Noir</g:title>
+      <g:description>Pull Chicago noir taille XXL</g:description>
+      <g:link>https://bouba-stor.vercel.app/</g:link>
+      <g:image_link>https://bouba-stor.vercel.app/icon-512.png</g:image_link>
+      <g:price>7000 XOF</g:price>
+      <g:availability>in stock</g:availability>
+      <g:condition>new</g:condition>
+    </item>
+
+    <item>
+      <g:id>pull-chicago-blanc</g:id>
+      <g:title>Pull Chicago 23 xxl Blanc</g:title>
+      <g:description>Pull Chicago blanc taille XXL</g:description>
+      <g:link>https://bouba-stor.vercel.app/</g:link>
+      <g:image_link>https://bouba-stor.vercel.app/icon-512.png</g:image_link>
+      <g:price>7000 XOF</g:price>
+      <g:availability>in stock</g:availability>
+      <g:condition>new</g:condition>
+    </item>
+
+    <item>
+      <g:id>ensemble-noir</g:id>
+      <g:title>Ensemble 2 pièces xxl noir</g:title>
+      <g:description>Ensemble 2 pièces noir taille XXL</g:description>
+      <g:link>https://bouba-stor.vercel.app/</g:link>
+      <g:image_link>https://bouba-stor.vercel.app/icon-512.png</g:image_link>
+      <g:price>11000 XOF</g:price>
+      <g:availability>in stock</g:availability>
+      <g:condition>new</g:condition>
+    </item>
+
+    <item>
+      <g:id>ensemble-blanc</g:id>
+      <g:title>Ensemble 2 pièces xxl blanc</g:title>
+      <g:description>Ensemble 2 pièces blanc taille XXL</g:description>
+      <g:link>https://bouba-stor.vercel.app/</g:link>
+      <g:image_link>https://bouba-stor.vercel.app/icon-512.png</g:image_link>
+      <g:price>11000 XOF</g:price>
+      <g:availability>in stock</g:availability>
+      <g:condition>new</g:condition>
+    </item>
+
+    <item>
+      <g:id>maillot-portugal</g:id>
+      <g:title>Maillot Portugal</g:title>
+      <g:description>Maillot de football Portugal</g:description>
+      <g:link>https://bouba-stor.vercel.app/</g:link>
+      <g:image_link>https://bouba-stor.vercel.app/icon-512.png</g:image_link>
+      <g:price>6000 XOF</g:price>
+      <g:availability>in stock</g:availability>
+      <g:condition>new</g:condition>
+    </item>
+
+    <item>
+      <g:id>liqui-brun</g:id>
+      <g:title>Liqui Brun</g:title>
+      <g:description>Parfum Liqui Brun</g:description>
+      <g:link>https://bouba-stor.vercel.app/</g:link>
+      <g:image_link>https://bouba-stor.vercel.app/icon-512.png</g:image_link>
+      <g:price>30000 XOF</g:price>
+      <g:availability>in stock</g:availability>
+      <g:condition>new</g:condition>
+    </item>
+
+    <item>
+      <g:id>intense-black</g:id>
+      <g:title>Intense Black</g:title>
+      <g:description>Parfum Intense Black</g:description>
+      <g:link>https://bouba-stor.vercel.app/</g:link>
+      <g:image_link>https://bouba-stor.vercel.app/icon-512.png</g:image_link>
+      <g:price>30000 XOF</g:price>
+      <g:availability>in stock</g:availability>
+      <g:condition>new</g:condition>
+    </item>
+
+    <item>
+      <g:id>moussluf</g:id>
+      <g:title>Moussluf</g:title>
+      <g:description>Moussluf</g:description>
+      <g:link>https://bouba-stor.vercel.app/</g:link>
+      <g:image_link>https://bouba-stor.vercel.app/icon-512.png</g:image_link>
+      <g:price>7000 XOF</g:price>
+      <g:availability>in stock</g:availability>
+      <g:condition>new</g:condition>
+    </item>
+
+  </channel>
+</rss>
