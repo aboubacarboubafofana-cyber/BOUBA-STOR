@@ -859,7 +859,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
 let isEnglish = false;
 function toggleLang() {
   isEnglish = !isEnglish;
-  const btn = document.querySelector('button[onclick="toggleLang()"]');
+  const btn = document.getElementById('langBtn');
   if (btn) btn.innerText = isEnglish ? '🌐 FR' : '🌐 EN';
 
   // Traduction des textes principaux
