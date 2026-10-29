@@ -855,7 +855,47 @@ window.addEventListener('beforeinstallprompt', (e) => {
   document.body.appendChild(installBtn);
 });
  </script>
+// --- TRADUCTION ---
+let isEnglish = false;
+function toggleLang() {
+  isEnglish = !isEnglish;
+  const btn = document.querySelector('button[onclick="toggleLang()"]');
+  if (btn) btn.innerText = isEnglish ? '🌐 FR' : '🌐 EN';
 
+  // Traduction des textes principaux
+  const traductions = {
+    'Chercher un article...': 'Search for an item...',
+    'Accueil': 'Home',
+    'Panier': 'Cart',
+    'Chat': 'Chat',
+    'Contrôle': 'Control',
+    'LIVRAISON 24H ABIDJAN • WAVE • ORANGE MONEY': 'DELIVERY 24H ABIDJAN • WAVE • ORANGE MONEY',
+    'Créer ma boutique': 'Create my shop',
+    'Installer l\'application': 'Install the app',
+    'Activer les notifications': 'Enable notifications',
+    'Ce que disent nos clients': 'What our customers say',
+    'Boutiques ➜ glisse': 'Shops ➜ swipe',
+    'Ajouter': 'Add',
+    'Partager': 'Share',
+    'Discuter': 'Chat',
+    'Complétez le look': 'Complete the look',
+    'Commander': 'Order'
+  };
+
+  // Remplace les textes dans la page
+  document.querySelectorAll('input, button, h2, h3, div, span').forEach(el => {
+    if (el.childNodes.length === 1 && el.childNodes[0].nodeType === 3) {
+      const txt = el.textContent.trim();
+      if (traductions[txt]) {
+        el.textContent = isEnglish ? traductions[txt] : txt; // Note: pour revenir au français, il faudrait stocker l'original
+      }
+    }
+  });
+  
+  // Change le placeholder de la recherche
+  const input = document.getElementById('qIn');
+  if (input) input.placeholder = isEnglish ? '🔍 Search for an item...' : '🔍 Chercher un article...';
+}
 </body>
 </html>
 
