@@ -27,7 +27,6 @@ function box() {
   if (el) return el;
   el = document.createElement('div');
   el.id = 'boutiques-articles';
-  // 1) juste après la bannière "Bienvenue chez BOUBA" (en haut de l'accueil)
   const cand = [...document.querySelectorAll('body *')].find(n =>
     n.children.length === 0 && /^\s*Bienvenue/i.test(n.textContent || ''));
   if (cand) {
@@ -36,7 +35,6 @@ function box() {
     t.parentNode.insertBefore(el, t.nextSibling);
     return el;
   }
-  // 2) sinon avant le menu du bas, sinon à la fin de la page
   const nav = document.querySelector('.bottom-nav, footer');
   nav ? nav.parentNode.insertBefore(el, nav) : document.body.appendChild(el);
   return el;
@@ -45,7 +43,6 @@ function box() {
 async function show() {
   const el = box();
   
-  // 1. AFFICHAGE INSTANTANÉ DU SQUELETTE (Effet 0 seconde perçu)
   if (!el.innerHTML.trim() || el.innerHTML.includes('ba-card')) {
     el.innerHTML = '<h3>🏪 Boutiques</h3><div class="ba-grid">' + 
       Array(3).fill('<div class="ba-card" style="height:350px;"><div style="height:190px;background:#222;"></div><div class="ba-info"><div style="height:15px;width:80%;background:#333;margin-bottom:8px;border-radius:4px;"></div><div style="height:15px;width:40%;background:#333;border-radius:4px;"></div></div></div>').join('') + 
@@ -66,7 +63,6 @@ async function show() {
     
     if (!items.length) { el.innerHTML = diag + note; return; }
     
-    // Image par défaut transparente pour éviter l'icône cassée
     const blankImg = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
     el.innerHTML = '<h3>🏪 Boutiques ➜ glisse (' + items.length + ')</h3>' + diag + note + '<div class="ba-grid">' + items.map(a => {
@@ -110,6 +106,7 @@ window.__baShow = show;
 show();
 setInterval(() => { if (!document.hidden) show(); }, 120000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) show(); });
+
 window.genererFluxGoogle = async function() {
   try {
     const [shops, arts] = [await list('boutiques'), await list('articles')];
@@ -135,12 +132,14 @@ window.genererFluxGoogle = async function() {
     alert("FLUX PRÊT ! Copie ce texte et colle-le dans ton fichier produits.xml sur GitHub :\n\n" + xml);
   } catch (e) {
     alert("Erreur : " + e.message);
+  }
+};
+
+// Fonction pour ouvrir le chat avec le produit pré-rempli
 window.ouvrirChat = function(vendeur, produit) {
-  // Ouvre le chat via le bouton "Aide" qui existe déjà
   const btnAide = document.getElementById('iaBtn') || document.querySelector('.chat-fab, .fab');
   if (btnAide) btnAide.click();
   
-  // Remplit le champ de message après l'ouverture
   setTimeout(() => {
     const input = document.getElementById('iaInput') || document.querySelector('input[placeholder*="message"]');
     if (input) {
