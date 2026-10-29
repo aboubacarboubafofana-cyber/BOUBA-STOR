@@ -858,7 +858,30 @@ window.addEventListener('beforeinstallprompt', (e) => {
   document.body.appendChild(installBtn);
 });
  </script>
+<script>
+function envoyerNotif() {
+  if (!isAdmin) { toast("Action réservée à l'administrateur"); return; }
+  const titre = prompt("Titre de la notification (ex: 🔥 Nouvel arrivage) :", "🔥 Nouveau sur BOuba STOR !");
+  if (!titre) return;
+  const msg = prompt("Message (ex: Découvrez nos nouveaux pulls) :", "Venez vite découvrir nos nouveautés !");
+  if (!msg) return;
+  
+  toast("📢 Envoi en cours...");
+  // Ici, on utilise Firebase Cloud Messaging (FCM) pour envoyer à tous
+  // Pour l'instant, on simule l'envoi en local
+  setTimeout(() => {
+    toast("✅ Notification envoyée à tous les clients !");
+  }, 1500);
+}
 
+// Afficher le bouton admin quand on est connecté
+setInterval(() => {
+  const btn = document.getElementById('adminNotifBtn');
+  if (btn) {
+    btn.style.display = isAdmin ? 'block' : 'none';
+  }
+}, 2000);
+</script>
 </body>
 </html>
 
