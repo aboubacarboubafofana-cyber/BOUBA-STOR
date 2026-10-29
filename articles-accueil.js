@@ -83,7 +83,7 @@ async function show() {
             <a class="ba-b ba-d" href="sms:${esc(a.phone)}">✉️</a>
           </div>
           <div class="ba-row ba-share">
-            <a class="ba-b ba-g" target="_blank" href="${s.whatsapp}">WhatsApp</a>
+            <a class="ba-b ba-g" href="#" onclick="var b=document.getElementById('iaBtn'); if(b){b.click();} setTimeout(function(){var i=document.getElementById('iaInput'); if(i){i.value='Bonjour ${esc(a.shopName)}, je suis intéressé par : ${esc(a.name)}'; i.focus();}}, 500); return false;">💬 Discuter</a>
             <a class="ba-b ba-bl" target="_blank" href="${s.facebook}">Facebook</a>
             <a class="ba-b ba-d" target="_blank" href="${s.telegram}">Telegram</a>
             <a class="ba-b ba-d" target="_blank" href="${s.x}">X</a>
