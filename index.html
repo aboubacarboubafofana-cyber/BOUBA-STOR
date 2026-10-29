@@ -803,6 +803,33 @@ document.getElementById('imgViewer').addEventListener('click',function(){this.st
     <a href="a-propos.html" style="color:#ffd700; text-decoration:none; margin: 0 10px;">À Propos</a> | 
     <a href="contact.html" style="color:#ffd700; text-decoration:none; margin: 0 10px;">Contact</a> | 
     <a href="confidentialite.html" style="color:#ffd700; text-decoration:none; margin: 0 10px;">Confidentialité</a>
+ <script>
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Empêche Chrome d'afficher la bannière automatique
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  // Crée un bouton flottant "Installer"
+  const installBtn = document.createElement('button');
+  installBtn.innerText = "📲 Installer l'appli";
+  installBtn.style.cssText = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:9999; background:#ffd700; color:#000; padding:12px 20px; border-radius:25px; font-weight:bold; font-family:Arial; border:none; box-shadow:0 4px 10px rgba(0,0,0,0.5); cursor:pointer;";
+  
+  // Quand on clique, on affiche la vraie popup d'installation
+  installBtn.onclick = () => {
+    installBtn.remove();
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('Application installée !');
+      }
+      deferredPrompt = null;
+    });
+  };
+  
+  document.body.appendChild(installBtn);
+});
+ </script>
 </div>
 </body>
 </html>
