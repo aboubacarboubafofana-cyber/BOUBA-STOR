@@ -861,6 +861,35 @@ setInterval(() => {
   }
 }, 2000);
 </script>
+ <script>
+async function partagerAvecPhoto(nomProduit, base64Image) {
+  try {
+    // Convertir l'image Base64 en vrai fichier
+    const res = await fetch(base64Image);
+    const blob = await res.blob();
+    const file = new File([blob], "produit.jpg", { type: "image/jpeg" });
+
+    // Vérifier si le téléphone peut partager des fichiers
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: 'BOuba STOR',
+        text: 'Découvrez cet article sur BOuba STOR : ' + nomProduit
+      });
+    } else {
+      // Si le téléphone ne supporte pas, on partage juste le texte et le lien
+      await navigator.share({
+        title: 'BOuba STOR',
+        text: 'Découvrez cet article sur BOuba STOR : ' + nomProduit + '\nhttps://bouba-stor.vercel.app/'
+      });
+    }
+  } catch (error) {
+    // En cas d'erreur, on copie le lien
+    navigator.clipboard.writeText('Découvrez BOuba STOR : https://bouba-stor.vercel.app/');
+    alert('Le partage direct a échoué. Le lien a été copié !');
+  }
+}
+ </script>
 </body>
 </html>
 
