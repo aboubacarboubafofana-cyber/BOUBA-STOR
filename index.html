@@ -148,7 +148,7 @@ body.gated>*:not(#gate):not(script):not(style):not(link):not(meta){visibility:hi
 <b id="shopName" style="color:gold;font-size:18px">BOUBA STORE</b>
 <span onclick="openPage('profilePage')" style="font-size:22px">👤</span></div>
 <div class="search" style="display:flex; gap:5px;">
-  <input id="qIn" placeholder="🔍 Chercher un article..." oninput="q=this.value;renderStore()" style="flex:1;">
+  <button id="langBtn" onclick="toggleLang()" style="background:gold; border:none; border-radius:8px; padding:0 10px; font-weight:bold; cursor:pointer;">🌐 EN</button>
   <button onclick="toggleLang()" style="background:gold; border:none; border-radius:8px; padding:0 10px; font-weight:bold; cursor:pointer;">🌐 EN</button>
 </div>
 <div class="cats" id="cats"></div>
