@@ -914,52 +914,50 @@ async function partagerAvecPhoto(nomProduit, base64Image) {
 }
  </script>
  <script>
-// Solution universelle pour le bouton "Partager avec la photo"
+// INTERCEPTEUR ULTIME POUR LE BOUTON "PARTAGER AVEC LA PHOTO"
 document.addEventListener('click', async function(e) {
-  // On vérifie si on a cliqué sur le bouton qui contient ce texte
-  if (e.target && e.target.innerText && e.target.innerText.includes('Partager avec la photo')) {
-    e.preventDefault();
-    
-    // On cherche l'image et le nom dans la fenêtre (le modal)
-    const modal = e.target.closest('div');
-    const imgEl = modal ? modal.querySelector('img') : null;
-    const nameEl = modal ? modal.querySelector('b') : null;
-    
-    const imgSrc = imgEl ? imgEl.src : '';
-    const nom = nameEl ? nameEl.innerText : 'Produit BOuba';
-    
-    if (imgSrc && imgSrc.startsWith('http')) {
-      try {
-        // On télécharge l'image pour la partager
-        const res = await fetch(imgSrc);
-        const blob = await res.blob();
-        const file = new File([blob], "produit.jpg", { type: "image/jpeg" });
-        
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: 'BOuba STOR',
-            text: 'Découvrez cet article sur BOuba STOR : ' + nom
-          });
-        } else {
-          // Si le téléphone ne supporte pas l'envoi de fichiers, on envoie le lien
-          await navigator.share({
-            title: 'BOuba STOR',
-            text: 'Découvrez ' + nom + ' sur BOuba STOR :\nhttps://bouba-stor.vercel.app/'
-          });
-        }
-      } catch (error) {
-        // Si ça plante (à cause de l'image cassée par exemple), on copie le lien
-        navigator.clipboard.writeText('Découvrez BOuba STOR : https://bouba-stor.vercel.app/');
-        alert('Le partage direct a échoué. Le lien a été copié !');
+  // On cherche si le clic vient du bouton ou d'un élément à l'intérieur
+  const btn = e.target.closest('button');
+  if (!btn || !btn.innerText.includes('Partager avec la photo')) return;
+
+  // ON BLOQUE LE CODE ORIGINAL QUI BUGUE
+  e.preventDefault();
+  e.stopImmediatePropagation();
+
+  // On cherche les infos dans la fenêtre (le modal)
+  const modal = btn.closest('div[style*="background"]') || btn.parentElement.parentElement;
+  const imgEl = modal.querySelector('img');
+  const nameEl = modal.querySelector('b');
+  
+  const nom = nameEl ? nameEl.innerText : 'Article BOuba';
+  const imgSrc = imgEl ? imgEl.src : '';
+
+  const textePartage = `Découvrez cet article sur BOuba STOR :\n\n👉 ${nom}\n\n🛒 Commandez ici : https://bouba-stor.vercel.app/`;
+
+  // Si l'image est un vrai lien internet (http...)
+  if (imgSrc && imgSrc.startsWith('http')) {
+    try {
+      const res = await fetch(imgSrc);
+      const blob = await res.blob();
+      const file = new File([blob], "produit.jpg", { type: "image/jpeg" });
+      
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'BOuba STOR', text: textePartage });
+        return;
       }
-    } else {
-      // Si l'image est cassée, on partage juste le lien de la boutique
-      navigator.clipboard.writeText('Découvrez BOuba STOR : https://bouba-stor.vercel.app/');
-      alert('Lien copié ! (L'image du produit est introuvable)');
+    } catch (err) {
+      // Si l'image ne se télécharge pas, on passe au partage de texte ci-dessous
     }
   }
-});
+
+  // Si l'image est cassée ou en Base64, on partage juste le texte et le lien
+  if (navigator.share) {
+    await navigator.share({ title: 'BOuba STOR', text: textePartage });
+  } else {
+    navigator.clipboard.writeText(textePartage);
+    alert('Lien copié ! Vous pouvez le coller sur WhatsApp.');
+  }
+}, true); // Le "true" est très important : il intercepte le clic AVANT les autres scripts
  </script>
 </body>
  </html>
