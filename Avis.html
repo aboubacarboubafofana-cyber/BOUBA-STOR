@@ -6,17 +6,17 @@
     <title>Laisser un avis - BOuba STOR</title>
     <style>
         body { background: #000; color: #fff; font-family: Arial, sans-serif; padding: 20px; text-align: center; }
-        h1 { color: #ffd700; }
-        .stars { font-size: 30px; cursor: pointer; color: #555; }
-        .stars span { transition: color 0.2s; }
-        textarea { width: 100%; height: 100px; background: #222; color: #fff; border: 1px solid #ffd700; border-radius: 8px; padding: 10px; margin-top: 10px; font-size: 14px; }
-        button { background: #ffd700; color: #000; border: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-top: 15px; width: 100%; cursor: pointer; }
-        a { color: #ffd700; display: block; margin-top: 20px; text-decoration: none; }
+        h1 { color: #ffd700; margin-top: 40px; }
+        .stars { font-size: 45px; cursor: pointer; color: #555; margin: 20px 0; }
+        .stars span { transition: color 0.2s; padding: 0 5px; }
+        textarea { width: 100%; height: 120px; background: #222; color: #fff; border: 1px solid #ffd700; border-radius: 8px; padding: 12px; margin-top: 10px; font-size: 15px; box-sizing: border-box; }
+        button { background: #ffd700; color: #000; border: none; padding: 16px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-top: 20px; width: 100%; cursor: pointer; }
+        a { color: #ffd700; display: block; margin-top: 25px; text-decoration: none; font-size: 14px; }
     </style>
 </head>
 <body>
-    <h1>Laissez-nous un avis</h1>
-    <p>Votre avis nous aide à améliorer notre service.</p>
+    <h1>Laissez-nous un avis ⭐</h1>
+    <p style="color:#aaa; font-size:14px;">Votre avis nous aide à améliorer notre service.</p>
 
     <div class="stars" id="stars">
         <span data-val="1">★</span><span data-val="2">★</span><span data-val="3">★</span><span data-val="4">★</span><span data-val="5">★</span>
@@ -24,7 +24,7 @@
 
     <textarea id="comment" placeholder="Dites-nous ce que vous pensez de votre commande..."></textarea>
     <button onclick="envoyerAvis()">Envoyer mon avis</button>
-    <a href="index.html">Retour à la boutique</a>
+    <a href="index.html">← Retour à la boutique</a>
 
     <script>
         let note = 0;
