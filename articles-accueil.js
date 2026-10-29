@@ -83,7 +83,7 @@ async function show() {
           <div class="ba-seller" style="display:flex;align-items:center;gap:8px">${av}<span>🏪 ${esc(a.shopName)}<br>👤 ${esc(a.owner)}</span></div>
           <div class="ba-row">
             <a class="ba-b ba-bl" href="tel:${esc(a.phone)}">📞</a>
-            <a class="ba-b ba-g" target="_blank" href="https://wa.me/${p}?text=${encodeURIComponent('Bonjour, je suis intéressé par : ' + a.name)}">💬 Écrire</a>
+            <a class="ba-b ba-g" href="#" onclick="if(window.ouvrirChat)window.ouvrirChat('${esc(a.shopName)}', '${esc(a.name)}'); return false;">💬 Discuter</a>
             <a class="ba-b ba-d" href="sms:${esc(a.phone)}">✉️</a>
           </div>
           <div class="ba-row ba-share">
