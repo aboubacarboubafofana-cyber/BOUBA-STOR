@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laisser un avis - BOuba STOR</title>
+    <style>
+        body { background: #000; color: #fff; font-family: Arial, sans-serif; padding: 20px; text-align: center; }
+        h1 { color: #ffd700; }
+        .stars { font-size: 30px; cursor: pointer; color: #555; }
+        .stars span { transition: color 0.2s; }
+        textarea { width: 100%; height: 100px; background: #222; color: #fff; border: 1px solid #ffd700; border-radius: 8px; padding: 10px; margin-top: 10px; font-size: 14px; }
+        button { background: #ffd700; color: #000; border: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-top: 15px; width: 100%; cursor: pointer; }
+        a { color: #ffd700; display: block; margin-top: 20px; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <h1>Laissez-nous un avis</h1>
+    <p>Votre avis nous aide à améliorer notre service.</p>
+
+    <div class="stars" id="stars">
+        <span data-val="1">★</span><span data-val="2">★</span><span data-val="3">★</span><span data-val="4">★</span><span data-val="5">★</span>
+    </div>
+
+    <textarea id="comment" placeholder="Dites-nous ce que vous pensez de votre commande..."></textarea>
+    <button onclick="envoyerAvis()">Envoyer mon avis</button>
+    <a href="index.html">Retour à la boutique</a>
+
+    <script>
+        let note = 0;
+        const stars = document.querySelectorAll('.stars span');
+        
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+                note = parseInt(star.getAttribute('data-val'));
+                stars.forEach(s => {
+                    s.style.color = parseInt(s.getAttribute('data-val')) <= note ? '#ffd700' : '#555';
+                });
+            });
+        });
+
+        function envoyerAvis() {
+            const commentaire = document.getElementById('comment').value;
+            if (note === 0) { alert("Veuillez choisir une note (les étoiles)."); return; }
+            if (!commentaire.trim()) { alert("Veuillez écrire un petit commentaire."); return; }
+
+            // On prépare le message pour WhatsApp
+            const msg = `⭐ Nouvel avis sur BOuba STOR !\nNote : ${note}/5\nCommentaire : ${commentaire}`;
+            const wa = "2250787619717"; // Ton numéro WhatsApp
+            
+            window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+    </script>
+</body>
+</html>
