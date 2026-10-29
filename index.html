@@ -913,6 +913,54 @@ async function partagerAvecPhoto(nomProduit, base64Image) {
   }
 }
  </script>
+ <script>
+// Solution universelle pour le bouton "Partager avec la photo"
+document.addEventListener('click', async function(e) {
+  // On vérifie si on a cliqué sur le bouton qui contient ce texte
+  if (e.target && e.target.innerText && e.target.innerText.includes('Partager avec la photo')) {
+    e.preventDefault();
+    
+    // On cherche l'image et le nom dans la fenêtre (le modal)
+    const modal = e.target.closest('div');
+    const imgEl = modal ? modal.querySelector('img') : null;
+    const nameEl = modal ? modal.querySelector('b') : null;
+    
+    const imgSrc = imgEl ? imgEl.src : '';
+    const nom = nameEl ? nameEl.innerText : 'Produit BOuba';
+    
+    if (imgSrc && imgSrc.startsWith('http')) {
+      try {
+        // On télécharge l'image pour la partager
+        const res = await fetch(imgSrc);
+        const blob = await res.blob();
+        const file = new File([blob], "produit.jpg", { type: "image/jpeg" });
+        
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'BOuba STOR',
+            text: 'Découvrez cet article sur BOuba STOR : ' + nom
+          });
+        } else {
+          // Si le téléphone ne supporte pas l'envoi de fichiers, on envoie le lien
+          await navigator.share({
+            title: 'BOuba STOR',
+            text: 'Découvrez ' + nom + ' sur BOuba STOR :\nhttps://bouba-stor.vercel.app/'
+          });
+        }
+      } catch (error) {
+        // Si ça plante (à cause de l'image cassée par exemple), on copie le lien
+        navigator.clipboard.writeText('Découvrez BOuba STOR : https://bouba-stor.vercel.app/');
+        alert('Le partage direct a échoué. Le lien a été copié !');
+      }
+    } else {
+      // Si l'image est cassée, on partage juste le lien de la boutique
+      navigator.clipboard.writeText('Découvrez BOuba STOR : https://bouba-stor.vercel.app/');
+      alert('Lien copié ! (L'image du produit est introuvable)');
+    }
+  }
+});
+ </script>
 </body>
-</html>
+ </html>
 
