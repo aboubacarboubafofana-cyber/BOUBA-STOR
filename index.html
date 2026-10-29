@@ -478,12 +478,35 @@ function shareNative(){
  if(navigator.share)navigator.share({title:shopN(),text:'Découvre '+shopN()+' 👑',url:siteUrl()}).catch(()=>{});
  else copyLink();
 }
-function shareProd(id){
+async function shareProd(id){
  const p=(S.products||{})[id];if(!p)return;
- const msg=p.name+' — '+fmt(p.price)+' F 👑 '+shopN()+'\n'+siteUrl();
- if(navigator.share)navigator.share({title:p.name,text:msg}).catch(()=>{});
- else window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+ const msg = p.name + ' — ' + fmt(p.price) + ' F 👑 ' + shopN() + '\n' + siteUrl();
+ 
+ if (navigator.share) {
+  try {
+   // Si on a une image, on la convertit en fichier pour l'envoyer
+   if (p.img && p.img.startsWith('data:image')) {
+    const res = await fetch(p.img);
+    const blob = await res.blob();
+    const file = new File([blob], "produit.jpg", { type: "image/jpeg" });
+    
+    // On vérifie si le téléphone accepte de partager des fichiers
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+     await navigator.share({ files: [file], title: p.name, text: msg });
+     return;
+    }
+   }
+   // Si pas d'image, on partage juste le texte et le lien
+   await navigator.share({ title: p.name, text: msg });
+  } catch (e) {
+   // Si l'utilisateur annule, on ne fait rien
+  }
+ } else {
+  // Si le téléphone ne supporte pas le partage natif, on ouvre WhatsApp Web
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+ }
 }
+
 function addShare(){
  document.querySelectorAll('#grid .card').forEach(c=>{
   if(c.querySelector('.shb'))return;
