@@ -360,7 +360,8 @@ function commander(){
   items:l.map(x=>({id:x.p.id,name:x.p.name,price:x.p.price,qty:x.qty}))};
  write('orders/'+id,o);
  const wa=((S.info||{}).whatsapp||DEFAULT_WA).replace(/\D/g,'');
- const msg='Commande #'+id+'\n'+l.map(x=>'• '+x.p.name+' x'+x.qty+' = '+fmt(x.p.price*x.qty)+' F').join('\n')+'\nTotal : '+fmt(o.total)+' F\nClient : '+me.name+' / '+me.phone+' / '+me.city;
+ const imgUrl = l[0].p.img ? l[0].p.img : '';
+const msg='Commande #'+id+'\n'+l.map(x=>'• '+x.p.name+' x'+x.qty+' = '+fmt(x.p.price*x.qty)+' F').join('\n')+'\nTotal : '+fmt(o.total)+' F\n'+(imgUrl && imgUrl.startsWith('http') ? 'Image : '+imgUrl+'\n' : '')+'Client : '+me.name+' / '+me.phone+' / '+me.city;
  cart=[];SV('b_cart',cart);renderCart();closeAll();
  window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg),'_blank');
 }
