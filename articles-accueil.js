@@ -135,19 +135,17 @@ window.genererFluxGoogle = async function() {
     alert("FLUX PRÊT ! Copie ce texte et colle-le dans ton fichier produits.xml sur GitHub :\n\n" + xml);
   } catch (e) {
     alert("Erreur : " + e.message);
-    // Fonction pour ouvrir le chat avec le produit pré-rempli
 window.ouvrirChat = function(vendeur, produit) {
-  // Ouvre la page de chat
-  if (window.openPage) window.openPage('chatPage'); 
+  // Ouvre le chat via le bouton "Aide" qui existe déjà
+  const btnAide = document.getElementById('iaBtn') || document.querySelector('.chat-fab, .fab');
+  if (btnAide) btnAide.click();
   
-  // Remplit le champ de message
+  // Remplit le champ de message après l'ouverture
   setTimeout(() => {
-    const input = document.getElementById('iaInput') || document.querySelector('#chatPage input');
+    const input = document.getElementById('iaInput') || document.querySelector('input[placeholder*="message"]');
     if (input) {
       input.value = `Bonjour ${vendeur}, je suis intéressé par : ${produit}`;
       input.focus();
     }
-  }, 500);
-};
-  }
+  }, 600);
 };
