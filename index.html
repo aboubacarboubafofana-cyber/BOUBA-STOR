@@ -147,7 +147,10 @@ body.gated>*:not(#gate):not(script):not(style):not(link):not(meta){visibility:hi
 <div class="top"><img id="logo" class="logo" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
 <b id="shopName" style="color:gold;font-size:18px">BOUBA STORE</b>
 <span onclick="openPage('profilePage')" style="font-size:22px">👤</span></div>
-<div class="search"><input id="qIn" placeholder="🔍 Chercher un article..." oninput="q=this.value;renderStore()"></div>
+<div class="search" style="display:flex; gap:5px;">
+  <input id="qIn" placeholder="🔍 Chercher un article..." oninput="q=this.value;renderStore()" style="flex:1;">
+  <button onclick="toggleLang()" style="background:gold; border:none; border-radius:8px; padding:0 10px; font-weight:bold; cursor:pointer;">🌐 EN</button>
+</div>
 <div class="cats" id="cats"></div>
 </div>
 <div class="banner" id="bannerText">LIVRAISON 24H ABIDJAN • WAVE • ORANGE MONEY</div>
