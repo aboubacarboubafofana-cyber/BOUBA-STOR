@@ -22,19 +22,22 @@ css.textContent = `
 `;
 document.head.appendChild(css);
 
-function box() {
-  let el = document.getElementById('boutiques-articles');
-  if (el) return el;
-  el = document.createElement('div');
-  el.id = 'boutiques-articles';
-  const cand = [...document.querySelectorAll('body *')].find(n =>
-    n.children.length === 0 && /^\s*Bienvenue/i.test(n.textContent || ''));
-  if (cand) {
-    let t = cand;
-    while (t.parentElement && t.parentElement !== document.body && t.parentElement.children.length === 1) t = t.parentElement;
-    t.parentNode.insertBefore(el, t.nextSibling);
-    return el;
-  }
+// ... (début de la fonction show inchangé)
+
+const [shops, arts] = [await list('boutiques'), await list('articles')];
+const md = await mode(), adm0 = (typeof isAdmin !== 'undefined' && isAdmin);
+
+// 1. On crée la table des boutiques
+const byId = Object.fromEntries(shops.map(s => [s.id, s]));
+
+// 2. On trie tous les articles du plus récent au plus ancien
+const all = arts.slice().sort((a, b) => (b.date || 0) - (a.date || 0));
+
+// 🔥 CORRECTION : On ignore le statut "closed" pour que TOUS les articles s'affichent
+const items = all; 
+
+// ... (le reste du code de rendu HTML avec items.map reste le même)
+
   const nav = document.querySelector('.bottom-nav, footer');
   nav ? nav.parentNode.insertBefore(el, nav) : document.body.appendChild(el);
   return el;
