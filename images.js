@@ -39,19 +39,27 @@ function ensure(){
  /* 1) toute image arrivée dans le catalogue est gardée en mémoire */
  Object.keys(P).forEach(function(id){var p=P[id];if(p&&ok(p.img)){var k=id+':'+(p.iv||0)+':'+p.img.length;if(!seen[k]){seen[k]=1;putC(id,{iv:p.iv||0,d:p.img})}}});
  /* 2) les articles affichés d'abord */
- [].forEach.call(document.querySelectorAll('#grid img[data-pid]'),function(i){ids.push(i.getAttribute('data-pid'))});
+ [].forEach.call(document.querySelectorAll('#grid img[data-pid], #boutiques-articles img[data-pid]'),function(i){ids.push(i.getAttribute('data-pid'))});
  ids.forEach(function(id){var p=P[id];if(p&&!ok(p.img))load(id)});
  /* 3) le reste, discrètement, quand le téléphone est tranquille */
  if(!idle&&!window.LITE){idle=1;var f=function(){Object.keys(S.products||{}).slice(0,80).forEach(function(id){var p=S.products[id];if(p&&!ok(p.img))load(id)});idle=0};(window.requestIdleCallback||function(c){setTimeout(c,3000)})(f,{timeout:6000})}
 }
 /* --- séparation d'une image (admin) : le catalogue reste léger --- */
 function recompress(url,max,qual){return new Promise(function(res){var i=new Image();i.onload=function(){var k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext('2d').drawImage(i,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',qual))};i.onerror=function(){res(null)};i.src=url})}
+
 function split(id){
  var p=(S.products||{})[id];if(!p||!ok(p.img))return Promise.resolve(false);
  return recompress(p.img,560,0.62).then(function(t){
   if(!t)return false;
   var iv=Date.now();
-  write('productimgs/'+id,t);write('products/'+id+'/img',null);write('products/'+id+'/iv',iv);
+  
+  // 1. On stocke la version d'origine dans productimgs
+  write('productimgs/'+id,t);
+  
+  // 🔥 RECTIFICATION : Au lieu d'effacer (null), on laisse la version compressée légère 't' directement accessible sur l'article !
+  write('products/'+id+'/img',t);
+  write('products/'+id+'/iv',iv);
+  
   putC(id,{iv:iv,d:t});setTimeout(function(){var q=(S.products||{})[id];if(q){q.img=t;q.iv=iv}apply(id,t)},60);
   return true;
  });
@@ -80,3 +88,4 @@ var _dp=window.delProd;
 if(_dp)window.delProd=function(id){_dp(id);setTimeout(function(){if(!(S.products||{})[id])write('productimgs/'+id,null)},800)};
 open();
 })();
+    
