@@ -31,5 +31,11 @@
   <!-- LA LIGNE MAGIQUE POUR LA VIDÉO -->
   <enclosure url="https://bouba-stor.vercel.app/videos/presentation.mp4" type="video/mp4" length="1000000" />
 </item>
+    <item>
+  <title>Test de publication Facebook</title>
+  <link>https://bouba-stor.vercel.app/</link>
+  <description>Ceci est un test pour voir si la publication fonctionne.</description>
+  <pubDate>Fri, 30 Oct 2026 17:25:00 GMT</pubDate>
+</item>
   </channel>
 </rss>
