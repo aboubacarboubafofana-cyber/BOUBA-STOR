@@ -176,4 +176,4 @@ window.genererFluxGoogle = async function() {
     console.error('Erreur lors de la génération du flux Google:', e);
   }
 };
-      
+                                     
