@@ -1,0 +1,97 @@
+/* ==========================================================
+   1. REDIMENSIONNEMENT AUTOMATIQUE DES IMAGES PRODUITS
+   ========================================================== */
+/* Cette classe s'applique aux images de la boutique */
+.product-img {
+    width: 100%;             /* L'image prend toute la largeur de sa case */
+    height: 180px;           /* Hauteur fixe (ajustez selon votre goût) */
+    object-fit: cover;       /* MAGIE : recadre l'image pour qu'elle remplisse la case sans se déformer */
+    object-position: center; /* Centre l'image */
+    border-radius: 12px;     /* Coins arrondis comme sur votre design */
+    display: block;
+    background-color: #222;  /* Fond gris en attendant le chargement */
+}
+
+/* Images dans le panier ou les petites listes (Admin, IA) */
+.mini-img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* ==========================================================
+   2. CORRECTION DE LA MISE EN PAGE (CARTES PRODUITS)
+   ========================================================== */
+/* Pour que les boutons ne se chevauchent pas */
+.card {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #1a1a1a;
+    margin-bottom: 15px;
+}
+
+.card .info {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Espace entre le texte et les boutons */
+}
+
+/* Bouton "Ajouter au panier" bien visible */
+.card .btn {
+    width: 100%;
+    padding: 12px;
+    font-weight: bold;
+    border-radius: 8px;
+    margin-top: auto; /* Pousse le bouton vers le bas */
+}
+
+/* ==========================================================
+   3. CORRECTION DES BOUTONS FLOTTANTS (Le problème de superposition)
+   ========================================================== */
+/* Décale le bouton Conseils pour qu'il ne cache plus le bouton Ajouter */
+#btn-conseils {
+    bottom: 100px; 
+    left: 15px;
+    z-index: 999;
+}
+
+/* Décale le bouton Aide */
+#btn-aide {
+    bottom: 160px;
+    right: 15px;
+    z-index: 999;
+}
+
+/* Le lecteur d'image plein écran (votre code existant, optimisé) */
+#imgViewer {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+#imgViewerPic {
+    max-width: 100%;
+    max-height: 88%;
+    object-fit: contain; /* Ici on utilise contain pour voir l'image en entier */
+    border-radius: 8px;
+}
+
+/* ==========================================================
+   4. IMAGE DE SECOURS (Si l'image est cassée)
+   ========================================================== */
+/* Quand l'image ne charge pas, on affiche un fond gris avec une icône */
+img.error-fallback {
+    background: #333 url('https://via.placeholder.com/300x300/222/ffd700?text=Image+Indisponible') no-repeat center center;
+    background-size: cover;
+    color: transparent; /* Cache le texte alternatif moche */
+}
