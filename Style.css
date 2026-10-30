@@ -95,3 +95,11 @@ img.error-fallback {
     background-size: cover;
     color: transparent; /* Cache le texte alternatif moche */
 }
+.product-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 12px;
+  display: block;
+  background-color: #222;
+}
