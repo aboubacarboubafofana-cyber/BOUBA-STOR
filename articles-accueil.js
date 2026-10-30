@@ -70,7 +70,7 @@ async function show() {
       const s = shareLinks(text, homeUrl()), p = intl(a.phone), sh = byId[a.shopId] || {};
       const av = sh.avatar ? `<img src="${sh.avatar}" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #ffd700">` : '';
       const off = !open.has(a.shopId) ? '<div style="background:#a00;color:#fff;font-size:11px;text-align:center;padding:3px">Boutique fermée ou supprimée</div>' : '';
-      return `<div class="ba-card">${off}${a.video ? `<video src="${a.video}" poster="${a.img || blankImg}" controls playsinline preload="metadata"></video>` : `<img class="ba-m" src="${a.img || blankImg}" alt="${esc(a.name)}" loading="lazy">`}
+      return `<div class="ba-card">${off}${a.video ? `<video src="${a.video}" poster="${a.img || blankImg}" controls playsinline preload="metadata"></video>` : `<img class="ba-m" src="${a.img || blankImg}" alt="${esc(a.name)}" loading="lazy" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x300/222/ffd700?text=Image+Indisponible';">
         <div class="ba-info">
           <div class="ba-name">${esc(a.name)}</div>
           <div class="ba-price">${money(a.price)}</div>
