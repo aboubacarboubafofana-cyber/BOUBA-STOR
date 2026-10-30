@@ -23,5 +23,13 @@
       <description>Le guide ultime pour choisir la bonne taille et la bonne couleur.</description>
       <pubDate>Wed, 28 Oct 2026 10:00:00 GMT</pubDate>
     </item>
+    <item>
+  <title>Découvrez la nouvelle collection BOuba STOR</title>
+  <link>https://bouba-stor.vercel.app/</link>
+  <description>Regardez notre dernière vidéo de présentation.</description>
+  <pubDate>Thu, 29 Oct 2026 10:00:00 GMT</pubDate>
+  <!-- LA LIGNE MAGIQUE POUR LA VIDÉO -->
+  <enclosure url="https://bouba-stor.vercel.app/videos/presentation.mp4" type="video/mp4" length="1000000" />
+</item>
   </channel>
 </rss>
