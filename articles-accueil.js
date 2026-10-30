@@ -64,8 +64,8 @@ async function show() {
     
     if (!items.length) { el.innerHTML = diag; return; }
     
-    // Lien générique utilisé si l'image stockée est absente ou ne se charge pas
-    const fallbackImg = 'https://placeholder.com';
+    // Lien générique utilisé si l'image stockée est absente ou se charge de manière asynchrone via images.js
+    const fallbackImg = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
     el.innerHTML = '<h3>🏪 Boutiques ➜ glisse (' + items.length + ')</h3>' + diag + '<div class="ba-grid">' + items.map(a => {
       // Sécurisation contre les propriétés manquantes ou indéfinies
@@ -80,8 +80,9 @@ async function show() {
       
       const av = sh.avatar ? `<img src="${sh.avatar}" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #ffd700">` : '';
       
+      // 🔥 Ajout indispensable de l'attribut data-pid pour que le gestionnaire images.js charge la vraie photo en arrière-plan
       return `<div class="ba-card">
-        ${a.video ? `<video src="${a.video}" poster="${imageArticle}" controls playsinline preload="metadata"></video>` : `<img class="ba-m" src="${imageArticle}" alt="${esc(a.name)}" loading="lazy" onerror="this.onerror=null; this.src='${fallbackImg}';">`}
+        ${a.video ? `<video src="${a.video}" poster="${imageArticle}" controls playsinline preload="metadata"></video>` : `<img class="ba-m" data-pid="${a.id}" src="${imageArticle}" alt="${esc(a.name)}" loading="lazy" onerror="this.onerror=null; this.src='https://placeholder.com';">`}
         <div class="ba-info">
           <div class="ba-name">${esc(a.name)}</div>
           <div class="ba-price">${money(a.price)}</div>
@@ -102,6 +103,13 @@ async function show() {
           </div>
         </div></div>`;
     }).join('') + '</div>';
+
+    // 🔥 DÉCLENCHEMENT DU CHARGEMENT ASYNCHRONE DE CHAQUE IMAGE EN ARRIÈRE-PLAN
+    if (window.IMG && typeof window.IMG.need === 'function') {
+      items.forEach(a => {
+        window.IMG.need(a.id);
+      });
+    }
   } catch (e) { 
     console.error('articles-accueil:', e); 
     el.innerHTML = '<div style="color:#888;font-size:11px;padding:6px;text-align:center">Articles boutiques : ' + String(e.message || e) + '</div>'; 
@@ -168,3 +176,4 @@ window.genererFluxGoogle = async function() {
     console.error('Erreur lors de la génération du flux Google:', e);
   }
 };
+      
