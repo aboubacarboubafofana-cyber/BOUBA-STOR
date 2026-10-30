@@ -18,6 +18,13 @@ function changed(a,b){
 self.addEventListener('fetch',e=>{
  const r=e.request;if(r.method!=='GET')return;
  const u=new URL(r.url);
+   if (r.destination === 'image') {
+  e.respondWith(caches.match(r).then(cached => cached || fetch(r).then(res => {
+    if (res.ok) caches.open('bouba-img').then(c => c.put(r, res.clone()));
+    return res;
+  }).catch(() => new Response('', {status: 404})));
+  return;
+   }
  if(u.origin===self.location.origin){
   if(u.pathname.startsWith('/api/'))return;
   e.respondWith(shell(e,r));
