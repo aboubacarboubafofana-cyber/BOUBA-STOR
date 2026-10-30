@@ -53,22 +53,22 @@ async function show() {
     const [shops, arts] = [await list('boutiques'), await list('articles')];
     const md = await mode(), adm0 = (typeof isAdmin !== 'undefined' && isAdmin);
     
-    // Diagnostic de connexion à la base
+    // Diagnostic de connexion à la base de données
     const diag = md === 'local' ? '<div style="background:#3a0000;border:1px solid #ff5a5a;border-radius:10px;color:#ffb3b3;font-size:12px;padding:8px;margin:0 0 10px;text-align:center">⚠️ La base en ligne est inaccessible : seuls les articles de CE téléphone s\'affichent.' + (adm0 ? '<br>Cause : <b>' + esc(lastError() || 'inconnue') + '</b>' : '') + '</div>' : (adm0 ? '<div style="color:#888;font-size:11px;text-align:center;margin-bottom:6px">🟢 Base en ligne • ' + shops.length + ' boutique(s) • ' + arts.length + ' article(s)</div>' : '');
     
-    // Indexation des boutiques pour retrouver rapidement les métadonnées (comme l'avatar)
+    // Indexation rapide des informations des boutiques
     const byId = Object.fromEntries(shops.map(s => [s.id, s]));
     
-    // Tri de TOUS les articles du plus récent au plus ancien
+    // 🔥 CORRECTION CRITIQUE : Tri et conservation de TOUS les articles sans aucun filtrage sur le statut de la boutique
     const items = arts.slice().sort((a, b) => (b.date || 0) - (a.date || 0));
     
     if (!items.length) { el.innerHTML = diag; return; }
     
-    // Image par défaut si le lien d'image de l'article est absent ou cassé
+    // Lien générique utilisé si l'image stockée est absente ou ne se charge pas
     const fallbackImg = 'https://placeholder.com';
 
     el.innerHTML = '<h3>🏪 Boutiques ➜ glisse (' + items.length + ')</h3>' + diag + '<div class="ba-grid">' + items.map(a => {
-      // Sécurisation des variables pour éviter les plantages si la boutique n'existe plus ou est mal configurée
+      // Sécurisation contre les propriétés manquantes ou indéfinies
       const nomBoutique = a.shopName || "Boutique Partenaire";
       const proprietaire = a.owner || "Vendeur";
       const imageArticle = a.img && a.img.trim() !== '' ? a.img : fallbackImg;
@@ -121,7 +121,7 @@ show();
 setInterval(() => { if (!document.hidden) show(); }, 120000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) show(); });
 
-// Génération du catalogue XML pour Google Merchant Center (Complet)
+// Génération du catalogue XML complet pour Google Merchant Center
 window.genererFluxGoogle = async function() {
   try {
     const [shops, arts] = [await list('boutiques'), await list('articles')];
@@ -168,4 +168,3 @@ window.genererFluxGoogle = async function() {
     console.error('Erreur lors de la génération du flux Google:', e);
   }
 };
-        
