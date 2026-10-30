@@ -248,7 +248,7 @@ S.info=S.info||{};S.products=S.products||{};S.users=S.users||{};S.orders=S.order
 let outbox=LS('b_out',[]),cart=LS('b_cart',[]),me=LS('b_me',null);
 let isAdmin=false,cat='all',q='',online=false,fb=null,flushing=false,adminSub=false,tab='stats';
 window.LITE=!!(navigator.connection&&(navigator.connection.saveData||/(^|-)2g$/.test(navigator.connection.effectiveType||'')));
-let SHOWN=LITE?12:24,_rt=0;
+let SHOWN=20,_rt=0;
 function renderSoon(){if(_rt)return;_rt=setTimeout(()=>{_rt=0;renderAll()},150)}
 /* défilement sans limite : la suite des articles se charge toute seule en descendant */
 const _io=('IntersectionObserver' in window)?new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){_io.disconnect();SHOWN+=30;renderStore()}},{rootMargin:'900px'}):null;
