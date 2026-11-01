@@ -1,4 +1,4 @@
-/* BOUBA STORE – Connexion claire + diagnostic de vitesse.
+/* BOUBA STOR – Connexion claire + diagnostic de vitesse.
    - Barre de réseau : En ligne / Hors ligne + qualité de la connexion (temps de réponse en ms).
    - Admin : page « Vitesse & connexion » (poids des données, images lourdes) + bouton « Optimiser les images ». */
 (function(){
