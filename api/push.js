@@ -1,4 +1,4 @@
-// BOUBA STORE : envoi des alertes "nouvel article" (Vercel, gratuit)
+// BOUBA STOR : envoi des alertes "nouvel article" (Vercel, gratuit)
 const crypto=require('crypto');
 const DB='https://project-f4477c80-7c55-4db7-b2e-default-rtdb.europe-west1.firebasedatabase.app';
 const PID='project-f4477c80-7c55-4db7-b2e';
