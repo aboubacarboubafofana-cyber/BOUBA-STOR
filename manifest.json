@@ -1,7 +1,7 @@
 {
- "name": "BOUBA STORE",
+ "name": "BOUBA STOR",
  "short_name": "BOUBA",
- "description": "Boutique BOUBA STORE - Abidjan",
+ "description": "Boutique BOUBA STOR - Abidjan",
  "start_url": "./index.html",
  "scope": "./",
  "display": "standalone",
