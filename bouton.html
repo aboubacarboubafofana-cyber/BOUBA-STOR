@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Boutiques - BOUBA STORE</title>
+<title>Boutiques - BOUBA STOR</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
 body{background:#000;color:#fff;min-height:100vh;padding:12px 12px 40px}
@@ -44,7 +44,7 @@ small{color:#aaa;display:block;margin-top:2px;font-size:12px;word-break:break-wo
 <body>
 <div class="top">
   <a class="btn" href="index.html">← Accueil</a>
-  <h1>🏪 BOUBA STORE</h1>
+  <h1>🏪 BOUBA STOR</h1>
   <span id="mode" class="badge" style="background:#444"></span>
 </div>
 <div id="app">Chargement…</div>
@@ -204,7 +204,7 @@ document.addEventListener('click', async e => {
   const act = b.dataset.act, v = id => ($(id) ? $(id).value.trim() : '');
   try {
     if (act === 'nshare') {
-      if (navigator.share) navigator.share({ title: 'BOUBA STORE', text: b.dataset.t, url: b.dataset.u || homeUrl() }).catch(() => {});
+      if (navigator.share) navigator.share({ title: 'BOUBA STOR', text: b.dataset.t, url: b.dataset.u || homeUrl() }).catch(() => {});
       else { navigator.clipboard && navigator.clipboard.writeText(b.dataset.t + ' ' + (b.dataset.u || homeUrl())); alert('Lien copié !'); }
       return;
     }
