@@ -1,4 +1,4 @@
-/* BOUBA STORE – Partage des articles : après chaque nouvelle publication, une fenêtre propose le partage en un geste
+/* BOUBA STOR – Partage des articles : après chaque nouvelle publication, une fenêtre propose le partage en un geste
    (WhatsApp : message, statut, groupes ; Facebook) avec la PHOTO. Si Facebook automatique est activé sur le serveur, la page Facebook est publiée toute seule. */
 (function(){
 var css=document.createElement('style');
