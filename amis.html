@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amis - Bouba Store</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{--bg:#0f0f0f;--card:#1a1a1a;--acc:#ffd700;--gray:#888}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',sans-serif}
+body{background:var(--bg);color:#fff;padding-bottom:70px}
+.top-bar{display:flex;justify-content:space-between;align-items:center;padding:15px;position:sticky;top:0;background:var(--bg);z-index:5}
+h2{color:var(--acc)}
+.search{margin:0 15px 15px;background:var(--card);border-radius:20px;padding:10px 15px;display:flex;align-items:center}
+.search input{flex:1;background:transparent;border:0;color:#fff;margin-left:10px;outline:0;font-size:1rem}
+#friendList{padding:0 15px}
+.friend-item{display:flex;align-items:center;background:var(--card);margin-bottom:10px;padding:10px;border-radius:15px;cursor:pointer}
+.avatar{width:50px;height:50px;background:var(--acc);color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;margin-right:12px;flex-shrink:0;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.friend-info{flex:1;min-width:0}
+.friend-info h4{font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.friend-info p{font-size:.8rem;color:var(--gray)}
+.note{padding:10px;color:var(--gray)}
+.chat-modal{display:none;position:fixed;inset:0;background:var(--bg);flex-direction:column;z-index:30}
+.chat-header{padding:15px;background:var(--card);display:flex;align-items:center;justify-content:space-between}
+.chat-header i{color:var(--acc);font-size:1.4rem;cursor:pointer}
+.chat-header h3{font-size:1.1rem}
+.chat-messages{flex:1;padding:15px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:80%;padding:10px 15px;border-radius:15px;font-size:.9rem;word-wrap:break-word}
+.msg.received{background:#333;align-self:flex-start;border-bottom-left-radius:0}
+.msg.sent{background:var(--acc);color:#000;align-self:flex-end;border-bottom-right-radius:0}
+.chat-input{padding:15px;background:var(--card);display:flex;gap:10px;border-top:1px solid #333}
+.chat-input input{flex:1;min-width:0;padding:12px;border-radius:20px;border:1px solid #444;background:#222;color:#fff;font-size:1rem}
+.chat-input button{flex-shrink:0;background:var(--acc);border:0;padding:0 20px;border-radius:20px;font-weight:bold}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <div style="display:flex;align-items:center;gap:10px"><i class="fas fa-home" style="color:var(--acc)"></i><h2>Tous les inscrits</h2></div>
+</div>
+<div class="search"><i class="fas fa-search" style="color:var(--gray)"></i>
+  <input type="text" id="searchInput" placeholder="Rechercher un ami...">
+</div>
+<div id="friendList"><p class="note">Chargement rapide...</p></div>
+
+<div class="chat-modal" id="chatModal">
+  <div class="chat-header">
+    <i class="fas fa-arrow-left" onclick="closeChat()"></i><h3 id="chatName"></h3>
+  </div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="chat-input">
+    <input type="text" id="messageInput" placeholder="Écrire un message...">
+    <button onclick="sendMessage()">Envoyer</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, onValue, push, set, serverTimestamp, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyAnLLXpUC35OleB0hCLUXnLU0lMiesY7j4",
+  authDomain: "project-f4477c80-7c55-4db7-b2e.firebaseapp.com",
+  databaseURL: "https://project-f4477c80-7c55-4db7-b2e-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "project-f4477c80-7c55-4db7-b2e",
+  storageBucket: "project-f4477c80-7c55-4db7-b2e.firebasestorage.app",
+  messagingSenderId: "697604298457",
+  appId: "1:697604298457:web:4f9a6d66ec6fde9c1990c8"
+});
+const db = getDatabase(app);
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeImg = s => (typeof s === 'string' && s.startsWith('data:image')) ? s : '';
+const ini = n => String(n || '?').slice(0, 2).toUpperCase();
+
+let me = null, allUsers = [], chatId = null, unsub = null;
+
+// 1. CONNEXION (Lecture du localStorage)
+const storedMe = localStorage.getItem('b_me');
+if (storedMe) {
+    const parsedMe = JSON.parse(storedMe);
+    me = { uid: parsedMe.key, name: parsedMe.name, phone: parsedMe.phone };
+} else {
+    location.replace('index.html');
+}
+
+// 2. AFFICHAGE INSTANTANÉ DEPUIS LA MÉMOIRE (Cache)
+const cached = localStorage.getItem('amis_cache_all');
+if (cached) {
+    allUsers = JSON.parse(cached);
+    render();
+}
+
+// 3. MISE À JOUR AVEC TOUS LES INSCRITS DE FIREBASE
+const usersRef = ref(db, 'users');
+onValue(usersRef, (snapshot) => {
+    const data = snapshot.val() || {};
+    let newUsers = [];
+    Object.keys(data).forEach(key => {
+        if (key === me.uid) return; // On ne s'affiche pas soi-même
+        const u = data[key];
+        if (u.name) {
+            newUsers.push({ id: key, name: u.name, tel: String(u.phone || ''), photo: safeImg(u.photo) });
+        }
+    });
+    allUsers = newUsers;
+    localStorage.setItem('amis_cache_all', JSON.stringify(allUsers)); // Sauvegarde locale
+    render();
+});
+
+function render() {
+    const q = $('searchInput').value.trim().toLowerCase();
+    let arr = allUsers;
+    if (q) arr = arr.filter(u => u.name.toLowerCase().includes(q) || u.tel.includes(q));
+    
+    let html = arr.map(u => `
+        <div class="friend-item" onclick="openChat('${esc(u.id)}', '${esc(u.name)}')">
+            <div class="avatar">${u.photo ? `<img src="${u.photo}">` : esc(ini(u.name))}</div>
+            <div class="friend-info"><h4>${esc(u.name)}</h4><p>${esc(u.tel)}</p></div>
+        </div>`).join('');
+        
+    $('friendList').innerHTML = html || '<p class="note">Aucun autre inscrit pour le moment.</p>';
+}
+
+$('searchInput').addEventListener('input', render);
+
+// 4. OUVRIR LE CHAT PRIVÉ ENTRE 2 PERSONNES
+window.openChat = function(id, name) {
+    chatId = [me.uid, id].sort().join('_'); // Crée un ID unique pour ces 2 personnes
+    $('chatName').textContent = name;
+    $('chatModal').style.display = 'flex';
+    loadMessages();
+}
+
+window.closeChat = function() {
+    if (unsub) { unsub(); unsub = null; }
+    $('chatModal').style.display = 'none';
+    chatId = null;
+}
+
+// 5. MESSAGERIE EN TEMPS RÉEL
+function loadMessages() {
+    if (unsub) unsub();
+    const box = $('chatMessages');
+    box.innerHTML = '<p style="color:#888;text-align:center">Chargement...</p>';
+    
+    const messagesRef = ref(db, 'chats/' + chatId + '/messages');
+    const q = query(messagesRef, orderByChild('timestamp'), limitToLast(50));
+    
+    unsub = onValue(q, (snapshot) => {
+        box.textContent = '';
+        const msgs = [];
+        snapshot.forEach(child => { msgs.push({ id: child.key, ...child.val() }); });
+        
+        msgs.forEach(m => {
+            const div = document.createElement('div');
+            div.className = 'msg ' + (m.senderId === me.uid ? 'sent' : 'received');
+            div.textContent = m.text;
+            box.appendChild(div);
+        });
+        box.scrollTop = box.scrollHeight;
+    });
+}
+
+window.sendMessage = async function() {
+    const input = $('messageInput');
+    const text = input.value.trim();
+    if (!text || !chatId) return;
+    input.value = '';
+    try {
+        const msgRef = push(ref(db, 'chats/' + chatId + '/messages'));
+        await set(msgRef, { text: text, senderId: me.uid, timestamp: serverTimestamp() });
+    } catch (e) {
+        console.error(e);
+        alert("Erreur d'envoi.");
+    }
+}
+
+$('messageInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+</script>
+</body>
+</html>
