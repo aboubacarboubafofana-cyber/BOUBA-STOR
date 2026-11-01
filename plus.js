@@ -1,4 +1,4 @@
-/* BOUBA STORE : inscription mondiale, installation de l'app, alertes nouveaux articles */
+/* BOUBA STOR : inscription mondiale, installation de l'app, alertes nouveaux articles */
 (function(){
  var LS=window.localStorage;
  function g(k){try{return LS.getItem(k)}catch(e){return null}}
