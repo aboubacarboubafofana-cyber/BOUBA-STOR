@@ -1,4 +1,4 @@
-// BOUBA STORE : vérification du code administrateur côté serveur (Vercel).
+// BOUBA STOR : vérification du code administrateur côté serveur (Vercel).
 // Le vrai code est dans la variable d'environnement ADMIN_CODE, jamais dans le dépôt.
 const crypto = require('crypto');
 module.exports = async (req, res) => {
