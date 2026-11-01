@@ -1,4 +1,4 @@
-/* BOUBA STORE – Tutoriel de premier lancement (5 écrans). Se montre une seule fois ; rouvrable depuis le Menu. */
+/* BOUBA STOR – Tutoriel de premier lancement (5 écrans). Se montre une seule fois ; rouvrable depuis le Menu. */
 (function(){
 var SL=[
  ['🛍️','Bienvenue sur BOUBA STORE','Mode, chaussures, cosmétiques et bien plus. Tout se commande en quelques touches.'],
