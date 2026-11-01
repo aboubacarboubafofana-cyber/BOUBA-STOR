@@ -1,4 +1,4 @@
-/* BOUBA STORE – Portefeuille, tombola, vendeur du mois, prix de gros, point relais, suivi livreur, commander à nouveau, complétez le look
+/* BOUBA STOR – Portefeuille, tombola, vendeur du mois, prix de gros, point relais, suivi livreur, commander à nouveau, complétez le look
    Dépend de index.html, promos.js, features.js, suite.js, bonus.js, more.js */
 (function(){
 var started='',WAL=0,month=function(){return new Date().toISOString().slice(0,7)};
