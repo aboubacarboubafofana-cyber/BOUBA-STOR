@@ -108,7 +108,7 @@ body.gated>*:not(#gate):not(script):not(style):not(link):not(meta){visibility:hi
 .cat{font-size:15px;padding:10px 18px}
 .gold{font-size:16px}
 </style></head><body><script>try{if(!localStorage.getItem('b_me'))document.body.classList.add('gated')}catch(e){}</script><div id="gate"><div class="gateBox">
-<h2 style="color:gold">👑 BOUBA STORE</h2>
+<h2 style="color:gold">👑 BOUBA STOR</h2>
 <p style="font-size:14px;color:#ffd700;margin:8px 0;font-weight:800">Crée ton compte gratuit pour visiter la boutique</p>
 <p style="font-size:12px;color:#aaa;margin:4px 0 10px">🎁 -10 % sur ta 1ère commande • ⚡ Ventes flash • 🎡 Jeux et cadeaux</p>
 <input id="uName" class="input" placeholder="Nom complet">
@@ -145,7 +145,7 @@ body.gated>*:not(#gate):not(script):not(style):not(link):not(meta){visibility:hi
 
 <div class="header">
 <div class="top"><img id="logo" class="logo" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
-<b id="shopName" style="color:gold;font-size:18px">BOUBA STORE</b>
+<b id="shopName" style="color:gold;font-size:18px">BOUBA STOR</b>
 <span onclick="openPage('profilePage')" style="font-size:22px">👤</span></div>
 <div class="search" style="display:flex; gap:5px; align-items:center;">
   <input id="qIn" placeholder="🔍 Chercher un article..." oninput="q=this.value;renderStore()" style="flex:1;">
@@ -333,7 +333,7 @@ function closeAll(){document.querySelectorAll('.page').forEach(p=>p.classList.re
 const prods=()=>Object.values(S.products||{}).filter(p=>p&&p.id).sort((a,b)=>(b.date||0)-(a.date||0));
 function renderStore(){
  const info=S.info||{};
- $('shopName').textContent=info.name||'BOUBA STORE';
+ $('shopName').textContent=info.name||'BOUBA STOR';
  if(info.banner)$('bannerText').textContent=info.banner;
  if(info.logo)$('logo').src=info.logo;
  const cs=['all',...new Set(prods().map(p=>p.cat).filter(Boolean))];
