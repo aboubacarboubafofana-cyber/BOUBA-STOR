@@ -178,6 +178,18 @@ window.sendMessage = async function() {
 }
 
 $('messageInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+  function openFromHash() {
+    const m = location.hash.match(/tel=(\d+)/);
+    if (!m) return;
+    const targetPhone = m[1];
+    const u = allUsers.find(x => x.tel && x.tel.replace(/\D/g,'').endsWith(targetPhone.replace(/\D/g,'').slice(-9)));
+    if (u) {
+        openChat(u.id, u.name);
+    } else {
+        openChat(targetPhone, "Vendeur");
+    }
+}
+openFromHash(); // Lancer la vérification au chargement
 </script>
 </body>
 </html>
