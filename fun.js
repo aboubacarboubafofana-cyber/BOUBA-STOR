@@ -1,4 +1,4 @@
-/* BOUBA STORE – Jeux & cadeaux : roue, série, faire une offre, classement parrains, alerte baisse de prix, coupons à gratter, vidéos, offrir à un ami
+/* BOUBA STOR – Jeux & cadeaux : roue, série, faire une offre, classement parrains, alerte baisse de prix, coupons à gratter, vidéos, offrir à un ami
    Dépend de index.html, promos.js (PROMO.addCredit/addPts) et features.js */
 (function(){
 var DAY=864e5,LSF='p_F',started='',lock=0,scratchPrize=null;
