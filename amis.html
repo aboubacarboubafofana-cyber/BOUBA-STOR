@@ -48,19 +48,8 @@ h2{color:var(--acc)}
 .chat-input{padding:15px;background:var(--card);display:flex;gap:10px;border-top:1px solid #333}
 .chat-input input{flex:1;min-width:0;padding:12px;border-radius:20px;border:1px solid #444;background:#222;color:#fff;font-size:1rem}
 .chat-input button{flex-shrink:0;background:var(--acc);border:0;padding:0 20px;border-radius:20px;font-weight:bold}
-#actusBox{display:none;position:fixed;inset:0 0 62px 0;background:var(--bg);z-index:10;overflow:auto;padding:15px}
-#actusBox button{background:var(--acc);border:0;border-radius:20px;padding:12px 20px;font-weight:bold}
-.st{margin-bottom:15px}.stitem{display:flex;align-items:center;gap:15px;padding:10px 0;cursor:pointer}
-.string{width:60px;height:60px;border-radius:50%;padding:3px;border:3px solid #25D366;flex-shrink:0}
-.string img{width:100%;height:100%;border-radius:50%;object-fit:cover}
-.stinfo b{display:block;font-size:1rem}
-.stinfo span{font-size:.85rem;color:var(--gray)}
-  .st img{max-width:100%;border-radius:12px;margin-top:6px}
-  *{caret-color:transparent}input{caret-color:auto}
-  #viewer{display:none;position:fixed;inset:0;background:#000;z-index:50;align-items:center;justify-content:center;flex-direction:column}
-#viewer img{max-width:100%;max-height:85%;object-fit:contain}
-#viewer p{color:#fff;padding:15px;font-weight:bold}
-  body{user-select:none;-webkit-user-select:none}
+*{caret-color:transparent}input{caret-color:auto}
+body{user-select:none;-webkit-user-select:none}
 input,textarea{user-select:text;-webkit-user-select:text}
 </style>
 </head>
@@ -70,8 +59,9 @@ input,textarea{user-select:text;-webkit-user-select:text}
   <div class="icons"><i class="fas fa-plus-circle" data-do="invite"></i><i class="fas fa-camera" onclick="document.getElementById('photoFile').click()"></i></div>
 </div>
 <div id="myAvatar" class="avatar" data-do="myPhoto" style="overflow:hidden;margin:0 15px 15px;cursor:pointer"></div>
-    <div class="search"><i class="fas fa-search" style="color:var(--gray)"></i>
-  <input type="text" id="searchInput" placeholder="Rechercher un ami..."></div>
+<div class="search"><i class="fas fa-search" style="color:var(--gray)"></i>
+  <input type="text" id="searchInput" placeholder="Rechercher un ami...">
+</div>
 
 <div class="filters">
   <button class="on" data-do="filter" data-f="all">Tous</button>
@@ -79,8 +69,7 @@ input,textarea{user-select:text;-webkit-user-select:text}
 </div>
 
 <div id="friendList"></div>
-  <div id="viewer" onclick="this.style.display='none'"></div>
-  <input type="file" id="photoFile" accept="image/*" hidden>
+<input type="file" id="photoFile" accept="image/*" hidden>
 
 <div class="fab" data-do="invite"><i class="fas fa-plus"></i></div>
 
@@ -117,18 +106,18 @@ input,textarea{user-select:text;-webkit-user-select:text}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, onSnapshot, query, orderBy, where, limit, serverTimestamp, doc, getDoc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getDatabase, ref, onValue, push, set, update, remove, serverTimestamp, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyAnLLXpUC35OleB0hCLUXnLU0lMiesY7j4",
   authDomain: "project-f4477c80-7c55-4db7-b2e.firebaseapp.com",
+  databaseURL: "https://project-f4477c80-7c55-4db7-b2e-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "project-f4477c80-7c55-4db7-b2e",
   storageBucket: "project-f4477c80-7c55-4db7-b2e.firebasestorage.app",
   messagingSenderId: "697604298457",
   appId: "1:697604298457:web:4f9a6d66ec6fde9c1990c8"
 });
-const db = getFirestore(app), auth = getAuth(app);
+const db = getDatabase(app);
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -142,305 +131,222 @@ const inviteText = 'Rejoins-moi sur Bouba Store ! ' + appLink;
 let me = null, allUsers = [], prefs = { hidden: [], favs: [] };
 let onlyFavs = false, cView = null, chatId = null, friendId = null, unsub = null;
 
-const prefRef = () => doc(db, 'users', me.uid, 'private', 'prefs');
-const savePrefs = () => setDoc(prefRef(), prefs).catch(e => console.error(e));
+// CONNEXION : On utilise le localStorage du site principal (index.html)
+const storedMe = localStorage.getItem('b_me');
+if (storedMe) {
+    const parsedMe = JSON.parse(storedMe);
+    me = {
+        uid: parsedMe.key, // Le numéro de téléphone sert d'ID unique
+        name: parsedMe.name,
+        phone: parsedMe.phone,
+        photo: parsedMe.photo || ''
+    };
+    prefs = JSON.parse(localStorage.getItem('chat_prefs_' + me.uid)) || { hidden: [], favs: [] };
+    const savePrefs = () => localStorage.setItem('chat_prefs_' + me.uid, JSON.stringify(prefs));
+    loadFriends();
+} else {
+    location.replace('index.html'); // Si pas connecté, on renvoie à l'accueil
+}
 
-// ---------- Connexion ----------
-onAuthStateChanged(auth, async u => {
-  if (!u) return location.replace('compte.html');
-  me = u;
-  localStorage.setItem('uid', u.uid); // utilisé par d'autres fichiers
-  try {
-    const s = await getDoc(prefRef());
-    if (s.exists()) prefs = { hidden: s.data().hidden || [], favs: s.data().favs || [] };
-  } catch (e) { console.error(e); }
-  loadFriends();
-});
-
-// ---------- Amis ----------
 async function loadFriends() {
-  const list = $('friendList');
-  list.innerHTML = '<p class="note">Chargement…</p>';
-  try {
-    const snap = await getDocs(query(collection(db, 'users'), limit(300)));
-    allUsers = [];
-    const seen = new Set();
-snap.forEach(d => {
-  if (d.id === me.uid) return;
-  const u = d.data();
-  const name = u.name || u.nom || u.displayName || '';
-  const tel = String(u.tel || u.phone || u.telephone || u.numero || u.p10 || '');
-  const key = norm(tel);
-  if (!name || seen.has(d.id)) return;
-  seen.add(d.id);
-  allUsers.push({ id: d.id, name, tel, photo: safeImg(u.photo) });
-});
-  
-    render();
-    const meDoc = await getDoc(doc(db, 'users', me.uid));
-const md = meDoc.exists() ? meDoc.data() : {};
-$('myAvatar').innerHTML = safeImg(md.photo)
-  ? `<img src="${safeImg(md.photo)}" style="width:100%;height:100%;object-fit:cover">`
-  : esc(ini(md.name || md.nom || md.displayName || me.displayName));
-    openFromHash();
-  } catch (e) {
-    console.error(e);
-    list.innerHTML = '<p class="note" style="color:#f66">Erreur de chargement.</p>';
-  }
+    const list = $('friendList');
+    list.innerHTML = '<p class="note">Chargement…</p>';
+    const usersRef = ref(db, 'users');
+    onValue(usersRef, (snapshot) => {
+        allUsers = [];
+        const data = snapshot.val() || {};
+        Object.keys(data).forEach(key => {
+            if (key === me.uid) return;
+            const u = data[key];
+            const name = u.name || '';
+            const tel = String(u.phone || '');
+            if (!name) return;
+            allUsers.push({ id: key, name: name, tel: tel, photo: u.photo || '' });
+        });
+        render();
+        const myData = data[me.uid] || {};
+        $('myAvatar').innerHTML = safeImg(myData.photo)
+            ? `<img src="${safeImg(myData.photo)}" style="width:100%;height:100%;object-fit:cover">`
+            : esc(ini(myData.name || me.name));
+        openFromHash();
+    });
 }
 
 function render() {
-  const q = $('searchInput').value.trim().toLowerCase();
-  let arr = allUsers.filter(u => !prefs.hidden.includes(u.id));
-  if (onlyFavs) arr = arr.filter(u => prefs.favs.includes(u.id));
-  
-  if (q) arr = arr.filter(u => u.name.toLowerCase().includes(q) || u.tel.includes(q));
-  let html = arr.map(u => `
-    <div class="friend-item" data-id="${esc(u.id)}">
-      <div class="avatar" style="overflow:hidden">${u.photo ? `<img src="${u.photo}" style="width:100%;height:100%;object-fit:cover">` : esc(ini(u.name))}</div>
-      <div class="friend-info"><h4>${esc(u.name)}</h4><p>${esc(u.tel)}</p></div>
-      <div class="actions">
-        <i class="fas fa-star" data-do="star" style="${prefs.favs.includes(u.id) ? 'color:#ffd700' : 'color:#888'}"></i>
-        <i class="fas fa-phone" data-do="call"></i>
-        <i class="fas fa-video" data-do="video"></i>
-        <i class="fas fa-trash" data-do="del" style="color:#e55"></i>
-      </div>
-    </div>`).join('');
-  if (cView && !q) html += cView.others.map(o => `
-    <div class="friend-item">
-      <div class="avatar">${esc(ini(o.name))}</div>
-      <div class="friend-info"><h4>${esc(o.name)}</h4><p>Pas sur l'app</p></div>
-      <div class="actions">
-        <i class="fas fa-comment-sms" data-do="sms" data-tel="${esc(safeTel(o.tel))}"></i>
-        <i class="fas fa-phone" data-do="tel" data-tel="${esc(safeTel(o.tel))}"></i>
-      </div>
-    </div>`).join('');
-  $('friendList').innerHTML = html || '<p class="note">Aucun contact.</p>';
+    const q = $('searchInput').value.trim().toLowerCase();
+    let arr = allUsers.filter(u => !prefs.hidden.includes(u.id));
+    if (onlyFavs) arr = arr.filter(u => prefs.favs.includes(u.id));
+    if (q) arr = arr.filter(u => u.name.toLowerCase().includes(q) || u.tel.includes(q));
+    
+    let html = arr.map(u => `
+        <div class="friend-item" data-id="${esc(u.id)}">
+            <div class="avatar" style="overflow:hidden">${u.photo ? `<img src="${u.photo}" style="width:100%;height:100%;object-fit:cover">` : esc(ini(u.name))}</div>
+            <div class="friend-info"><h4>${esc(u.name)}</h4><p>${esc(u.tel)}</p></div>
+            <div class="actions">
+                <i class="fas fa-star" data-do="star" style="${prefs.favs.includes(u.id) ? 'color:#ffd700' : 'color:#888'}"></i>
+                <i class="fas fa-phone" data-do="call"></i>
+                <i class="fas fa-video" data-do="video"></i>
+                <i class="fas fa-trash" data-do="del" style="color:#e55"></i>
+            </div>
+        </div>`).join('');
+        
+    if (cView && !q) html += cView.others.map(o => `
+        <div class="friend-item">
+            <div class="avatar">${esc(ini(o.name))}</div>
+            <div class="friend-info"><h4>${esc(o.name)}</h4><p>Pas sur l'app</p></div>
+            <div class="actions">
+                <i class="fas fa-comment-sms" data-do="sms" data-tel="${esc(safeTel(o.tel))}"></i>
+                <i class="fas fa-phone" data-do="tel" data-tel="${esc(safeTel(o.tel))}"></i>
+            </div>
+        </div>`).join('');
+    $('friendList').innerHTML = html || '<p class="note">Aucun contact.</p>';
 }
 
 $('searchInput').addEventListener('input', render);
 
 function openFromHash() {
-  const m = location.hash.match(/tel=(\d+)/);
-  if (!m) return;
-  const t = m[1].slice(-9);
-  const u = allUsers.find(x => x.tel && x.tel.endsWith(t));
-  if (u) openChat(u); else alert("Ce client n'a pas encore de compte dans l'app.");
+    const m = location.hash.match(/tel=(\d+)/);
+    if (!m) return;
+    const t = m[1].slice(-9);
+    const u = allUsers.find(x => x.tel && x.tel.endsWith(t));
+    if (u) openChat(u); else alert("Ce client n'a pas encore de compte dans l'app.");
 }
 
-// ---------- Répertoire ----------
 async function pickContacts() {
-  closeInvite();
-  if (!('contacts' in navigator && 'ContactsManager' in window))
-    return alert("Répertoire indisponible. Utilise Chrome sur Android.");
-  try {
-    const sel = await navigator.contacts.select(['name', 'tel'], { multiple: true });
-    if (!sel.length) return;
-    const ids = new Set(), others = [];
-    sel.forEach(c => {
-      const tel = (c.tel || [])[0] || '';
-      const n = norm(tel);
-      
-      const name = (c.name || [])[0] || tel || 'Sans nom';
-      if (n.length < 8) return; // un numéro vide ne doit jamais correspondre à quelqu'un
-      const u = allUsers.find(x => x.tel && x.tel.endsWith(n));
-      if (u) ids.add(u.id); else others.push({ name, tel });
-    });
-    cView = { ids, others };
-    onlyFavs = false;
-    setFilterUI('all');
-    render();
-  } catch (e) { console.error(e); }
+    closeInvite();
+    if (!('contacts' in navigator && 'ContactsManager' in window)) return alert("Répertoire indisponible. Utilise Chrome sur Android.");
+    try {
+        const sel = await navigator.contacts.select(['name', 'tel'], { multiple: true });
+        if (!sel.length) return;
+        const ids = new Set(), others = [];
+        sel.forEach(c => {
+            const tel = (c.tel || [])[0] || '';
+            const n = norm(tel);
+            const name = (c.name || [])[0] || tel || 'Sans nom';
+            if (n.length < 8) return;
+            const u = allUsers.find(x => x.tel && x.tel.endsWith(n));
+            if (u) ids.add(u.id); else others.push({ name, tel });
+        });
+        cView = { ids, others };
+        onlyFavs = false;
+        setFilterUI('all');
+        render();
+    } catch (e) { console.error(e); }
 }
 
 function setFilterUI(f) {
-  document.querySelectorAll('.filters button').forEach(b => b.classList.toggle('on', b.dataset.f === f));
+    document.querySelectorAll('.filters button').forEach(b => b.classList.toggle('on', b.dataset.f === f));
 }
 
-// ---------- Actus (statuts) ----------
-function openActus() {
-  let box = $('actusBox');
-  if (!box) {
-    box = document.createElement('div');
-    box.id = 'actusBox';
-    box.innerHTML = `<h2 style="margin-bottom:12px">Actus</h2>
-      <button id="addStatusBtn">+ Ajouter un statut</button>
-      <input type="file" id="statusFile" accept="image/*" hidden>
-      <div id="statusList" style="margin-top:15px"></div>`;
-    document.body.appendChild(box);
-    $('addStatusBtn').onclick = () => $('statusFile').click();
-    $('statusFile').onchange = async e => {
-      const f = e.target.files[0];
-      if (!f) return;
-      try {
-        const url = URL.createObjectURL(f);
-        const img = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = url; });
-        URL.revokeObjectURL(url);
-        const s = Math.min(1, 800 / Math.max(img.width, img.height));
-        const c = document.createElement('canvas');
-        c.width = img.width * s; c.height = img.height * s;
-        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-        const data = c.toDataURL('image/jpeg', 0.7);
-        if (data.length > 900000) return alert('Image trop lourde.');
-        await addDoc(collection(db, 'status'), { uid: me.uid, name: me.displayName || 'Moi', img: data, t: Date.now() });
-        loadStatus();
-      } catch (err) { alert('Publication impossible.'); console.error(err); }
-      e.target.value = '';
-    };
-  }
-  box.style.display = 'block';
-  loadStatus();
-}
-function closeActus() { const b = $('actusBox'); if (b) b.style.display = 'none'; }
-
-async function loadStatus() {
-  const out = $('statusList');
-  try {
-    const snap = await getDocs(query(collection(db, 'status'), where('t', '>', Date.now() - 86400000)));
-    const arr = snap.docs.map(d => d.data()).sort((a, b) => b.t - a.t);
-    statusArr = arr;
-    out.innerHTML = arr.map(s => `<div class="stitem" onclick="openStatus(${arr.indexOf(s)})"><div class="string">${safeImg(s.img) ? `<img src="${safeImg(s.img)}">` : ''}</div><div class="stinfo"><b>${esc(s.name)}</b><span>${new Date(s.t).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</span></div></div>`).join('') || '<p class="note">Aucun statut.</p>';
-  } catch (e) { console.error(e); out.innerHTML = '<p class="note" style="color:#f66">Erreur de chargement.</p>'; }
-}
-  let statusArr = [];
-function openStatus(i) {
-  const s = statusArr[i]; if (!s) return;
-  const v = $('viewer');
-  v.innerHTML = `<img src="${safeImg(s.img)}"><p>${esc(s.name)}</p>`;
-  v.style.display = 'flex';
-}
-window.openStatus = openStatus;
-// ---------- Invitations ----------
 function openInvite() { $('overlay').style.display = 'block'; $('inviteModal').style.display = 'block'; }
 function closeInvite() { $('overlay').style.display = 'none'; $('inviteModal').style.display = 'none'; }
 
 async function share() {
-  if (navigator.share) {
-    try { await navigator.share({ title: 'Bouba Store', text: 'Rejoins-moi sur Bouba Store !', url: appLink }); }
-    catch (e) { /* annulé */ }
-  } else {
-    try { await navigator.clipboard.writeText(appLink); alert('Lien copié !'); }
-    catch (e) { prompt('Copie ce lien :', appLink); }
-  }
+    if (navigator.share) {
+        try { await navigator.share({ title: 'Bouba Store', text: 'Rejoins-moi sur Bouba Store !', url: appLink }); }
+        catch (e) { }
+    } else {
+        try { await navigator.clipboard.writeText(appLink); alert('Lien copié !'); }
+        catch (e) { prompt('Copie ce lien :', appLink); }
+    }
 }
 
-// ---------- Chat ----------
-  const avatar = u => safeImg(u.photo)
-  ? `<img class="avatar" src="${safeImg(u.photo)}" alt="">`
-  : `<div class="avatar">${esc(ini(u.name))}</div>`;
-  async function setMyPhoto(f) {
-const url = URL.createObjectURL(f);
-  const img = await new Promise((res, rej) => {
-    const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = url;
-  });
-  URL.revokeObjectURL(url);
-  const c = document.createElement('canvas'); c.width = c.height = 200;
-  const s = Math.max(200 / img.width, 200 / img.height);
-  c.getContext('2d').drawImage(img, (200 - img.width * s) / 2, (200 - img.height * s) / 2, img.width * s, img.height * s);
-  await updateDoc(doc(db, 'users', me.uid), { photo: c.toDataURL('image/jpeg', 0.7) });
-  }
-
-function starBtns(oid) {
-  const w = document.createElement('div');
-  w.style.cssText = 'display:flex;gap:8px;margin-top:8px;flex-wrap:wrap';
-  const mk = (label, act, bg) => {
-    const b = document.createElement('button');
-    b.textContent = label;
-    b.style.cssText = 'padding:9px 12px;border:0;border-radius:8px;font-weight:800;font-size:14px;background:' + bg + ';color:#000';
-    b.onclick = async () => {
-      const c = sessionStorage.getItem('sx_ac') || prompt('Code administrateur :');
-      if (!c) return;
-      b.disabled = true;
-      try {
-        const r = await fetch('/api/star', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ a: act, code: c, oid }) }).then(x => x.json());
-        if (!r.ok) { sessionStorage.removeItem('sx_ac'); alert(r.err || 'Erreur'); b.disabled = false; return; }
-        sessionStorage.setItem('sx_ac', c);
-        const ok = act === 'admin_validate';
-        const txt = ok
-          ? ('✅ PAIEMENT VALIDÉ pour la commande ' + oid + '. Ton achat est débloqué : le téléchargement se lance tout seul dans ⭐ Stars. Merci ! [VALIDÉ ' + oid + ']')
-          : ('❌ Commande ' + oid + ' refusée. Contacte-nous si c\'est une erreur. [REFUSÉ ' + oid + ']');
-        await addDoc(collection(db, 'chats', chatId, 'messages'), { text: txt, senderId: me.uid, timestamp: serverTimestamp() });
-      } catch (e) { console.error(e); alert('Erreur, réessaie.'); b.disabled = false; }
-    };
-    return b;
-  };
-  w.appendChild(mk('✅ Valider le paiement', 'admin_validate', '#25d366'));
-  w.appendChild(mk('❌ Refuser', 'admin_reject', '#ffd700'));
-  return w;
-}
-  function openChat(u) {
-  friendId = u.id;
-  chatId = [me.uid, u.id].sort().join('_');
-  $('chatName').textContent = u.name;
-  $('chatModal').style.display = 'flex';
-  loadMessages();
-}
-function closeChat() {
-  if (unsub) { unsub(); unsub = null; }
-  $('chatModal').style.display = 'none';
-  chatId = null; friendId = null;
-}
-function loadMessages() {
-  if (unsub) unsub();
-  const box = $('chatMessages');
-  box.textContent = '';
-  const q = query(collection(db, 'chats', chatId, 'messages'), orderBy('timestamp', 'asc'), limit(200));
-  unsub = onSnapshot(q, snap => {
-    box.textContent = '';
-    const done = new Set();
-    snap.forEach(d => { const k = String(d.data().text || '').match(/\[(?:VALIDÉ|REFUSÉ) (BS\d{6})\]/); if (k) done.add(k[1]); });
-    snap.forEach(d => {
-      const m = d.data();
-      const div = document.createElement('div');
-      div.className = 'msg ' + (m.senderId === me.uid ? 'sent' : 'received');
-      if (m.audio) { div.innerHTML = '<audio controls src="' + m.audio + '" style="max-width:100%"></audio>'; } else {
-        div.textContent = m.text;
-        if (m.senderId !== me.uid && /COMMANDE SUPER STAR/.test(String(m.text || ''))) {
-          const oid = (String(m.text).match(/\bBS\d{6}\b/) || [])[0];
-          if (oid && !done.has(oid)) div.appendChild(starBtns(oid));
-        }
-      }
-      if (m.senderId === me.uid) {
-  const x = document.createElement('span');
-  x.textContent = '🗑️';
-  x.style.cssText = 'cursor:pointer;font-size:.9rem;display:block;text-align:right;margin-top:4px';
-  const mid = d.id, cid = chatId;
-  x.onclick = async () => {
-    if (!confirm('Supprimer ce message ?')) return;
-    try { await deleteDoc(doc(db, 'chats', cid, 'messages', mid)); }
-    catch (e) { console.error(e); alert('Suppression impossible'); }
-  };
-  div.appendChild(x);
-  }
-      box.appendChild(div);
+async function setMyPhoto(f) {
+    const url = URL.createObjectURL(f);
+    const img = await new Promise((res, rej) => {
+        const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = url;
     });
-    box.scrollTop = box.scrollHeight;
-  }, err => { console.error(err); box.textContent = 'Impossible de charger les messages.'; });
+    URL.revokeObjectURL(url);
+    const c = document.createElement('canvas'); c.width = c.height = 200;
+    const s = Math.max(200 / img.width, 200 / img.height);
+    c.getContext('2d').drawImage(img, (200 - img.width * s) / 2, (200 - img.height * s) / 2, img.width * s, img.height * s);
+    const photoData = c.toDataURL('image/jpeg', 0.7);
+    
+    await update(ref(db, 'users/' + me.uid), { photo: photoData });
+    $('myAvatar').innerHTML = `<img src="${photoData}" style="width:100%;height:100%;object-fit:cover">`;
+    
+    const parsedMe = JSON.parse(localStorage.getItem('b_me'));
+    parsedMe.photo = photoData;
+    localStorage.setItem('b_me', JSON.stringify(parsedMe));
 }
-async function sendMessage() {
-  const input = $('messageInput');
-  const text = input.value.trim();
-  if (!text || !chatId) return;
 
-  input.value = '';
-  try {
-    await addDoc(collection(db, 'chats', chatId, 'messages'), { text, senderId: me.uid, timestamp: serverTimestamp() });
-  } catch (e) { console.error(e); input.value = text; alert("Erreur lors de l'envoi du message."); }
+function openChat(u) {
+    friendId = u.id;
+    chatId = [me.uid, u.id].sort().join('_');
+    $('chatName').textContent = u.name;
+    $('chatModal').style.display = 'flex';
+    loadMessages();
 }
+
+function closeChat() {
+    if (unsub) { unsub(); unsub = null; }
+    $('chatModal').style.display = 'none';
+    chatId = null; friendId = null;
+}
+
+function loadMessages() {
+    if (unsub) unsub();
+    const box = $('chatMessages');
+    box.textContent = '';
+    const messagesRef = ref(db, 'chats/' + chatId + '/messages');
+    const q = query(messagesRef, orderByChild('timestamp'), limitToLast(200));
+    
+    unsub = onValue(q, (snapshot) => {
+        box.textContent = '';
+        const msgs = [];
+        snapshot.forEach(child => { msgs.push({ id: child.key, ...child.val() }); });
+        
+        msgs.forEach(m => {
+            const div = document.createElement('div');
+            div.className = 'msg ' + (m.senderId === me.uid ? 'sent' : 'received');
+            
+            if (m.audio) {
+                div.innerHTML = '<audio controls src="' + m.audio + '" style="max-width:100%"></audio>';
+            } else {
+                div.textContent = m.text;
+                if (m.senderId === me.uid) {
+                    const x = document.createElement('span');
+                    x.textContent = '🗑️';
+                    x.style.cssText = 'cursor:pointer;font-size:.9rem;display:block;text-align:right;margin-top:4px';
+                    x.onclick = async () => {
+                        if (!confirm('Supprimer ce message ?')) return;
+                        try { await remove(ref(db, 'chats/' + chatId + '/messages/' + m.id)); }
+                        catch (e) { console.error(e); alert('Suppression impossible'); }
+                    };
+                    div.appendChild(x);
+                }
+            }
+            box.appendChild(div);
+        });
+        box.scrollTop = box.scrollHeight;
+    }, err => { console.error(err); box.textContent = 'Impossible de charger les messages.'; });
+}
+
+async function sendMessage() {
+    const input = $('messageInput');
+    const text = input.value.trim();
+    if (!text || !chatId) return;
+    input.value = '';
+    try {
+        const msgRef = push(ref(db, 'chats/' + chatId + '/messages'));
+        await set(msgRef, { text: text, senderId: me.uid, timestamp: serverTimestamp() });
+    } catch (e) {
+        console.error(e);
+        input.value = text;
+        alert("Erreur lors de l'envoi du message.");
+    }
+}
+
 $('messageInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
-    $('photoFile').onchange = e => { const f = e.target.files[0]; if (f) setMyPhoto(f); };
+$('photoFile').onchange = e => { const f = e.target.files[0]; if (f) setMyPhoto(f); };
 
 const goCall = (id, video) => { if (id) location.href = 'Call.html?call=' + encodeURIComponent(id) + '&video=' + video; };
 const fid = a => a.closest('[data-id]').dataset.id;
 
-// ---------- Actions (un seul gestionnaire de clics) ----------
 const A = {
   call: a => goCall(fid(a), false),
-  
-  
   myPhoto: () => $('photoFile').click(),
   video: a => goCall(fid(a), true),
-  
   chatCall: () => goCall(friendId, false),
   chatVideo: () => goCall(friendId, true),
   star: a => {
@@ -464,13 +370,14 @@ const A = {
   actus: openActus, closeActus,
   closeChat, send: sendMessage
 };
+
 document.addEventListener('click', e => {
   const a = e.target.closest('[data-do]');
   if (a) return A[a.dataset.do]?.(a);
   const it = e.target.closest('.friend-item[data-id]');
   if (it) { const u = allUsers.find(x => x.id === it.dataset.id); if (u) openChat(u); }
 });
-  let rec = null, chunks = [], recTimer = null;
+let rec = null, chunks = [], recTimer = null;
 $('micBtn').addEventListener('click', async () => {
   if (!chatId) return;
   if (rec) { rec.stop(); return; }
@@ -487,15 +394,22 @@ $('micBtn').addEventListener('click', async () => {
       rec = null;
       const audio = await new Promise(ok => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(blob); });
       if (audio.length > 650000) return alert('Vocal trop long');
-      try { await addDoc(collection(db, 'chats', chatId, 'messages'), { audio, senderId: me.uid, timestamp: serverTimestamp() }); }
+      try { 
+          const msgRef = push(ref(db, 'chats/' + chatId + '/messages'));
+          await set(msgRef, { audio: audio, senderId: me.uid, timestamp: serverTimestamp() }); 
+      }
       catch (e) { console.error(e); alert("Erreur d'envoi du vocal."); }
     };
     rec.start();
     $('micBtn').textContent = '⏹️';
     recTimer = setTimeout(() => rec && rec.stop(), 60000);
-  } catch (e) { alert('Autorisez le micro dans Chrome.'); }
+  } catch (e) { 
+      alert('Autorisez le micro dans Chrome.'); 
+  }
 });
+
+function openActus() { alert('Fonctionnalité Actus bientôt disponible !'); }
+function closeActus() {}
 </script>
-<script type="module" src="appel-recu.js"></script>
 </body>
 </html>
