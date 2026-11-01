@@ -1,4 +1,4 @@
-// BOUBA STORE : lecture d'un article boutique (Firestore, collection "articles")
+// BOUBA STOR : lecture d'un article boutique (Firestore, collection "articles")
 const crypto=require('crypto');
 const PID='project-f4477c80-7c55-4db7-b2e';
 const KEY='AIzaSyAnLLXpUC35OleB0hCLUXnLU0lMiesY7j4'; // clé web publique (déjà présente dans vos pages)
