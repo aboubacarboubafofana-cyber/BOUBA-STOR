@@ -1,4 +1,4 @@
-// BOUBA STORE - affiche les articles publiés par toutes les boutiques sur l'accueil
+// BOUBA STOR - affiche les articles publiés par toutes les boutiques sur l'accueil
 import { list, mode, lastError, esc, money, intl, shareLinks, homeUrl } from './bouba-data.js';
 
 const css = document.createElement('style');
@@ -133,7 +133,7 @@ document.addEventListener('click', e => {
   const b = e.target.closest('[data-share]');
   if (!b) return;
   const text = b.dataset.share;
-  if (navigator.share) navigator.share({ title: 'BOUBA STORE', text, url: b.dataset.link || homeUrl() }).catch(() => {});
+  if (navigator.share) navigator.share({ title: 'BOUBA STOR', text, url: b.dataset.link || homeUrl() }).catch(() => {});
   else navigator.clipboard && navigator.clipboard.writeText(text + ' ' + (b.dataset.link || homeUrl())).then(() => alert('Lien copié !'));
 });
 
