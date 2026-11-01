@@ -1,4 +1,4 @@
-/* BOUBA STORE – Page Contrôle : bouton « 🔁 Republier des articles ».
+/* BOUBA STOR – Page Contrôle : bouton « 🔁 Republier des articles ».
    Choisissez tous les articles ou seulement quelques-uns : ils repassent en tête de l'accueil (date de publication = maintenant). */
 (function(){
 var sel={p:new Set(),a:new Set()},vend=null,vmode='',q='',notif=false;
