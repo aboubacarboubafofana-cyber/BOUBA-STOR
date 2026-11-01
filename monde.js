@@ -1,4 +1,4 @@
-/* BOUBA STORE – Communauté internationale : choix du pays (drapeau), salons de discussion Monde / Pays / Affaires / Créateurs / Entraide.
+/* BOUBA STOR – Communauté internationale : choix du pays (drapeau), salons de discussion Monde / Pays / Affaires / Créateurs / Entraide.
    Dépend de index.html (me, fb, write, esc, toast, openPage, closeAll, isAdmin) et vibes.js (flagOf, identifiant créateur LS 'v_id'). */
 (function(){
 var C=[['CI','Côte d\'Ivoire'],['SN','Sénégal'],['ML','Mali'],['BF','Burkina Faso'],['GN','Guinée'],['TG','Togo'],['BJ','Bénin'],['NE','Niger'],['CM','Cameroun'],['GA','Gabon'],['CG','Congo'],['CD','RD Congo'],['GH','Ghana'],['NG','Nigeria'],['MA','Maroc'],['DZ','Algérie'],['TN','Tunisie'],['FR','France'],['BE','Belgique'],['CA','Canada'],['US','États-Unis'],['XX','Autre pays']];
