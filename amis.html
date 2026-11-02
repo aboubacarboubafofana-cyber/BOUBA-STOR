@@ -324,7 +324,7 @@ $('locationBtn').addEventListener('click', () => {
         catch(err) { alert("Impossible d'envoyer la position."); }
     }, () => alert("Autorisez la localisation pour partager votre position."), { enableHighAccuracy:true, timeout:10000 });
 });
-const goCall = (id, video) => { if (id) location.href = 'Call.html?call=' + encodeURIComponent(id) + '&video=' + video; };
+const goCall = (id, video) => { if (id) location.href = 'call.html?call=' + encodeURIComponent(id) + '&video=' + video; };
 const fid = a => a.closest('[data-id]').dataset.id;
 
 const A = {
