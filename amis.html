@@ -151,6 +151,13 @@ if (storedMe) {
 
 function loadFriends() {
     const list = document.getElementById('friendList');
+  // Sécurité : si Firebase met trop de temps, on affiche une erreur
+list.innerHTML = '<p class="note">Chargement...</p>';
+setTimeout(() => {
+    if (list.innerHTML.includes('Chargement')) {
+        list.innerHTML = '<p class="note" style="color:orange">Le réseau est lent ou Firebase bloque. Vérifiez votre connexion.</p>';
+    }
+}, 5000);
     
     // 1. Vérifier si tu es bien connecté
     if (!me || !me.uid) {
