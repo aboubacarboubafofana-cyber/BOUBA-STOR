@@ -550,7 +550,10 @@ $('micBtn').addEventListener('click', async () => {
       rec = null;
       const audio = await new Promise(ok => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(blob); });
       if (audio.length > 650000) return alert('Vocal trop long');
-      try { await addDoc(collection(db, 'chats', chatId, 'messages'), { audio, senderId: me.uid, timestamp: serverTimestamp() }); }
+      try { 
+          const msgRef = push(ref(db, 'chats/' + chatId + '/messages'));
+          await set(msgRef, { audio: audio, senderId: me.uid, timestamp: serverTimestamp() }); 
+      }
       catch (e) { console.error(e); alert("Erreur d'envoi du vocal."); }
     };
     rec.start();
@@ -558,6 +561,22 @@ $('micBtn').addEventListener('click', async () => {
     recTimer = setTimeout(() => rec && rec.stop(), 60000);
   } catch (e) { alert('Autorisez le micro dans Chrome.'); }
 });
+
+// Connexion des boutons (Envoyer, Appeler, Vidéo, Inviter)
+document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-do]');
+    if (!btn) return;
+    
+    const action = btn.dataset.do;
+    if (action === 'send') window.sendMessage();
+    if (action === 'closeChat') window.closeChat();
+    if (action === 'invite') { document.getElementById('overlay').style.display='block'; document.getElementById('inviteModal').style.display='block'; }
+    if (action === 'closeInvite') { document.getElementById('overlay').style.display='none'; document.getElementById('inviteModal').style.display='none'; }
+    
+    if (action === 'chatCall' && friendId) location.href = 'call.html?call=' + encodeURIComponent(friendId) + '&video=false';
+    if (action === 'chatVideo' && friendId) location.href = 'call.html?call=' + encodeURIComponent(friendId) + '&video=true';
+});
+  
 </script>
 <script type="module" src="appel-recu.js"></script>
 </body>
