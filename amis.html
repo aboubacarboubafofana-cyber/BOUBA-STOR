@@ -141,8 +141,6 @@ const inviteText = 'Rejoins-moi sur Bouba Store ! ' + appLink;
 let me = null, allUsers = [], prefs = { hidden: [], favs: [] };
 let onlyFavs = false, cView = null, chatId = null, friendId = null, unsub = null;
 
-const prefRef = () => doc(db, 'users', me.uid, 'private', 'prefs');
-const savePrefs = () => setDoc(prefRef(), prefs).catch(e => console.error(e));
 
 // ---------- Connexion ----------
 const storedMe = localStorage.getItem('b_me');
