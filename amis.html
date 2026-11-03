@@ -82,7 +82,7 @@ input,textarea{user-select:text;-webkit-user-select:text}
   <div id="viewer" onclick="this.style.display='none'"></div>
   <input type="file" id="photoFile" accept="image/*" hidden>
 
-<div class="fab" data-do="invite"><i class="fas fa-plus"></i></div>
+<div class="fab" onclick="document.getElementById('overlay').style.display='block';document.getElementById('inviteModal').style.display='block'"><i class="fas fa-plus"></i></div>
 
 <div class="bottom-nav">
   <div class="nav-item" onclick="location.href='index.html'"><i class="fas fa-comment-dots"></i><span>Chats</span></div>
