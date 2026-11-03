@@ -247,18 +247,36 @@ function loadMessages() {
     const box = $('chatMessages');
     box.innerHTML = '<p style="color:#888;text-align:center">Chargement...</p>';
     const q = query(ref(db, 'chats/' + chatId + '/messages'), orderByChild('timestamp'), limitToLast(200));
+    
     unsub = onValue(q, (snapshot) => {
         box.textContent = '';
         snapshot.forEach(child => {
             const m = child.val();
+            const msgId = child.key; 
+            
             const div = document.createElement('div');
             div.className = 'msg ' + (m.senderId === me.uid ? 'sent' : 'received');
-            if (m.audio) div.innerHTML = '<audio controls src="' + m.audio + '" style="max-width:100%"></audio>';
-            else div.textContent = m.text;
+            
+            if (m.audio) {
+                div.innerHTML = '<audio controls src="' + m.audio + '" style="max-width:100%"></audio>';
+            } else {
+                div.textContent = m.text;
+            }
+
+            // Si c'est moi qui ai envoyé, on ajoute la poubelle
+            if (m.senderId === me.uid) {
+                const delBtn = document.createElement('span');
+                delBtn.innerHTML = ' 🗑️';
+                delBtn.style.cssText = 'cursor:pointer; margin-left:10px; font-size:12px; opacity:0.7;';
+                delBtn.onclick = () => deleteMessage(msgId);
+                div.appendChild(delBtn);
+            }
+
             box.appendChild(div);
         });
         box.scrollTop = box.scrollHeight;
     });
+  }
 }
 
 window.sendMessage = async function() {
