@@ -521,7 +521,7 @@ $('mediaInput').addEventListener('change', async e => {
       if (file.size > 500 * 1024) { alert('Fichier trop lourd : 500 Ko maximum pour les documents (sans photo).'); e.target.value = ''; return; }
       data = await fileToDataURL(file);
     }
-    await addDoc(collection(db, 'chats', chatId, 'messages'), { mediaData: data, mediaType: type, fileName: file.name, senderId: me.uid, timestamp: serverTimestamp() });
+    await set(push(ref(db, 'chats/' + chatId + '/messages')), { mediaData: data, mediaType: type, fileName: file.name, senderId: me.uid, timestamp: serverTimestamp() });
   } catch (e) { console.error(e); alert("Envoi impossible."); }
   e.target.value = '';
 });
