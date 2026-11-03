@@ -429,6 +429,15 @@ function loadStatuses() {
         if (!hasStatus) box.innerHTML = '<p class="note">Aucun statut récent.</p>';
     });
 }
+  window.deleteMessage = async function(msgId) {
+    if (!confirm("Voulez-vous vraiment supprimer ce message ?")) return;
+    try {
+        await remove(ref(db, 'chats/' + chatId + '/messages/' + msgId));
+    } catch (e) {
+        console.error(e);
+        alert("Erreur : Impossible de supprimer le message.");
+    }
+  }
 </script>
 </body>
 </html>
