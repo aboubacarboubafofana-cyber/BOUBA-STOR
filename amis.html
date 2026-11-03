@@ -530,7 +530,7 @@ $('locationBtn').addEventListener('click', () => {
   if (!navigator.geolocation) return alert('Localisation indisponible sur cet appareil.');
   navigator.geolocation.getCurrentPosition(async pos => {
     const url = 'https://www.google.com/maps?q=' + pos.coords.latitude + ',' + pos.coords.longitude;
-    try { await addDoc(collection(db, 'chats', chatId, 'messages'), { locationUrl: url, senderId: me.uid, timestamp: serverTimestamp() }); }
+    try { await set(push(ref(db, 'chats/' + chatId + '/messages')), { locationUrl: url, senderId: me.uid, timestamp: serverTimestamp() }); }
     catch (e) { console.error(e); alert("Impossible d'envoyer la position."); }
   }, () => alert('Autorisez la localisation pour partager votre position.'), { enableHighAccuracy: true, timeout: 10000 });
 });
