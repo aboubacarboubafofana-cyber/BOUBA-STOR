@@ -192,9 +192,12 @@ function render() {
 
     $('friendList').innerHTML = arr.map(u => `
         <div class="friend-item">
-            <div class="avatar">${u.photo ? `<img src="${u.photo}">` : esc(ini(u.name))}</div>
+            <div class="avatar">${u.photo ? `<img src="${u.photo}" style="width:100%;height:100%;object-fit:cover">` : esc(ini(u.name))}</div>
             <div class="friend-info"><h4>${esc(u.name)}</h4><p>${esc(u.tel)}</p></div>
-            <button onclick="openChat('${esc(u.id)}', '${esc(u.name)}')" style="border:0;border-radius:18px;padding:9px 11px;background:#ffd700;color:#000;font-weight:bold">Discuter</button>
+            <div style="display:flex; gap:5px; align-items:center;">
+                <button onclick="openChat('${esc(u.id)}', '${esc(u.name)}')" style="border:0;border-radius:18px;padding:9px 11px;background:#ffd700;color:#000;font-weight:bold">Discuter</button>
+                <button onclick="deleteFriend('${esc(u.id)}')" style="border:0;border-radius:50%;width:36px;height:36px;background:#ff4444;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;">🗑️</button>
+            </div>
         </div>`).join('') || '<p class="note">Aucun contact.</p>';
 }
 
