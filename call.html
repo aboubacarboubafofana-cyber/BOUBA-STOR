@@ -174,5 +174,25 @@ const p = new URLSearchParams(location.search);
   } catch (e) { console.error(e); }
 })();
 </script>
+  <!-- Sonnerie d'appel -->
+<audio id="ringtone" loop>
+  <source src="https://actions.google.com/sounds/v1/alarms/phone_alerts_and_rings.ogg" type="audio/ogg">
+</audio>
+
+<script>
+  // On récupère l'élément audio
+  const ringtone = document.getElementById('ringtone');
+  
+  // On lance la sonnerie dès que la page s'ouvre
+  ringtone.play().catch(e => console.log("Lecture auto bloquée par le navigateur"));
+
+  // Fonction pour arrêter la sonnerie (à appeler quand on décroche ou qu'on raccroche)
+  window.stopRingtone = function() {
+      if (ringtone) {
+          ringtone.pause();
+          ringtone.currentTime = 0;
+      }
+  }
+</script>
 </body>
 </html>
