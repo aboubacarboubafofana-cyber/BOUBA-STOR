@@ -568,13 +568,40 @@ document.addEventListener('click', e => {
     if (!btn) return;
     
     const action = btn.dataset.do;
+    const appLink = location.origin;
+    const inviteText = 'Rejoins-moi sur Bouba Store ! ' + appLink;
+
+    // Boutons du chat
     if (action === 'send') window.sendMessage();
     if (action === 'closeChat') window.closeChat();
-    if (action === 'invite') { document.getElementById('overlay').style.display='block'; document.getElementById('inviteModal').style.display='block'; }
-    if (action === 'closeInvite') { document.getElementById('overlay').style.display='none'; document.getElementById('inviteModal').style.display='none'; }
-    
     if (action === 'chatCall' && friendId) location.href = 'call.html?call=' + encodeURIComponent(friendId) + '&video=false';
     if (action === 'chatVideo' && friendId) location.href = 'call.html?call=' + encodeURIComponent(friendId) + '&video=true';
+
+    // Boutons du menu "Inviter"
+    if (action === 'closeInvite') {
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('inviteModal').style.display = 'none';
+    }
+    if (action === 'wa') {
+        window.open('https://wa.me/?text=' + encodeURIComponent(inviteText), '_blank');
+    }
+    if (action === 'shareSms') {
+        window.open('sms:?body=' + encodeURIComponent(inviteText));
+    }
+    if (action === 'mail') {
+        window.open('mailto:?subject=' + encodeURIComponent('Invitation Bouba Store') + '&body=' + encodeURIComponent(inviteText));
+    }
+    if (action === 'copy') {
+        navigator.clipboard.writeText(inviteText);
+        alert('Lien copié !');
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('inviteModal').style.display = 'none';
+    }
+    if (action === 'contacts') {
+        alert("L'accès aux contacts sera bientôt disponible !");
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('inviteModal').style.display = 'none';
+    }
 });
   
 </script>
