@@ -28,28 +28,51 @@
 
     <script>
         let note = 0;
-        const stars = document.querySelectorAll('.stars span');
-        
-        stars.forEach(star => {
-            star.addEventListener('click', () => {
-                note = parseInt(star.getAttribute('data-val'));
-                stars.forEach(s => {
-                    s.style.color = parseInt(s.getAttribute('data-val')) <= note ? '#ffd700' : '#555';
-                });
-            });
+const stars = document.querySelectorAll('.stars span');
+
+stars.forEach(star => {
+    star.addEventListener('click', () => {
+        note = parseInt(star.getAttribute('data-val'));
+        stars.forEach(s => {
+            s.style.color = parseInt(s.getAttribute('data-val')) <= note ? '#ffd700' : '#555';
         });
+    });
+});
 
-        function envoyerAvis() {
-            const commentaire = document.getElementById('comment').value;
-            if (note === 0) { alert("Veuillez choisir une note (les étoiles)."); return; }
-            if (!commentaire.trim()) { alert("Veuillez écrire un petit commentaire."); return; }
+async function envoyerAvis() {
+    const commentaire = document.getElementById('comment').value;
+    if (note === 0) { alert("Veuillez choisir une note (les étoiles)."); return; }
+    if (!commentaire.trim()) { alert("Veuillez écrire un petit commentaire."); return; }
 
-            // On prépare le message pour WhatsApp
-            const msg = `⭐ Nouvel avis sur BOuba STOR !\nNote : ${note}/5\nCommentaire : ${commentaire}`;
-            const wa = "2250787619717"; // Ton numéro WhatsApp
+    const btn = document.querySelector('button');
+    btn.innerText = "Envoi en cours...";
+    btn.disabled = true;
+
+    // On récupère le nom du client s'il est connecté
+    const storedMe = localStorage.getItem('b_me');
+    const nom = storedMe ? JSON.parse(storedMe).name : 'Client BOuba';
+
+    try {
+        // On envoie l'avis directement dans Firebase
+        const reviewRef = window.firebaseDb 
+            ? window.firebaseDb.push(window.firebaseDb.ref(window.firebaseDb.db, 'reviews'))
+            : null;
             
-            window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`, '_blank');
+        // Si on a une fonction de sauvegarde globale (définie dans index.html)
+        if (window.saveReview) {
+            await window.saveReview({ name: nom, note: note, text: commentaire, date: Date.now() });
+            alert('✅ Merci ! Votre avis a bien été publié sur la page d\'accueil.');
+            window.location.href = 'index.html';
+        } else {
+            // Fallback simple si on est sur la page seule
+            alert('✅ Merci pour votre avis !');
+            window.location.href = 'index.html';
         }
-    </script>
+    } catch (e) {
+        alert("Erreur d'envoi : " + e.message);
+        btn.innerText = "Envoyer mon avis";
+        btn.disabled = false;
+    }
+}
 </body>
 </html>
