@@ -105,7 +105,18 @@ body{user-select:none;-webkit-user-select:none}input,textarea{user-select:text;-
     <button onclick="sendMessage()">Envoyer</button>
   </div>
 </div>
-
+<div id="statusModal" class="modal" style="height: 80vh; border-radius: 20px 20px 0 0;">
+  <h3>Actus (Statuts)</h3>
+  <div style="margin-bottom: 15px;">
+    <button onclick="document.getElementById('statusFile').click()" style="background:var(--acc); color:#000; padding:10px; border-radius:8px; font-weight:bold; border:none; width:100%;">
+      ➕ Ajouter une photo
+    </button>
+    <input type="file" id="statusFile" accept="image/*" hidden>
+  </div>
+  <div id="statusList" style="overflow-y: auto; max-height: 50vh; display: flex; gap: 10px; flex-wrap: wrap;">
+    <p class="note">Chargement des statuts...</p>
+  </div>
+</div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, onValue, push, set, serverTimestamp, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
