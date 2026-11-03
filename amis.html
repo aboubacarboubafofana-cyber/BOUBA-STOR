@@ -304,6 +304,39 @@ $('micBtn').addEventListener('click', async () => {
 });
 
 $('searchInput').addEventListener('input', render);
+  // Supprimer un ami de sa liste
+window.deleteFriend = function(id) {
+    if (!confirm("Voulez-vous vraiment retirer cet ami ?")) return;
+    if (!prefs.hidden) prefs.hidden = [];
+    if (!prefs.hidden.includes(id)) prefs.hidden.push(id);
+    localStorage.setItem('chat_prefs_' + me.uid, JSON.stringify(prefs));
+    render(); // On rafraîchit la liste
+}
+
+// Ajouter/Changer sa photo de profil
+async function setMyPhoto(f) {
+    const url = URL.createObjectURL(f);
+    const img = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = url; });
+    URL.revokeObjectURL(url);
+    const c = document.createElement('canvas'); c.width = c.height = 200;
+    const s = Math.max(200 / img.width, 200 / img.height);
+    c.getContext('2d').drawImage(img, (200 - img.width * s) / 2, (200 - img.height * s) / 2, img.width * s, img.height * s);
+    const photoData = c.toDataURL('image/jpeg', 0.7);
+    
+    // On enregistre dans Firebase
+    await set(ref(db, 'users/' + me.uid + '/photo'), photoData);
+    
+    // On met à jour l'écran
+    document.getElementById('myAvatar').innerHTML = `<img src="${photoData}" style="width:100%;height:100%;object-fit:cover">`;
+    
+    // On sauvegarde sur le téléphone
+    const parsedMe = JSON.parse(localStorage.getItem('b_me'));
+    parsedMe.photo = photoData;
+    localStorage.setItem('b_me', JSON.stringify(parsedMe));
+}
+
+// Connexion du bouton Caméra en haut
+document.getElementById('photoFile').onchange = e => { const f = e.target.files[0]; if (f) setMyPhoto(f); };
 </script>
 </body>
 </html>
