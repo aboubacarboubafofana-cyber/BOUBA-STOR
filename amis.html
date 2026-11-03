@@ -146,16 +146,24 @@ const prefRef = () => doc(db, 'users', me.uid, 'private', 'prefs');
 const savePrefs = () => setDoc(prefRef(), prefs).catch(e => console.error(e));
 
 // ---------- Connexion ----------
-onAuthStateChanged(auth, async u => {
-  if (!u) return location.replace('compte.html');
-  me = u;
-  localStorage.setItem('uid', u.uid); // utilisé par d'autres fichiers
-  try {
-    const s = await getDoc(prefRef());
-    if (s.exists()) prefs = { hidden: s.data().hidden || [], favs: s.data().favs || [] };
-  } catch (e) { console.error(e); }
-  loadFriends();
-});
+const storedMe = localStorage.getItem('b_me');
+if (storedMe) {
+    try {
+        const parsedMe = JSON.parse(storedMe);
+        me = { uid: parsedMe.key || parsedMe.uid, name: parsedMe.name || 'Utilisateur', phone: parsedMe.phone || '', photo: parsedMe.photo || '' };
+        if (!me.uid) throw new Error('ID manquant');
+        
+        // On récupère les préférences du chat (favoris, cachés)
+        prefs = JSON.parse(localStorage.getItem('chat_prefs_' + me.uid)) || { hidden: [], favs: [] };
+        
+        loadFriends(); // On lance le chargement des amis
+    } catch (err) {
+        console.error(err);
+        location.replace('index.html'); // Si erreur, retour à l'accueil
+    }
+} else {
+    location.replace('index.html'); // Si pas connecté, retour à l'accueil
+}
 
 // ---------- Amis ----------
 async function loadFriends() {
