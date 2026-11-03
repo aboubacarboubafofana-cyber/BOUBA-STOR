@@ -140,31 +140,48 @@ if (storedMe) {
 
 function loadFriends() {
     const list = document.getElementById('friendList');
-    list.innerHTML = '<p class="note">Chargement…</p>';
     
+    // 1. Vérifier si tu es bien connecté
+    if (!me || !me.uid) {
+        list.innerHTML = '<p class="note" style="color:red">Erreur : Vous n\'êtes pas connecté. Retournez à l\'accueil et inscrivez-vous.</p>';
+        return;
+    }
+
+    // 2. Essayer de lire la base de données
     onValue(ref(db, 'users'), (snapshot) => {
+        const data = snapshot.val();
+        
+        // 3. Si la base est vide
+        if (!data) {
+            list.innerHTML = '<p class="note" style="color:orange">La base de données Firebase est vide. Aucun utilisateur trouvé.</p>';
+            return;
+        }
+        
         allUsers = [];
-        const data = snapshot.val() || {};
         Object.keys(data).forEach(key => {
             if (key === me.uid) return;
             const u = data[key];
-            if (u.name) {
-                allUsers.push({ id: key, name: u.name, tel: String(u.phone || ''), photo: safeImg(u.photo) });
+            if (u && u.name) {
+                allUsers.push({ id: key, name: u.name, tel: String(u.phone || u.tel || ''), photo: safeImg(u.photo) });
             }
         });
         
-        render(); // C'est cette ligne qui va effacer "Chargement..." et afficher la liste
+        // 4. Afficher le résultat
+        if (allUsers.length === 0) {
+            list.innerHTML = '<p class="note">Vous êtes le seul inscrit pour le moment.</p>';
+        } else {
+            render(); 
+        }
         
         const myData = data[me.uid] || {};
         document.getElementById('myAvatar').innerHTML = safeImg(myData.photo) ? `<img src="${safeImg(myData.photo)}" style="width:100%;height:100%;object-fit:cover">` : esc(ini(myData.name || me.name));
         
         openFromHash();
+        
     }, (error) => {
-        // Si Firebase refuse l'accès, on affiche l'erreur en rouge
-        console.error(error);
-        list.innerHTML = '<p class="note" style="color:#f66">Erreur : ' + error.message + '</p>';
+        // 5. Si Firebase refuse l'accès
+        list.innerHTML = '<p class="note" style="color:red">Erreur de lecture Firebase : ' + error.message + '</p>';
     });
-          }
 }
 
 function render() {
