@@ -163,23 +163,33 @@ if (storedMe) {
 }
 
 // ---------- Amis ----------
-async function loadFriends() {
-  const list = $('friendList');
-  list.innerHTML = '<p class="note">Chargement…</p>';
-  try {
-    const snap = await getDocs(query(collection(db, 'users'), limit(300)));
-    allUsers = [];
-    const seen = new Set();
-snap.forEach(d => {
-  if (d.id === me.uid) return;
-  const u = d.data();
-  const name = u.name || u.nom || u.displayName || '';
-  const tel = String(u.tel || u.phone || u.telephone || u.numero || u.p10 || '');
-  const key = norm(tel);
-  if (!name || seen.has(d.id)) return;
-  seen.add(d.id);
-  allUsers.push({ id: d.id, name, tel, photo: safeImg(u.photo) });
-});
+function loadFriends() {
+    const list = $('friendList');
+    list.innerHTML = '<p class="note">Chargement…</p>';
+    
+    const usersRef = ref(db, 'users');
+    onValue(usersRef, (snapshot) => {
+        allUsers = [];
+        const data = snapshot.val() || {};
+        Object.keys(data).forEach(key => {
+            if (key === me.uid) return;
+            const u = data[key];
+            if (u.name) {
+                allUsers.push({ id: key, name: u.name, tel: String(u.phone || ''), photo: safeImg(u.photo) });
+            }
+        });
+        localStorage.setItem('amis_cache_all', JSON.stringify(allUsers));
+        render();
+        
+        const myData = data[me.uid] || {};
+        $('myAvatar').innerHTML = safeImg(myData.photo) ? `<img src="${safeImg(myData.photo)}" style="width:100%;height:100%;object-fit:cover">` : esc(ini(myData.name || me.name));
+        
+        openFromHash();
+    }, (error) => {
+        console.error(error);
+        list.innerHTML = '<p class="note" style="color:#f66">Erreur de chargement. Vérifiez les règles Firebase.</p>';
+    });
+}
   
     render();
     const meDoc = await getDoc(doc(db, 'users', me.uid));
