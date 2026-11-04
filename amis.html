@@ -190,21 +190,37 @@ function setPresence() {
 // 2. CHARGEMENT DES INSCRITS ET STATUTS
 function loadFriends() {
     const list = $('friendList');
+    list.innerHTML = '<p class="note">Chargement...</p>';
 
-    // 1. AFFICHAGE INSTANTANÉ (0 seconde)
-    const cachedUsers = localStorage.getItem('amis_cache');
-    if (cachedUsers) {
-        allUsers = JSON.parse(cachedUsers);
-        render(); 
-    } else {
-        list.innerHTML = '<p class="note">Chargement...</p>';
-        // Si ça bloque, on met un bouton Réessayer au bout de 3 secondes
-        setTimeout(() => {
-            if (list.innerHTML.includes('Chargement')) {
-                list.innerHTML = '<p class="note" style="color:orange">Réseau lent ou Firebase bloque.</p><button onclick="loadFriends()" style="margin-top:10px; padding:10px; background:#ffd700; color:#000; border:none; border-radius:8px; font-weight:bold; width:100%;">🔄 Réessayer</button>';
+    try {
+        onValue(ref(db, 'users'), (snapshot) => {
+            const data = snapshot.val();
+            if (!data) {
+                list.innerHTML = '<p class="note" style="color:orange">La base de données est vide (aucun inscrit).</p>';
+                return;
             }
-        }, 3000);
+
+            allUsers = [];
+            const myPhone = String(me.uid).replace(/\D/g, ''); 
+
+            Object.keys(data).forEach(key => {
+                const userPhone = String(key).replace(/\D/g, '');
+                if (userPhone === myPhone) return; 
+                
+                const u = data[key];
+                if (u && u.name) {
+                    allUsers.push({ id: key, name: u.name, tel: String(u.phone || key), photo: safeImg(u.photo) });
+                }
+            });
+            
+            render(); 
+        }, (error) => {
+            list.innerHTML = '<p class="note" style="color:red">Erreur Firebase : ' + error.message + '</p>';
+        });
+    } catch (e) {
+        list.innerHTML = '<p class="note" style="color:red">Erreur code : ' + e.message + '</p>';
     }
+}
 
     // 2. MISE À JOUR FIREBASE EN ARRIÈRE-PLAN
     onValue(ref(db, 'users'), (snapshot) => {
