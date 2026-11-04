@@ -68,6 +68,8 @@
     await OneSignal.init({
       appId: "5672576c-c60f-4364-9bb3-316526fcd35e",
     });
+    // Cette ligne force la demande d'autorisation
+    OneSignal.Notifications.requestPermission();
   });
 </script>
 <style>
