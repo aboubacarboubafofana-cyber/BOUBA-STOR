@@ -192,34 +192,38 @@ function loadFriends() {
     const list = $('friendList');
     list.innerHTML = '<p class="note">Chargement...</p>';
 
-    try {
-        onValue(ref(db, 'users'), (snapshot) => {
-            const data = snapshot.val();
-            if (!data) {
-                list.innerHTML = '<p class="note" style="color:orange">La base de données est vide (aucun inscrit).</p>';
-                return;
-            }
+    // Si au bout de 5 secondes ça charge encore, on affiche un message
+    setTimeout(() => {
+        if (list.innerHTML.includes('Chargement')) {
+            list.innerHTML = '<p class="note" style="color:orange">La connexion à Firebase est trop lente ou bloquée.</p>';
+        }
+    }, 5000);
 
-            allUsers = [];
-            const myPhone = String(me.uid).replace(/\D/g, ''); 
+    onValue(ref(db, 'users'), (snapshot) => {
+        const data = snapshot.val();
+        
+        if (!data) {
+            list.innerHTML = '<p class="note" style="color:orange">La base de données est vide (aucun inscrit pour le moment).</p>';
+            return;
+        }
 
-            Object.keys(data).forEach(key => {
-                const userPhone = String(key).replace(/\D/g, '');
-                if (userPhone === myPhone) return; 
-                
-                const u = data[key];
-                if (u && u.name) {
-                    allUsers.push({ id: key, name: u.name, tel: String(u.phone || key), photo: safeImg(u.photo) });
-                }
-            });
+        allUsers = [];
+        const myPhone = String(me.uid).replace(/\D/g, ''); 
+
+        Object.keys(data).forEach(key => {
+            const userPhone = String(key).replace(/\D/g, '');
+            if (userPhone === myPhone) return; 
             
-            render(); 
-        }, (error) => {
-            list.innerHTML = '<p class="note" style="color:red">Erreur Firebase : ' + error.message + '</p>';
+            const u = data[key];
+            if (u && u.name) {
+                allUsers.push({ id: key, name: u.name, tel: String(u.phone || key), photo: safeImg(u.photo) });
+            }
         });
-    } catch (e) {
-        list.innerHTML = '<p class="note" style="color:red">Erreur code : ' + e.message + '</p>';
-    }
+        
+        render(); 
+    }, (error) => {
+        list.innerHTML = '<p class="note" style="color:red">Erreur Firebase : ' + error.message + '</p>';
+    });
 }
 
 
