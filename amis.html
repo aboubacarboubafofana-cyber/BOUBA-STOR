@@ -279,6 +279,19 @@ function loadMessages() {
     box.innerHTML = '<p style="color:#888;text-align:center">Chargement...</p>';
     const q = query(ref(db, 'chats/' + chatId + '/messages'), orderByChild('timestamp'), limitToLast(200));
     
+    let otherReadTime = 0;
+    onValue(ref(db, 'chats/' + chatId + '/read/' + friendId), (snap) => {
+        otherReadTime = snap.val() || 0;
+        document.querySelectorAll('.msg.sent').forEach(el => {
+            const ts = parseInt(el.getAttribute('data-ts'));
+            const tick = el.querySelector('.ticks');
+            if (tick && ts && ts <= otherReadTime) {
+                tick.textContent = '✓✓';
+                tick.style.color = '#4fc3f7';
+            }
+        });
+    });
+
     unsub = onValue(q, (snapshot) => {
         box.textContent = '';
         snapshot.forEach(child => {
@@ -287,19 +300,41 @@ function loadMessages() {
             const div = document.createElement('div');
             div.className = 'msg ' + (m.senderId === me.uid ? 'sent' : 'received');
             
+            const ts = m.timestamp || 0;
+            if (m.senderId === me.uid) {
+                div.setAttribute('data-ts', ts);
+            }
+
             if (m.audio) {
                 div.innerHTML = '<audio controls src="' + m.audio + '" style="max-width:100%"></audio>';
             } else {
-                div.textContent = m.text;
+                div.innerHTML = '<span>' + (m.text || '') + '</span>';
             }
 
             if (m.senderId === me.uid) {
+                const footer = document.createElement('div');
+                footer.style.cssText = 'display:flex; justify-content:flex-end; align-items:center; gap:6px; margin-top:4px; font-size:12px;';
+                
+                const tick = document.createElement('span');
+                tick.className = 'ticks';
+                if (ts && ts <= otherReadTime) {
+                    tick.textContent = '✓✓';
+                    tick.style.color = '#4fc3f7';
+                } else {
+                    tick.textContent = '✓';
+                    tick.style.color = '#aaa';
+                }
+
                 const delBtn = document.createElement('span');
-                delBtn.innerHTML = ' 🗑️';
-                delBtn.style.cssText = 'cursor:pointer; margin-left:10px; font-size:12px; opacity:0.7;';
+                delBtn.innerHTML = '🗑️';
+                delBtn.style.cursor = 'pointer';
                 delBtn.onclick = () => deleteMessage(msgId);
-                div.appendChild(delBtn);
+
+                footer.appendChild(tick);
+                footer.appendChild(delBtn);
+                div.appendChild(footer);
             }
+
             box.appendChild(div);
         });
         box.scrollTop = box.scrollHeight;
