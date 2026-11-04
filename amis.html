@@ -312,34 +312,30 @@ function loadMessages() {
             }
 
             if (m.senderId === me.uid) {
-                const footer = document.createElement('div');
-                footer.style.cssText = 'display:flex; justify-content:flex-end; align-items:center; gap:6px; margin-top:4px; font-size:12px;';
-                
-                const tick = document.createElement('span');
-                tick.className = 'ticks';
-                if (ts && ts <= otherReadTime) {
-                    tick.textContent = '✓✓';
-                    tick.style.color = '#4fc3f7';
-                } else {
-                    tick.textContent = '✓';
-                    tick.style.color = '#aaa';
-                }
+    const footer = document.createElement('div');
+    footer.style.cssText = 'display:flex; justify-content:flex-end; align-items:center; gap:6px; margin-top:4px; font-size:12px;';
+    
+    const tick = document.createElement('span');
+    tick.className = 'ticks';
+    
+    // Si c'est lu, on met double coche bleue, sinon simple coche grise
+    if (ts && ts <= otherReadTime) {
+        tick.textContent = '✓✓';
+        tick.style.color = '#4fc3f7';
+    } else {
+        tick.textContent = '✓';
+        tick.style.color = '#aaa';
+    }
 
-                const delBtn = document.createElement('span');
-                delBtn.innerHTML = '🗑️';
-                delBtn.style.cursor = 'pointer';
-                delBtn.onclick = () => deleteMessage(msgId);
+    const delBtn = document.createElement('span');
+    delBtn.innerHTML = '🗑️';
+    delBtn.style.cursor = 'pointer';
+    delBtn.onclick = () => deleteMessage(msgId);
 
-                footer.appendChild(tick);
-                footer.appendChild(delBtn);
-                div.appendChild(footer);
+    footer.appendChild(tick);
+    footer.appendChild(delBtn);
+    div.appendChild(footer);
             }
-
-            box.appendChild(div);
-        });
-        box.scrollTop = box.scrollHeight;
-    });
-}
 
 window.sendMessage = async function() {
     const input = $('messageInput');
