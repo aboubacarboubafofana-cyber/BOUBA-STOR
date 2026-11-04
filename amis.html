@@ -237,25 +237,26 @@ window.setFilter = function(f, btn) {
 }
 
 function render() {
+    const list = $('friendList');
     const q = $('searchInput').value.trim().toLowerCase();
-    let arr = allUsers.filter(u => !prefs.hidden.includes(u.id)); 
+    
+    let arr = allUsers.filter(u => !prefs.hidden.includes(u.id));
     if (currentFilter === 'fav') arr = arr.filter(u => prefs.favs.includes(u.id));
     if (q) arr = arr.filter(u => u.name.toLowerCase().includes(q) || u.tel.includes(q));
 
     if (arr.length === 0) {
-        $('friendList').innerHTML = '<p class="note">Aucun contact à afficher.</p>';
+        list.innerHTML = '<p class="note">Aucun contact à afficher.</p>';
         return;
     }
 
-    $('friendList').innerHTML = arr.map(u => `
+    list.innerHTML = arr.map(u => `
         <div class="friend-item">
             <div class="avatar">
                 ${u.photo ? `<img src="${u.photo}" style="width:100%;height:100%;object-fit:cover">` : esc(ini(u.name))}
-                <div class="online-dot" style="display: ${u.online ? 'block' : 'none'};"></div>
             </div>
             <div class="friend-info">
                 <h4>${esc(u.name)}</h4>
-                <p style="color: ${u.online ? '#25D366' : 'var(--gray)'}">${u.online ? 'En ligne' : esc(u.tel)}</p>
+                <p>${esc(u.tel)}</p>
             </div>
             <div class="actions">
                 <button onclick="openChat('${esc(u.id)}', '${esc(u.name)}')">Discuter</button>
