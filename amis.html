@@ -198,6 +198,12 @@ function loadFriends() {
         render(); 
     } else {
         list.innerHTML = '<p class="note">Chargement...</p>';
+        // Si ça bloque, on met un bouton Réessayer au bout de 3 secondes
+        setTimeout(() => {
+            if (list.innerHTML.includes('Chargement')) {
+                list.innerHTML = '<p class="note" style="color:orange">Réseau lent ou Firebase bloque.</p><button onclick="loadFriends()" style="margin-top:10px; padding:10px; background:#ffd700; color:#000; border:none; border-radius:8px; font-weight:bold; width:100%;">🔄 Réessayer</button>';
+            }
+        }, 3000);
     }
 
     // 2. MISE À JOUR FIREBASE EN ARRIÈRE-PLAN
@@ -216,14 +222,15 @@ function loadFriends() {
             }
         });
         
-        // On sauvegarde pour la prochaine ouverture
         localStorage.setItem('amis_cache', JSON.stringify(allUsers));
         render(); 
         
         const myData = data[me.uid] || {};
         $('myAvatar').innerHTML = safeImg(myData.photo) ? `<img src="${safeImg(myData.photo)}" style="width:100%;height:100%;object-fit:cover">` : esc(ini(myData.name || me.name));
     }, (error) => {
-        if (!cachedUsers) list.innerHTML = '<p class="note" style="color:red">Erreur : ' + error.message + '</p>';
+        if (!cachedUsers) {
+            list.innerHTML = '<p class="note" style="color:red">Erreur : ' + error.message + '</p><button onclick="loadFriends()" style="margin-top:10px; padding:10px; background:#ffd700; color:#000; border:none; border-radius:8px; font-weight:bold; width:100%;">🔄 Réessayer</button>';
+        }
     });
 }
 
