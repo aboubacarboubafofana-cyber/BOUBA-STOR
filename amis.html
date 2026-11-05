@@ -183,20 +183,29 @@ async function touchChat(cid, recipientId, lastText) {
 const prefRef = () => doc(db, 'users', me.uid, 'private', 'prefs');
 const savePrefs = () => setDoc(prefRef(), prefs).catch(e => console.error(e));
 
-// ---------- Connexion ----------
-onAuthStateChanged(auth, async u => {
-  if (!u) return location.replace('compte.html');
-  me = u;
-  localStorage.setItem('uid', u.uid); // utilisé par d'autres fichiers
-  try {
-    const s = await getDoc(prefRef());
-    if (s.exists()) prefs = { hidden: s.data().hidden || [], favs: s.data().favs || [], imported: s.data().imported || [], seenStatus: s.data().seenStatus || [] };
-  } catch (e) { console.error(e); }
-  loadFriends();
-  touchPresence();
-  setInterval(touchPresence, 30000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) touchPresence(); });
-});
+// CONNEXION VIA LE TELEPHONE (comme index.html)
+const storedMe = localStorage.getItem('b_me');
+if (storedMe) {
+    const parsedMe = JSON.parse(storedMe);
+    me = { 
+        uid: parsedMe.key, 
+        name: parsedMe.name, 
+        phone: parsedMe.phone, 
+        photo: parsedMe.photo || '' 
+    };
+    
+    // On charge les amis
+    loadFriends();
+    
+    // On garde la mise à jour du statut "En ligne"
+    touchPresence();
+    setInterval(touchPresence, 30000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) touchPresence(); });
+    
+} else {
+    // Si pas connecté, retour à l'accueil
+    location.replace('index.html');
+}
 
 // ---------- Amis ----------
 function buildUsers(snap) {
