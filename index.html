@@ -61,26 +61,6 @@
     }
   }
   </script>
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "5672576c-c60f-4364-9bb3-316526fcd35e",
-      serviceWorkerPath: "/push/onesignal/OneSignalSDKWorker.js",
-      serviceWorkerParam: { scope: "/push/onesignal/" }
-    });
-
-    // On connecte le bouton ici, une fois que OneSignal est prêt
-    const btn = document.getElementById('btnOneSignal');
-    if (btn) {
-      btn.addEventListener('click', async () => {
-        await OneSignal.Notifications.requestPermission();
-        alert("Demande envoyée à Chrome !");
-      });
-    }
-  });
-</script>
 <style>
 *{margin:0;box-sizing:border-box;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 #shopName{user-select:none;-webkit-user-select:none}
