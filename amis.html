@@ -627,14 +627,30 @@ async function sendMessage() {
 
   input.value = '';
   try {
-    await addDoc(collection(db, 'chats', chatId, 'messages'), { text, senderId: me.uid, timestamp: serverTimestamp() });
+    // Nouvelle base de données (Realtime Database)
+    const msgRef = push(ref(db, 'chats/' + chatId + '/messages'));
+    await set(msgRef, { 
+        text: text, 
+        senderId: me.uid, 
+        timestamp: serverTimestamp() 
+    });
+    
     const prev = text.length > 60 ? text.slice(0, 60) + '…' : text;
     await touchChat(chatId, friendId, prev);
-    notifyUser(friendId, myName, prev, 'bouba-chat', 'amis.html#tel=' + me.uid);
-  } catch (e) { console.error(e); input.value = text; alert("Erreur lors de l'envoi du message."); }
+    
+    // On garde la notification si la fonction existe
+    if (typeof notifyUser === 'function') {
+        notifyUser(friendId, myName, prev, 'bouba-chat', 'amis.html#tel=' + me.uid);
+    }
+  } catch (e) { 
+      console.error(e); 
+      input.value = text; 
+      alert("Erreur lors de l'envoi du message."); 
+  }
 }
+
 $('messageInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
-    $('photoFile').onchange = e => { const f = e.target.files[0]; if (f) setMyPhoto(f); };
+$('photoFile').onchange = e => { const f = e.target.files[0]; if (f) setMyPhoto(f); };
 
 const goCall = (id, video) => { if (id) location.href = 'call.html?call=' + encodeURIComponent(id) + '&video=' + video; };
 const fid = a => a.closest('[data-id]').dataset.id;
