@@ -544,17 +544,34 @@ function loadMessages() {
   const box = $('chatMessages');
   box.textContent = '';
   sentNodes = {};
-  const q = query(collection(db, 'chats', chatId, 'messages'), orderBy('timestamp', 'asc'), limit(200));
-  unsub = onSnapshot(q, snap => {
+
+  // Nouvelle base de données (Realtime Database)
+  const q = query(ref(db, 'chats/' + chatId + '/messages'), orderByChild('timestamp'), limitToLast(200));
+
+  unsub = onValue(q, snap => {
     box.textContent = '';
     const done = new Set();
-    snap.forEach(d => { const k = String(d.data().text || '').match(/\[(?:VALIDÉ|REFUSÉ) (BS\d{6})\]/); if (k) done.add(k[1]); });
-    snap.forEach(d => {
-      const m = d.data();
+    const msgs = [];
+
+    snap.forEach(child => {
+      const m = child.val();
+      m.id = child.key; // On garde l'ID du message
+      msgs.push(m);
+
+      const k = String(m.text || '').match(/\[(?:VALIDÉ|REFUSÉ) (BS\d{6})\]/);
+      if (k) done.add(k[1]);
+    });
+
+    // Trier les messages par date
+    msgs.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+    msgs.forEach(m => {
       const div = document.createElement('div');
       div.className = 'msg ' + (m.senderId === me.uid ? 'sent' : 'received');
-      if (m.audio) { div.innerHTML = '<audio controls src="' + m.audio + '" style="max-width:100%"></audio>'; }
-      else if (m.mediaData) {
+
+      if (m.audio) {
+        div.innerHTML = '<audio controls src="' + m.audio + '" style="max-width:100%"></audio>';
+      } else if (m.mediaData) {
         if (m.mediaType && m.mediaType.startsWith('image/')) {
           const im = document.createElement('img'); im.src = m.mediaData; im.style.cssText = 'display:block;max-width:220px;border-radius:10px;cursor:pointer';
           im.onclick = () => { const v = $('viewer'); v.innerHTML = '<img src="' + m.mediaData + '">'; v.style.display = 'flex'; };
@@ -565,36 +582,43 @@ function loadMessages() {
       } else if (m.locationUrl) {
         const a = document.createElement('a'); a.href = m.locationUrl; a.target = '_blank'; a.rel = 'noopener'; a.textContent = '📍 Voir la position'; a.style.color = 'inherit'; div.appendChild(a);
       } else {
-        div.textContent = m.text;
+        div.textContent = m.text || '';
         if (m.senderId !== me.uid && /COMMANDE SUPER STAR/.test(String(m.text || ''))) {
           const oid = (String(m.text).match(/\bBS\d{6}\b/) || [])[0];
           if (oid && !done.has(oid)) div.appendChild(starBtns(oid));
         }
       }
+
       if (m.senderId === me.uid) {
-  const foot = document.createElement('div');
-  foot.style.cssText = 'display:flex;justify-content:flex-end;align-items:center;gap:6px;margin-top:4px';
-  const x = document.createElement('span');
-  x.textContent = '🗑️';
-  x.style.cssText = 'cursor:pointer;font-size:.9rem';
-  const mid = d.id, cid = chatId;
-  x.onclick = async () => {
-    if (!confirm('Supprimer ce message ?')) return;
-    try { await deleteDoc(doc(db, 'chats', cid, 'messages', mid)); }
-    catch (e) { console.error(e); alert('Suppression impossible'); }
-  };
-  const tick = document.createElement('span');
-  tick.className = 'ticks sent'; tick.textContent = '✓';
-  const ts = m.timestamp && m.timestamp.toMillis ? m.timestamp.toMillis() : 0;
-  sentNodes[d.id] = { el: tick, ts };
-  foot.appendChild(tick); foot.appendChild(x);
-  div.appendChild(foot);
-  }
+        const foot = document.createElement('div');
+        foot.style.cssText = 'display:flex;justify-content:flex-end;align-items:center;gap:6px;margin-top:4px';
+        
+        const x = document.createElement('span');
+        x.textContent = '🗑️';
+        x.style.cssText = 'cursor:pointer;font-size:.9rem';
+        x.onclick = async () => {
+          if (!confirm('Supprimer ce message ?')) return;
+          try { await remove(ref(db, 'chats/' + chatId + '/messages/' + m.id)); }
+          catch (e) { console.error(e); alert('Suppression impossible'); }
+        };
+        
+        const tick = document.createElement('span');
+        tick.className = 'ticks sent'; tick.textContent = '✓';
+        const ts = m.timestamp || 0;
+        sentNodes[m.id] = { el: tick, ts };
+        
+        foot.appendChild(tick); foot.appendChild(x);
+        div.appendChild(foot);
+      }
       box.appendChild(div);
     });
+    
     box.scrollTop = box.scrollHeight;
     updateTicks();
-  }, err => { console.error(err); box.textContent = 'Impossible de charger les messages.'; });
+  }, err => { 
+      console.error(err); 
+      box.textContent = 'Impossible de charger les messages.'; 
+  });
 }
 async function sendMessage() {
   const input = $('messageInput');
