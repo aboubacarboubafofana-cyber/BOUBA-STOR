@@ -12,18 +12,22 @@
     <script>
         window.OneSignalDeferred = window.OneSignalDeferred || [];
         OneSignalDeferred.push(async function(OneSignal) {
+            // On sauvegarde OneSignal dans une variable globale
+            window.MonOneSignal = OneSignal; 
+            
             await OneSignal.init({
-                appId: "5672576c-c60f-4364-9bb3-316526fcd35e",
-                serviceWorkerPath: "/push/onesignal/OneSignalSDKWorker.js",
-                serviceWorkerParam: { scope: "/push/onesignal/" }
+                appId: "5672576c-c60f-4364-9bb3-316526fcd35e"
+                // J'ai enlevé le serviceWorkerPath pour ce test
             });
         });
 
         function demander() {
-            OneSignalDeferred.push(async function(OneSignal) {
-                await OneSignal.Notifications.requestPermission();
-                alert("Demande envoyée à Chrome !");
-            });
+            if (window.MonOneSignal) {
+                window.MonOneSignal.Notifications.requestPermission();
+                alert("Demande envoyée !");
+            } else {
+                alert("OneSignal n'est pas encore prêt. Attends 2 secondes et réessaie.");
+            }
         }
     </script>
 </body>
