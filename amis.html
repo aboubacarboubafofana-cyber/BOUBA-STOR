@@ -491,39 +491,53 @@ function starBtns(oid) {
   $('chatName').textContent = u.name;
   $('chatStatus').textContent = '';
   $('chatModal').style.display = 'flex';
-  getDoc(doc(db, 'users', u.id)).then(d => {
-    if (!d.exists()) return;
-    const ls = d.data().lastSeen;
-    const ms = ls && ls.toMillis ? ls.toMillis() : 0;
+
+  // 1. Vérifier si la personne est en ligne (Realtime Database)
+  onValue(ref(db, 'users/' + u.id + '/lastSeen'), (snap) => {
+    const ms = snap.val() || 0;
     if (ms && Date.now() - ms < 120000) $('chatStatus').textContent = 'En ligne';
     else if (ms) $('chatStatus').textContent = 'Vu à ' + fmtWhen(ms);
+  });
+
+  // 2. Remettre les messages non lus à zéro
+  update(ref(db, 'chats/' + chatId), { 
+    ['unread/' + me.uid]: 0, 
+    ['lastReadAt/' + me.uid]: Date.now() 
   }).catch(() => {});
-  setDoc(doc(db, 'chats', chatId), { ['unread.' + me.uid]: 0, ['lastReadAt.' + me.uid]: serverTimestamp() }, { merge: true }).catch(() => {});
+  
   const i = allUsers.findIndex(x => x.id === u.id);
   if (i >= 0) { allUsers[i].unread = 0; render(); }
+  
   loadMessages();
+  
   if (unsubChat) unsubChat();
   otherReadAt = 0;
-  unsubChat = onSnapshot(doc(db, 'chats', chatId), cd => {
+  
+  // 3. Écouter quand l'autre personne lit mes messages
+  unsubChat = onValue(ref(db, 'chats/' + chatId), (cd) => {
     if (!cd.exists()) return;
-    const c = cd.data(), lr = c.lastReadAt && c.lastReadAt[friendId];
-    otherReadAt = lr && lr.toMillis ? lr.toMillis() : (lr || 0);
+    const c = cd.val(), lr = c.lastReadAt && c.lastReadAt[friendId];
+    otherReadAt = lr || 0;
     updateTicks();
   });
 }
+
 function closeChat() {
   if (unsub) { unsub(); unsub = null; }
   if (unsubChat) { unsubChat(); unsubChat = null; }
   $('chatModal').style.display = 'none';
   chatId = null; friendId = null;
 }
+
 let otherReadAt = 0, sentNodes = {};
+
 function updateTicks() {
   Object.keys(sentNodes).forEach(id => {
     const n = sentNodes[id];
     n.el.className = 'ticks ' + (n.ts && n.ts <= otherReadAt ? 'read' : 'sent');
     n.el.textContent = n.ts && n.ts <= otherReadAt ? '✓✓' : '✓';
   });
+}
 }
 function loadMessages() {
   if (unsub) unsub();
