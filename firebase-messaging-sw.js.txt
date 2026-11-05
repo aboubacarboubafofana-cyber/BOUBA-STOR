@@ -1,0 +1,43 @@
+// firebase-messaging-sw.js - A METTRE A LA RACINE DU SITE
+importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
+
+firebase.initializeApp({
+  apiKey: "AIzaSyAnLLXpUC35OleB0hCLUXnLU0lMiesY7j4",
+  authDomain: "project-f4477c80-7c55-4db7-b2e.firebaseapp.com",
+  projectId: "project-f4477c80-7c55-4db7-b2e",
+  storageBucket: "project-f4477c80-7c55-4db7-b2e.firebasestorage.app",
+  messagingSenderId: "697604298457",
+  appId: "1:697604298457:web:4f9a6d66ec6fde9c1990c8"
+});
+
+const messaging = firebase.messaging();
+
+messaging.onBackgroundMessage((payload) => {
+  console.log('[SW] Message reçu en arrière-plan', payload);
+  const title = payload.notification?.title || payload.data?.title || 'Bouba Store';
+  const options = {
+    body: payload.notification?.body || payload.data?.body || 'Nouveau message',
+    icon: '/icon.png',
+    badge: '/badge.png',
+    data: { url: payload.data?.url || payload.fcmOptions?.link || '/amis.html' },
+    tag: payload.data?.tag || 'bouba-notif',
+    renotify: true,
+    requireInteraction: true,
+    vibrate: [200, 100, 200]
+  };
+  self.registration.showNotification(title, options);
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || '/amis.html';
+  event.waitUntil(
+    clients.matchAll({ type: 'window' }).then(windowClients => {
+      for (let client of windowClients) {
+        if (client.url.includes(url) && 'focus' in client) return client.focus();
+      }
+      if (clients.openWindow) return clients.openWindow(url);
+    })
+  );
+});
