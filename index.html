@@ -65,22 +65,21 @@
 <script>
   window.OneSignalDeferred = window.OneSignalDeferred || [];
   OneSignalDeferred.push(async function(OneSignal) {
-    window.MonOneSignal = OneSignal; // On sauvegarde la connexion
     await OneSignal.init({
       appId: "5672576c-c60f-4364-9bb3-316526fcd35e",
       serviceWorkerPath: "/push/onesignal/OneSignalSDKWorker.js",
       serviceWorkerParam: { scope: "/push/onesignal/" }
     });
-  });
 
-  // La fonction pour le bouton
-  function demanderNotif() {
-      if (window.MonOneSignal) {
-          window.MonOneSignal.Notifications.requestPermission();
-      } else {
-          alert("Attends 2 secondes que le site charge et réessaie.");
-      }
-  }
+    // On connecte le bouton ici, une fois que OneSignal est prêt
+    const btn = document.getElementById('btnOneSignal');
+    if (btn) {
+      btn.addEventListener('click', async () => {
+        await OneSignal.Notifications.requestPermission();
+        alert("Demande envoyée à Chrome !");
+      });
+    }
+  });
 </script>
 <style>
 *{margin:0;box-sizing:border-box;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
