@@ -62,6 +62,7 @@
   }
   </script>
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
   window.OneSignalDeferred = window.OneSignalDeferred || [];
   OneSignalDeferred.push(async function(OneSignal) {
@@ -70,7 +71,11 @@
       serviceWorkerPath: "/push/onesignal/OneSignalSDKWorker.js",
       serviceWorkerParam: { scope: "/push/onesignal/" }
     });
-    OneSignal.Notifications.requestPermission();
+    
+    // On crée une fonction simple pour le bouton
+    window.demanderNotif = function() {
+        OneSignal.Notifications.requestPermission();
+    };
   });
 </script>
 <style>
