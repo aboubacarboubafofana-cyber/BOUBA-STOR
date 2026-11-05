@@ -170,16 +170,20 @@ function hl(text, q) {
   if (i < 0) return t;
   return t.slice(0, i) + '<mark>' + t.slice(i, i + q.length) + '</mark>' + t.slice(i + q.length);
 }
-function touchPresence() { if (me) updateDoc(doc(db, 'users', me.uid), { lastSeen: serverTimestamp() }).catch(() => {}); }
-async function touchChat(cid, recipientId, lastText) {
-  try {
-    await setDoc(doc(db, 'chats', cid), {
-      lastText, lastAt: serverTimestamp(), lastSender: me.uid,
-      ['unread.' + recipientId]: increment(1)
-    }, { merge: true });
-  } catch (e) { console.error(e); }
+function touchPresence() { 
+    if (me) set(ref(db, 'users/' + me.uid + '/lastSeen'), Date.now()); 
 }
 
+async function touchChat(cid, recipientId, lastText) {
+    try {
+        update(ref(db, 'chats/' + cid), {
+            lastText: lastText, 
+            lastAt: serverTimestamp(), 
+            lastSender: me.uid,
+            ['unread/' + recipientId]: increment(1)
+        });
+    } catch (e) { console.error(e); }
+}
 const prefRef = () => doc(db, 'users', me.uid, 'private', 'prefs');
 const savePrefs = () => setDoc(prefRef(), prefs).catch(e => console.error(e));
 
