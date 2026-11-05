@@ -723,14 +723,28 @@ $('mediaInput').addEventListener('change', async e => {
       if (file.size > 500 * 1024) { alert('Fichier trop lourd : 500 Ko maximum pour les documents (sans photo).'); e.target.value = ''; return; }
       data = await fileToDataURL(file);
     }
-    await addDoc(collection(db, 'chats', chatId, 'messages'), { mediaData: data, mediaType: type, fileName: file.name, senderId: me.uid, timestamp: serverTimestamp() });
+    
+    // Nouvelle base de données (Realtime Database)
+    const msgRef = push(ref(db, 'chats/' + chatId + '/messages'));
+    await set(msgRef, { 
+        mediaData: data, 
+        mediaType: type, 
+        fileName: file.name, 
+        senderId: me.uid, 
+        timestamp: serverTimestamp() 
+    });
+    
     const prevM = type.startsWith('image/') ? '📷 Photo' : '📎 ' + (file.name || 'Fichier');
     await touchChat(chatId, friendId, prevM);
-    notifyUser(friendId, myName, prevM, 'bouba-chat', 'amis.html#tel=' + me.uid);
+    
+    if (typeof notifyUser === 'function') {
+        notifyUser(friendId, myName, prevM, 'bouba-chat', 'amis.html#tel=' + me.uid);
+    }
   } catch (e) { console.error(e); alert("Envoi impossible."); }
   e.target.value = '';
 });
-  window.deleteMessage = async function(msgId) {
+
+window.deleteMessage = async function(msgId) {
     if (!confirm("Voulez-vous vraiment supprimer ce message ?")) return;
     try {
         await remove(ref(db, 'chats/' + chatId + '/messages/' + msgId));
@@ -738,7 +752,7 @@ $('mediaInput').addEventListener('change', async e => {
         console.error(e);
         alert("Erreur : Impossible de supprimer le message.");
     }
-  }
+}
 $('locationBtn').addEventListener('click', () => {
   if (!chatId) return;
   if (!navigator.geolocation) return alert('Localisation indisponible sur cet appareil.');
