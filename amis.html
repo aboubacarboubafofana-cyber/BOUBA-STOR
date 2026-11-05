@@ -228,41 +228,35 @@ function buildUsers(snap) {
   });
 }
 
-async function loadFriends() {
-  const list = $('friendList');
-  let shownFromCache = false;
+function loadFriends() {
+    const list = $('friendList');
+    list.innerHTML = '<p class="note">Chargement…</p>';
 
-  // 1) affichage instantané depuis la mémoire du téléphone, si déjà visitée une fois
-  try {
-    const cached = await getDocsFromCache(query(collection(db, 'users'), limit(300)));
-    if (!cached.empty) { buildUsers(cached); render(); loadPreviews(); shownFromCache = true; }
-  } catch (e) { /* pas de cache : normal au premier lancement */ }
+    onValue(ref(db, 'users'), (snapshot) => {
+        const data = snapshot.val();
+        if (!data) {
+            list.innerHTML = '<p class="note">Aucun utilisateur trouvé.</p>';
+            return;
+        }
 
-  if (!shownFromCache) list.innerHTML = '<p class="note">Chargement…</p>';
+        buildUsers(data);
+        render();
+        
+        // On vérifie si les fonctions existent avant de les appeler
+        if (typeof loadPreviews === 'function') loadPreviews();
+        if (typeof loadStatus === 'function') loadStatus();
 
-  // 2) mise à jour réelle depuis le réseau, en arrière-plan si on a déjà quelque chose à l'écran
-  try {
-    const lent = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 6000));
-    const snap = await Promise.race([getDocs(query(collection(db, 'users'), limit(300))), lent]);
-    buildUsers(snap);
-    render();
-    loadPreviews();
-    loadStatus();
-    const meDoc = await getDoc(doc(db, 'users', me.uid));
-    const md = meDoc.exists() ? meDoc.data() : {};
-    myName = md.name || md.nom || md.displayName || 'Un contact';
-    $('myAvatar').innerHTML = safeImg(md.photo)
-      ? `<img src="${safeImg(md.photo)}" style="width:100%;height:100%;object-fit:cover">`
-      : esc(ini(md.name || md.nom || md.displayName || me.displayName));
-    openFromHash();
-  } catch (e) {
-    console.error(e);
-    if (!shownFromCache) {
-      const msg = e && e.message === 'timeout' ? 'Connexion trop lente.' : 'Erreur de chargement.';
-      list.innerHTML = '<p class="note" style="color:#f66">' + msg + '</p><button class="mini" onclick="loadFriends()" style="margin-top:8px">🔄 Réessayer</button>';
-    }
-    // si on avait déjà le cache à l'écran, on le laisse tel quel : pas d'erreur bloquante
-  }
+        const myData = data[me.uid] || {};
+        myName = myData.name || 'Un contact';
+        
+        $('myAvatar').innerHTML = safeImg(myData.photo)
+            ? `<img src="${safeImg(myData.photo)}" style="width:100%;height:100%;object-fit:cover">`
+            : esc(ini(myData.name || me.name));
+
+        openFromHash();
+    }, (error) => {
+        list.innerHTML = '<p class="note" style="color:#f66">Erreur de connexion : ' + error.message + '</p><button class="mini" onclick="loadFriends()" style="margin-top:8px">🔄 Réessayer</button>';
+    });
 }
 
 async function loadPreviews() {
