@@ -730,6 +730,15 @@ $('mediaInput').addEventListener('change', async e => {
   } catch (e) { console.error(e); alert("Envoi impossible."); }
   e.target.value = '';
 });
+  window.deleteMessage = async function(msgId) {
+    if (!confirm("Voulez-vous vraiment supprimer ce message ?")) return;
+    try {
+        await remove(ref(db, 'chats/' + chatId + '/messages/' + msgId));
+    } catch (e) {
+        console.error(e);
+        alert("Erreur : Impossible de supprimer le message.");
+    }
+  }
 $('locationBtn').addEventListener('click', () => {
   if (!chatId) return;
   if (!navigator.geolocation) return alert('Localisation indisponible sur cet appareil.');
@@ -770,6 +779,7 @@ $('micBtn').addEventListener('click', async () => {
   } catch (e) { alert('Autorisez le micro dans Chrome.'); }
 });
 </script>
+  
 <script type="module" src="appel-recu.js"></script>
 </body>
 </html>
