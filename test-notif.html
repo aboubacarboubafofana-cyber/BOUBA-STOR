@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Notification</title>
+</head>
+<body style="background:#000;color:#fff;text-align:center;padding-top:50px;">
+    <h2>Test OneSignal</h2>
+    <button onclick="demander()" style="padding:20px;font-size:20px;background:gold;border:none;border-radius:10px;font-weight:bold;">ACTIVER LES NOTIFICATIONS</button>
+
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                appId: "5672576c-c60f-4364-9bb3-316526fcd35e",
+                serviceWorkerPath: "/push/onesignal/OneSignalSDKWorker.js",
+                serviceWorkerParam: { scope: "/push/onesignal/" }
+            });
+        });
+
+        function demander() {
+            OneSignalDeferred.push(async function(OneSignal) {
+                await OneSignal.Notifications.requestPermission();
+                alert("Demande envoyée à Chrome !");
+            });
+        }
+    </script>
+</body>
+</html>
