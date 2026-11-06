@@ -441,6 +441,21 @@ function renderAdmin(){
  else if(tab==='orders'){
   b.innerHTML=orders().map(o=>'<div class="ctrl"><b style="color:gold">#'+esc(o.id)+'</b> • '+new Date(o.date).toLocaleString('fr-FR')+'<br>'+esc(o.name)+' • '+esc(o.phone)+' • '+esc(o.city)+'<br>'+(o.items||[]).map(i=>'• '+esc(i.name)+' x'+i.qty).join('<br>')+'<br><b>'+fmt(o.total)+' F</b><br><select class="input" style="margin:6px 0" onchange="setStatus(\''+o.id+'\',this.value)">'+STAT.map(s=>'<option '+(s===o.status?'selected':'')+'>'+s+'</option>').join('')+'</select><a class="mini" style="text-decoration:none" href="https://wa.me/'+String(o.phone).replace(/\D/g,'')+'" target="_blank">💬 WhatsApp</a> <button class="mini" style="color:#f44;border-color:#f44" onclick="delOrder(\''+o.id+'\')">🗑️</button></div>').join('')||'<p style="color:#888">Aucune commande</p>';
  }
+  else if(tab==='returns'){
+  const rets=Object.keys(S.returns||{}).map(k=>Object.assign({id:k},S.returns[k])).sort((a,b)=>b.date-a.date);
+  b.innerHTML=rets.length?rets.map(r=>{
+    let statColor=r.status==='valide'?'#25D366':r.status==='refuse'?'#f44':'gold';
+    return '<div class="ctrl" style="border-color:'+statColor+'"><b style="color:gold">Retour : '+esc(r.prodName)+'</b> • '+new Date(r.date).toLocaleDateString('fr-FR')+'<br>'+
+    '<span style="color:#ccc;font-size:13px">Raison : '+esc(r.raison)+'</span><br>'+
+    'Client : '+esc(r.nom)+' • '+esc(r.num)+'<br>'+
+    'Remboursement : <b>'+esc(r.pay)+'</b><br>'+
+    'Statut : <b style="color:'+statColor+'">'+esc(r.status||'nouveau')+'</b><br>'+
+    '<div style="display:flex;gap:6px;margin-top:8px">'+
+      '<button class="mini" style="flex:1;background:#25D366;color:#000;border:0" onclick="setRetStatus(\''+r.id+'\',\'valide\')">✅ Valider</button>'+
+      '<button class="mini" style="flex:1;background:#f44;color:#fff;border:0" onclick="setRetStatus(\''+r.id+'\',\'refuse\')">❌ Refuser</button>'+
+    '</div></div>';
+  }).join(''):'<p style="color:#888;text-align:center;padding:20px">Aucune demande de retour.</p>';
+  }
  else if(tab==='prods'){
   const e=(S.products||{})[editId]||{};
   b.innerHTML='<div class="ctrl"><h4 style="color:gold;margin-bottom:8px">'+(editId?'✏️ Modifier':'➕ Nouveau produit')+'</h4><input id="pName" class="input" placeholder="Nom" value="'+esc(e.name)+'"><input id="pPrice" class="input" type="number" placeholder="Prix (F)" value="'+esc(e.price)+'"><input id="pCat" class="input" placeholder="Catégorie (ex: Homme)" value="'+esc(e.cat)+'"><input type="file" accept="image/*" class="input" onchange="compress(this.files[0],600,d=>{tmpImg=d;$(\'pPrev\').src=d})"><img id="pPrev" src="'+safeImg(tmpImg||e.img)+'" style="width:80px;border-radius:8px;margin-bottom:8px"><button class="gold" onclick="saveProd()">✅ Enregistrer</button>'+(editId?'<button class="ghost" onclick="editId=\'\';tmpImg=\'\';renderAdmin()">Annuler</button>':'')+'</div>'+
