@@ -1295,7 +1295,10 @@ const _oldSaveProd = window.saveProd;
 window.saveProd = function(){ const r = _oldSaveProd ? _oldSaveProd.apply(this, arguments) : null; setTimeout(()=>{ let n = googleAutoUpdate(); if(window.toast) window.toast('✅ Publié + Google auto : '+n+' articles sur Google'); }, 500); return r; };
 console.log('✅ AUTO-GOOGLE activé : chaque article publié va sur Google');
 </script>
- 
+ </script>
+<script src="auto-google.js"></script>
+</body>
+</html>
 </body>
  </html>
 
