@@ -310,5 +310,6 @@ const showErr=m=>{app.innerHTML='<div class="card warn"><h2>Chargement impossibl
 const _t=setTimeout(()=>{if(app.textContent.trim()==='Chargement…')showErr('Le serveur ne répond pas (délai dépassé). Vérifiez les règles Firebase.')},10000);
 render().then(()=>clearTimeout(_t)).catch(e=>{clearTimeout(_t);showErr((e&&e.code?e.code+' : ':'')+(e&&e.message||e))});
 </script>
+  <script src="bouton-panier.js"></script>
   </body>
-</html>
+  </html>
