@@ -200,7 +200,13 @@ body.gated>*:not(#gate):not(script):not(style):not(link):not(meta){visibility:hi
 <h3 id="cartTotal" style="color:gold;margin:10px 0"></h3>
 <button class="gold" onclick="commander()">📲 Commander sur WhatsApp</button>
 </div>
-
+<!-- ========== PAGE MARQUES ========== -->
+<div id="brandPage" class="page">
+  <button class="mini" onclick="closeAll()">← Retour</button>
+  <h2 style="color:gold;margin:10px 0">🏷️ Toutes les marques</h2>
+  <p style="color:#aaa;font-size:13px;margin-bottom:10px">Choisis une marque pour filtrer les articles.</p>
+  <div id="brandGrid" class="grid" style="grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap:10px; padding:0;"></div>
+</div>
 <div id="profilePage" class="page">
 <button class="mini" onclick="closeAll()">← Retour</button>
 <h2 style="color:gold;margin:10px 0">👤 MON COMPTE</h2>
