@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BOUBA STOR | Livraison Abidjan</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#000;color:#fff;font-family:Arial,sans-serif;padding-bottom:95px}
+header{background:#000;border-bottom:2px solid #ffd700;padding:12px;text-align:center;position:sticky;top:0;z-index:60}
+header h1{color:#ffd700;font-size:26px}
+header small{color:#aaa;font-size:12px}
+.search{display:flex;gap:8px;padding:12px}
+.search input{flex:1;padding:12px;border-radius:25px;border:1px solid #ffd700;background:#111;color:#fff;font-size:16px}
+.search button{background:#ffd700;border:none;padding:0 16px;border-radius:20px;font-weight:bold}
+.badge-proof{background:#111;border:1px solid #333;padding:8px 12px;margin:0 12px;border-radius:20px;font-size:13px;text-align:center;color:#ffd700}
+h2{padding:12px;color:#ffd700;font-size:18px}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:0 12px 8px;scrollbar-width:none}
+.tabs button{white-space:nowrap;padding:9px 14px;border-radius:20px;border:1px solid #ffd700;background:#111;color:#fff}
+.tabs button.on{background:#ffd700;color:#000;font-weight:bold}
+.tabs2{display:flex;gap:8px;overflow-x:auto;padding:0 12px 12px}
+.tabs2 button{white-space:nowrap;padding:7px 12px;border-radius:20px;border:1px solid #555;background:#111;color:#ccc;font-size:13px}
+.tabs2 button.on{background:#fff;color:#000;font-weight:bold}
+.grid{display:flex;gap:12px;overflow-x:auto;padding:0 12px 12px;scroll-snap-type:x mandatory}
+.card{flex:0 0 84%;max-width:340px;background:#111;border:1px solid #ffd700;border-radius:16px;overflow:hidden;scroll-snap-align:start}
+.card img{width:100%;height:260px;object-fit:cover;display:block;background:#222}
+.card .info{padding:10px}
+.card .info b{font-size:17px;line-height:1.3;display:block}
+.card .price{color:#ffd700;font-size:19px;font-weight:bold;margin:6px 0}
+.row2{display:flex;gap:6px;margin-top:6px}
+.row2 button{flex:1;padding:8px;border-radius:8px;border:1px solid #444;background:#1c1c1c;color:#fff;font-size:12px}
+.btn{width:100%;padding:12px;border:none;border-radius:10px;font-size:15px;font-weight:bold;margin-top:8px;cursor:pointer}
+.btn-gold{background:#ffd700;color:#000}.btn-green{background:#25d366;color:#fff}.btn-dark{background:#222;color:#fff;border:1px solid #555}.btn-blue{background:#1877f2;color:#fff}.btn-black{background:#000;color:#fff;border:1px solid #555}
+.tag{font-size:12px;color:#aaa;margin-top:6px}
+.section{background:#111;margin:12px;border:1px solid #333;border-radius:14px;padding:12px}
+.section h3{color:#ffd700;margin-bottom:8px}
+.footer-links{display:flex;justify-content:center;gap:14px;padding:18px 12px 8px;color:#ffd700;font-size:14px}
+.footer-links a{color:#ffd700;text-decoration:none}
+.help-row{display:flex;gap:10px;padding:0 12px 18px}
+.help-row button{flex:1;padding:12px;border-radius:25px;border:none;font-weight:bold;font-size:15px}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#000;border-top:2px solid #ffd700;display:flex;justify-content:space-around;padding:8px 0;z-index:100}
+.nav a{color:#fff;text-decoration:none;text-align:center;font-size:11px;display:flex;flex-direction:column;gap:2px}
+.nav a span{font-size:20px}
+#toast{position:fixed;bottom:95px;left:50%;transform:translateX(-50%);background:#ffd700;color:#000;padding:10px 18px;border-radius:20px;font-weight:bold;display:none;z-index:300;max-width:90%;text-align:center}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;z-index:200;overflow-y:auto;padding:14px}
+.modal .box{background:#111;border:1px solid #ffd700;border-radius:16px;padding:14px;max-width:500px;margin:20px auto}
+.modal input,.modal select,.modal textarea{width:100%;padding:11px;margin:6px 0;border-radius:10px;border:1px solid #444;background:#000;color:#fff;font-size:15px}
+.modal label{font-size:13px;color:#ccc}
+.close{float:right;background:#333;color:#fff;border:none;padding:6px 10px;border-radius:50%}
+.chat-msgs{background:#000;border:1px solid #333;border-radius:10px;height:220px;overflow-y:auto;padding:8px;margin:8px 0}
+.chat-msgs div{margin:6px 0;padding:8px 10px;border-radius:12px;background:#1c1c1c;font-size:14px}
+.admin-prod{display:flex;gap:8px;align-items:center;background:#000;border:1px solid #333;border-radius:10px;padding:8px;margin:6px 0}
+.admin-prod img{width:50px;height:50px;object-fit:cover;border-radius:8px}
+.admin-prod button{padding:6px 8px;border-radius:8px;border:none}
+</style></head>
+<body>
+<header><h1>BOUBA STOR</h1><small>Livraison rapide à Abidjan • Wave / Orange Money</small></header>
+<div class="search"><input id="q" placeholder="🔍 Chercher un article..."><button onclick="toast('Langue FR / EN bientôt')">🌐 EN</button></div>
+<div class="badge-proof" id="proof">👀 23 personnes sur BOUBA STOR en ce moment</div>
+
+<div class="tabs" id="tabsCat">
+<button class="on" onclick="setCat('all',this)">🌍 Toutes</button>
+<button onclick="setCat('Vêtements',this)">👗 Vêtements</button>
+<button onclick="setCat('Maillots',this)">⚽ Maillots</button>
+<button onclick="setCat('Chaussures',this)">👟 Chaussures</button>
+<button onclick="setCat('Électrique',this)">📱 Électrique</button>
+<button onclick="setCat('Sacs',this)">👜 Sacs</button>
+<button onclick="setCat('Beauté',this)">💄 Beauté</button>
+<button onclick="setCat('Montres',this)">⌚ Montres</button>
+<button onclick="setCat('Maison',this)">🏠 Maison</button>
+</div>
+<div class="tabs2" id="tabsBrand">
+<button class="on" onclick="setBrand('all',this)">Toutes marques</button>
+<button onclick="setBrand('Nike',this)">Nike</button><button onclick="setBrand('Adidas',this)">Adidas</button><button onclick="setBrand('Zara',this)">Zara</button><button onclick="setBrand('Shein',this)">Shein</button><button onclick="setBrand('Jordan',this)">Jordan</button><button onclick="setBrand('Yeezy',this)">Yeezy</button><button onclick="setBrand('Crocs',this)">Crocs</button><button onclick="setBrand('iPhone',this)">iPhone</button><button onclick="setBrand('Samsung',this)">Samsung</button><button onclick="setBrand('JBL',this)">JBL</button><button onclick="setBrand('Real Madrid',this)">Real Madrid</button><button onclick="setBrand('Barça',this)">Barça</button><button onclick="setBrand('PSG',this)">PSG</button><button onclick="setBrand('Côte d’Ivoire',this)">Côte d’Ivoire</button>
+</div>
+
+<h2>🛍️ Boutiques <span id="nbBout" style="font-size:13px;color:#fff"></span></h2>
+<div class="grid" id="grid"></div>
+
+<div class="section">
+<h3>⭐ Ce que disent nos clients</h3>
+<p style="font-size:14px;color:#ccc">⭐⭐⭐⭐⭐ “Livraison très rapide à Abidjan, merci BOUBA STOR !” — Mariam, Yopougon</p>
+<p style="font-size:14px;color:#ccc;margin-top:6px">⭐⭐⭐⭐⭐ “Article conforme à la photo, je recommande.” — Yao, Cocody</p>
+</div>
+
+<div class="section">
+<h3>🔥 Partage & Gagne 1000F</h3>
+<p style="font-size:14px;color:#ccc">Partage ton lien, ton ami a -10%, toi tu gagnes <b style="color:#ffd700">1000F</b>.</p>
+<button class="btn btn-gold" onclick="openShare()">🔥 Partage & Gagne 1000F</button>
+<button class="btn btn-dark" onclick="copyRef()">🔗 Copier mon lien parrainage</button>
+</div>
+
+<div class="footer-links"><a href="#" onclick="openModal('apropos');return false">À Propos</a><span>|</span><a href="#" onclick="openChat();return false">Contact</a><span>|</span><a href="#" onclick="openModal('conf');return false">Confidentialité</a></div>
+<div class="help-row"><button style="background:#ffd700;color:#000" onclick="openModal('conseils')">💡 Conseils</button><button style="background:#25d366;color:#fff" onclick="openChat()">💬 Aide</button></div>
+
+<nav class="nav">
+<a href="index.html"><span>🏠</span>Accueil</a>
+<a href="#" onclick="openPanier();return false"><span>🛒</span>Panier <b id="nbPanier"></b></a>
+<a href="#" onclick="openModal('vibes');return false"><span>🎬</span>Vibes</a>
+<a href="#" onclick="openModal('stars');return false"><span>⭐</span>Stars</a>
+<a href="#" onclick="openChat();return false"><span>💬</span>Chat</a>
+<a href="#" onclick="openModal('videos');return false"><span>📺</span>Vidéos</a>
+<a href="#" onclick="openAdmin();return false"><span>⚙️</span>Contrôle</a>
+</nav>
+<div id="toast"></div>
+
+<!-- MODAL PANIER / PAIEMENT -->
+<div class="modal" id="mPanier"><div class="box"><button class="close" onclick="closeModal('mPanier')">X</button><h3 style="color:#ffd700">🛒 Mon Panier</h3><div id="panierList"></div><div id="panierTotal" style="margin:8px 0;font-weight:bold;color:#ffd700"></div><button class="btn btn-gold" onclick="openPaiement()">💳 Payer - Wave / Orange Money</button></div></div>
+
+<!-- MODAL PAIEMENT -->
+<div class="modal" id="mPay"><div class="box"><button class="close" onclick="closeModal('mPay')">X</button><h3 style="color:#ffd700">💳 Paiement</h3><p style="font-size:14px">Envoie le total à ce numéro :</p><div style="background:#000;padding:12px;border-radius:10px;text-align:center;font-size:20px;font-weight:bold;color:#ffd700;margin:8px 0">+225 07 87 61 97 17</div><button class="btn btn-dark" onclick="navigator.clipboard.writeText('0787619717');toast('📋 Numéro copié')">📋 Copier le numéro</button><div style="display:flex;gap:8px;margin:8px 0"><button class="btn btn-gold" id="btnWave" onclick="setPay('Wave')">Wave (recommandé)</button><button class="btn btn-dark" id="btnOM" onclick="setPay('Orange Money')">Orange Money</button></div><input id="payNom" placeholder="Ton Nom"><input id="payNum" placeholder="Numéro qui a payé"><input id="payId" placeholder="ID transaction Wave / OM"><div id="payRecap" style="font-size:14px;color:#ccc"></div><button class="btn btn-green" onclick="confirmerPaiement()">✅ J'ai payé - Confirmer</button><p style="font-size:12px;color:#aaa;margin-top:8px">Pas via WhatsApp. Ta commande part dans le chat interne de l'app.</p></div></div>
+
+<!-- MODAL RETOUR -->
+<div class="modal" id="mRetour"><div class="box"><button class="close" onclick="closeModal('mRetour')">X</button><h3 style="color:#ffd700">↩️ Retourner cet article</h3><p style="font-size:13px;color:#ccc">Coche les 7 conditions :</p><div id="conds" style="font-size:13px;line-height:1.8"></div><input id="retRaison" placeholder="Pourquoi tu retournes ? (obligatoire)"><input id="retNom" placeholder="Nom pour remboursement"><input id="retNum" placeholder="Numéro remboursement"><select id="retPay"><option>Wave</option><option>Orange Money</option></select><button class="btn btn-gold" onclick="envoyerRetour()">📩 Envoyer demande de retour</button></div></div>
+
+<!-- MODAL PARTAGE -->
+<div class="modal" id="mShare"><div class="box"><button class="close" onclick="closeModal('mShare')">X</button><h3 style="color:#ffd700">🔥 Partage & Gagne 1000F</h3><p id="shareText" style="font-size:14px;background:#000;padding:10px;border-radius:10px"></p><button class="btn btn-green" onclick="shareWA()">💬 WhatsApp</button><button class="btn btn-blue" onclick="shareFB()">📘 Facebook</button><button class="btn btn-dark" onclick="copyRef()">🔗 Copier le lien</button></div></div>
+
+<!-- MODAL CHAT -->
+<div class="modal" id="mChat"><div class="box"><button class="close" onclick="closeModal('mChat')">X</button><h3 style="color:#ffd700">💬 Chat - Admin BOUBA STOR <span style="color:#25d366;font-size:12px">● En ligne</span></h3><div class="chat-msgs" id="chatMsgs"></div><div style="display:flex;gap:6px"><input id="chatInput" placeholder="Écris ton message..." style="flex:1"><button style="background:#ffd700;border:none;padding:0 14px;border-radius:10px;font-weight:bold" onclick="sendChat()">✈️</button></div><div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-dark" style="flex:1" onclick="openCall()">📞 Appel vocal</button><button class="btn btn-dark" style="flex:1" onclick="openCall()">📹 Appel vidéo</button></div></div></div>
+
+<!-- MODAL APPEL -->
+<div class="modal" id="mCall"><div class="box" style="text-align:center"><button class="close" onclick="closeModal('mCall')">X</button><h3>📞 Appel en cours...</h3><div style="font-size:60px;margin:14px">👤</div><p>Admin BOUBA STOR</p><p id="callTimer" style="color:#ffd700">00:00</p><button class="btn btn-green" onclick="toast('✅ Appel connecté')">✅ Décrocher</button><button class="btn" style="background:red;color:#fff" onclick="closeModal('mCall');toast('📞 Appel terminé')">❌ Raccrocher</button></div></div>
+
+<!-- MODAL ADMIN -->
+<div class="modal" id="mAdmin"><div class="box"><button class="close" onclick="closeModal('mAdmin')">X</button><h3 style="color:#ffd700">⚙️ CONTRÔLE TOTAL</h3><p style="font-size:13px;color:#ccc">Ajouter / Publier / Supprimer</p><input type="file" id="fPhoto" accept="image/*"><img id="imgPrev" style="width:100%;border-radius:10px;display:none;margin:6px 0"><input id="fNom" placeholder="Nom article ex: Djine styline / xxl / bleu"><input id="fPrix" type="number" placeholder="Prix ex: 8000"><select id="fCat"><option>Vêtements</option><option>Maillots</option><option>Chaussures</option><option>Électrique</option><option>Sacs</option><option>Beauté</option><option>Montres</option><option>Maison</option></select><select id="fBrand"><option>Nike</option><option>Adidas</option><option>Zara</option><option>Shein</option><option>Jordan</option><option>Yeezy</option><option>Crocs</option><option>iPhone</option><option>Samsung</option><option>JBL</option><option>Real Madrid</option><option>Barça</option><option>PSG</option><option>Côte d’Ivoire</option><option>Autre</option></select><button class="btn btn-gold" onclick="saveProd()">✅ Enregistrer / Publier</button><button class="btn btn-dark" onclick="delDoublons()">🧹 Supprimer doublons</button><div id="adminList"></div><div style="font-size:12px;color:#aaa;margin-top:10px">Commandes: <span id="nbCmd">0</span> • Retours: <span id="nbRet">0</span> • Panier: <span id="nbPanier2">0</span></div></div></div>
+
+<!-- MODALS SIMPLES -->
+<div class="modal" id="apropos"><div class="box"><button class="close" onclick="closeModal('apropos')">X</button><h3>À Propos</h3><p>BOUBA STOR - Boutique à Abidjan. Livraison rapide, paiement Wave / Orange Money au 07 87 61 97 17.</p></div></div>
+<div class="modal" id="conf"><div class="box"><button class="close" onclick="closeModal('conf')">X</button><h3>Confidentialité</h3><p>Tes infos restent dans ton téléphone. Pas de partage.</p></div></div>
+<div class="modal" id="conseils"><div class="box"><button class="close" onclick="closeModal('conseils')">X</button><h3>💡 Conseils</h3><p>• Vérifie ta taille avant de commander<br>• Paie par Wave / OM au 07 87 61 97 17<br>• Garde ton ID transaction<br>• Retour sous 7 jours si non porté, étiquettes intactes</p></div></div>
+<div class="modal" id="vibes"><div class="box"><button class="close" onclick="closeModal('vibes')">X</button><h3>🎬 Vibes</h3><p>Nouveautés en vidéo bientôt. Reste branché.</p></div></div>
+<div class="modal" id="stars"><div class="box"><button class="close" onclick="closeModal('stars')">X</button><h3>⭐ Stars</h3><p>Points Stars : 500F par partage. Partage et gagne.</p><button class="btn btn-gold" onclick="openShare()">🔥 Gagner des Stars</button></div></div>
+<div class="modal" id="videos"><div class="box"><button class="close" onclick="closeModal('videos')">X</button><h3>📺 Vidéos</h3><p>Les vidéos produits arrivent ici.</p></div></div>
+
+<script>
+let PRODS=[]; let CAT='all'; let BRAND='all'; let PAY='Wave'; let TMPIMG=''; let EDITID=''; let RETOUR_ID='';
+let CONDS=["1) Non porté, non lavé, étiquettes intactes","2) Retour ≤7 jours après livraison","3) Emballage d'origine intact","4) Preuve d'achat Wave / OM","5) Non endommagé par le client","6) Beauté non ouvert","7) Remboursement après vérification admin (24h)"];
+function toast(m){let t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2500)}
+function openModal(id){document.getElementById(id).style.display='block'}
+function closeModal(id){document.getElementById(id).style.display='none'}
+function getProds(){try{let l=JSON.parse(localStorage.getItem('b_products')||'[]');return Array.isArray(l)?l:[]}catch(e){return[]}}
+function saveProds(){localStorage.setItem('b_products',JSON.stringify(PRODS))}
+function load(){
+  PRODS=getProds();
+  if(!PRODS.length){
+    PRODS=[
+      {id:'1',name:'Ensemble / homme / XL / Orange',price:9000,cat:'Vêtements',brand:'Zara',img:'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=600&q=80',publie:true},
+      {id:'2',name:'Ensemble 2 pièce / 3XL / blanc noir',price:8000,cat:'Vêtements',brand:'Shein',img:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80',publie:true},
+      {id:'3',name:'Robe longue',price:10000,cat:'Vêtements',brand:'Zara',img:'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600&q=80',publie:true},
+      {id:'4',name:'Maillot Real Madrid',price:12000,cat:'Maillots',brand:'Real Madrid',img:'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=600&q=80',publie:true},
+      {id:'5',name:'Nike Air - Chaussures',price:25000,cat:'Chaussures',brand:'Nike',img:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80',publie:true},
+      {id:'6',name:'iPhone 13',price:250000,cat:'Électrique',brand:'iPhone',img:'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=600&q=80',publie:true}
+    ]; saveProds();
+  }
+  render(); renderChat();
+}
+function setCat(c,btn){CAT=c;document.querySelectorAll('#tabsCat button').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');render()}
+function setBrand(b,btn){BRAND=b;document.querySelectorAll('#tabsBrand button').forEach(x=>x.classList.remove('on'));if(btn)btn.classList.add('on');render()}
+function render(){
+  let q=(document.getElementById('q').value||'').toLowerCase();
+  let list=PRODS.filter(p=>p.publie!==false && (CAT==='all'||p.cat===CAT) && (BRAND==='all'||p.brand===BRAND) && (p.name||'').toLowerCase().includes(q));
+  document.getElementById('nbBout').textContent='('+list.length+')';
+  let g=document.getElementById('grid');
+  if(!list.length){g.innerHTML='<div style="padding:20px;color:#aaa">Aucun article dans cet onglet.<br>Ajoute un article dans Contrôle.</div>';return}
+  g.innerHTML=list.map(p=>`
+  <div class="card">
+    <img src="${p.img||''}" onerror="this.src='https://via.placeholder.com/600x600?text=BOUBA+STOR'">
+    <div class="info"><b>${p.name}</b><div class="price">${Number(p.price).toLocaleString('fr-FR')} F</div>
+    <div class="row2"><button onclick="toast('📦 Offre : -10% si tu partages')">🏷️ Offre</button><button onclick="openShare()">🎁 Offrir</button></div>
+    <div class="row2"><button onclick="toast('Taille : demande dans le chat')">📏 Taille</button><button onclick="toast('👔 Complétez le look : voir les articles assortis')">👔 Complétez le look</button></div>
+    <div class="row2"><button onclick="openCall()">📞</button><button onclick="openChat()">💬 Discuter</button><button onclick="openChat()">✉️</button></div>
+    <div class="row2"><button onclick="openChat()">🤖 Discuter avec IA</button><button onclick="shareFB()">📘 Facebook</button></div>
+    <div class="row2"><button onclick="toast('Telegram bientôt')">✈️ Telegram</button><button onclick="toast('X bientôt')">𝕏 X</button></div>
+    <button class="btn btn-gold" onclick="ajouter('${p.id}')">🛒 Ajouter au panier</button>
+    <button class="btn btn-green" onclick="openShare('${p.id}')">🔥 Partage & Gagne 1000F</button>
+    <button class="btn btn-dark" onclick="partager('${p.id}')">📤 Partager</button>
+    <div class="tag">${(p.cat||'').toLowerCase()} • ${p.brand||''}</div>
+    <button class="btn btn-dark" onclick="openRetour('${p.id}')">↩️ Retourner cet article</button>
+    </div>
+  </div>`).join('');
+  let cart=JSON.parse(localStorage.getItem('b_cart')||'[]');document.getElementById('nbPanier').textContent=cart.length?'('+cart.length+')':'';
+}
+function ajouter(id){let p=PRODS.find(x=>x.id==id);let c=JSON.parse(localStorage.getItem('b_cart')||'[]');c.push(p);localStorage.setItem('b_cart',JSON.stringify(c));toast('✅ Ajouté !');if(navigator.vibrate)navigator.vibrate(80);render()}
+function partager(id){let p=PRODS.find(x=>x.id==id);let t=`${p.name} - ${p.price}F sur BOUBA STOR -10% avec mon lien`;if(navigator.share)navigator.share({text:t});else{navigator.clipboard.writeText(t);toast('🔗 Lien copié')}}
+function openShare(id){let p=id?PRODS.find(x=>x.id==id):PRODS[0];let ref='?ref=BOUBA';document.getElementById('shareText').textContent=`${p?p.name+' - '+p.price+'F':''} sur BOUBA STOR -10% avec mon lien https://bouba-stor.vercel.app/${ref}`;openModal('mShare')}
+function shareWA(){let t=document.getElementById('shareText').textContent;window.open('https://wa.me/?text='+encodeURIComponent(t));toast('✅ Partage WhatsApp')}
+function shareFB(){let t=document.getElementById('shareText').textContent;window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent('https://bouba-stor.vercel.app/'));toast('✅ Partage Facebook')}
+function copyRef(){let link='https://bouba-stor.vercel.app/?ref=BOUBA';navigator.clipboard.writeText(link);toast('🔗 Lien parrainage copié : '+link)}
+function openPanier(){let c=JSON.parse(localStorage.getItem('b_cart')||'[]');let el=document.getElementById('panierList');if(!c.length){el.innerHTML='Panier vide';document.getElementById('panierTotal').textContent='';}else{el.innerHTML=c.map((p,i)=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #333"><span>${p.name}</span><b>${Number(p.price).toLocaleString('fr-FR')}F <button onclick="delCart(${i})" style="background:red;color:#fff;border:none;padding:4px 8px;border-radius:6px">X</button></b></div>`).join('');let tot=c.reduce((s,x)=>s+Number(x.price||0),0);document.getElementById('panierTotal').textContent='Total : '+tot.toLocaleString('fr-FR')+' F';}openModal('mPanier')}
+function delCart(i){let c=JSON.parse(localStorage.getItem('b_cart')||'[]');c.splice(i,1);localStorage.setItem('b_cart',JSON.stringify(c));openPanier();render()}
+function openPaiement(){let c=JSON.parse(localStorage.getItem('b_cart')||'[]');if(!c.length){toast('Panier vide');return}let tot=c.reduce((s,x)=>s+Number(x.price||0),0);document.getElementById('payRecap').textContent='Total à payer : '+tot.toLocaleString('fr-FR')+' F | Paiement : '+PAY;closeModal('mPanier');openModal('mPay')}
+function setPay(m){PAY=m;document.getElementById('btnWave').style.background=m==='Wave'?'#ffd700':'#222';document.getElementById('btnOM').style.background=m==='Orange Money'?'#ffd700':'#222';let c=JSON.parse(localStorage.getItem('b_cart')||'[]');let tot=c.reduce((s,x)=>s+Number(x.price||0),0);document.getElementById('payRecap').textContent='Total : '+tot.toLocaleString('fr-FR')+' F | '+PAY}
+function confirmerPaiement(){let nom=document.getElementById('payNom').value.trim();let num=document.getElementById('payNum').value.trim();let id=document.getElementById('payId').value.trim();if(!nom||!num||!id){toast('❌ Remplis Nom / Numéro / ID transaction');return}let c=JSON.parse(localStorage.getItem('b_cart')||'[]');let tot=c.reduce((s,x)=>s+Number(x.price||0),0);let cmdId='CMD'+Date.now();let cmd={id:cmdId,nom, num, payId:id, pay:PAY, total:tot, items:c, date:Date.now()};let cmds=JSON.parse(localStorage.getItem('b_commandes')||'[]');cmds.push(cmd);localStorage.setItem('b_commandes',JSON.stringify(cmds));localStorage.setItem('b_cart','[]');addChat('💳 NOUVELLE COMMANDE PAYÉE ID: '+cmdId+' | '+nom+' | '+tot.toLocaleString('fr-FR')+'F | '+PAY+' | ID: '+id);closeModal('mPay');toast('✅ Commande '+cmdId+' envoyée dans le chat !');render()}
+function openRetour(id){RETOUR_ID=id;document.getElementById('conds').innerHTML=CONDS.map((c,i)=>`<label><input type="checkbox" id="cond${i}"> ${c}</label><br>`).join('');openModal('mRetour')}
+function envoyerRetour(){for(let i=0;i<7;i++){if(!document.getElementById('cond'+i).checked){toast('❌ Coche les 7 conditions');return}}let raison=document.getElementById('retRaison').value.trim();if(!raison){toast('❌ Dis pourquoi tu retournes');return}let nom=document.getElementById('retNom').value.trim();let num=document.getElementById('retNum').value.trim();if(!nom||!num){toast('❌ Nom + numéro remboursement obligatoires');return}let p=PRODS.find(x=>x.id==RETOUR_ID);let rets=JSON.parse(localStorage.getItem('b_retours')||'[]');rets.push({prod:p?p.name:'',raison,nom,num,pay:document.getElementById('retPay').value,date:Date.now()});localStorage.setItem('b_retours',JSON.stringify(rets));addChat('↩️ NOUVEAU RETOUR : '+(p?p.name:'')+' | Pourquoi : '+raison+' | Remboursement '+document.getElementById('retPay').value+' à '+num);closeModal('mRetour');toast('✅ Demande de retour envoyée - Admin répond en 24h')}
+function openChat(){renderChat();openModal('mChat')}
+function renderChat(){let msgs=JSON.parse(localStorage.getItem('b_chat')||'[]');if(!msgs.length){msgs=[{t:'Bonjour 👋 Bienvenue sur BOUBA STOR, comment je peux aider ?',me:false}];localStorage.setItem('b_chat',JSON.stringify(msgs))}document.getElementById('chatMsgs').innerHTML=msgs.map(m=>`<div>${m.t}</div>`).join('')}
+function addChat(txt){let msgs=JSON.parse(localStorage.getItem('b_chat')||'[]');msgs.push({t:txt,me:true});localStorage.setItem('b_chat',JSON.stringify(msgs));renderChat()}
+function sendChat(){let inp=document.getElementById('chatInput');let v=inp.value.trim();if(!v)return;addChat('Moi : '+v);inp.value='';setTimeout(()=>{addChat('Admin : Merci, je te réponds vite 🙏');},800)}
+function openCall(){openModal('mCall');let s=0;let iv=setInterval(()=>{s++;let m=String(Math.floor(s/60)).padStart(2,'0');let ss=String(s%60).padStart(2,'0');let el=document.getElementById('callTimer');if(el)el.textContent=m+':'+ss;if(!document.getElementById('mCall').style.display||document.getElementById('mCall').style.display==='none'){clearInterval(iv)}},1000)}
+function openAdmin(){renderAdmin();openModal('mAdmin')}
+function renderAdmin(){let el=document.getElementById('adminList');el.innerHTML=PRODS.map(p=>`<div class="admin-prod"><img src="${p.img}"><div style="flex:1"><b style="font-size:13px">${p.name}</b><br><span style="color:#ffd700">${Number(p.price).toLocaleString('fr-FR')}F</span> • ${p.publie===false?'❌ NON PUBLIÉ':'✅ PUBLIÉ'}</div><button style="background:#ffd700" onclick="togglePub('${p.id}')">✅/❌</button><button style="background:red;color:#fff" onclick="delProd('${p.id}')">🗑️</button></div>`).join('');document.getElementById('nbCmd').textContent=JSON.parse(localStorage.getItem('b_commandes')||'[]').length;document.getElementById('nbRet').textContent=JSON.parse(localStorage.getItem('b_retours')||'[]').length;document.getElementById('nbPanier2').textContent=JSON.parse(localStorage.getItem('b_cart')||'[]').length}
+function togglePub(id){let p=PRODS.find(x=>x.id==id);p.publie=p.publie===false?true:false;saveProds();renderAdmin();render();toast(p.publie?'✅ PUBLIÉ en haut':'❌ NON PUBLIÉ')}
+function delProd(id){if(!confirm('Supprimer cet article ?'))return;PRODS=PRODS.filter(x=>x.id!=id);saveProds();renderAdmin();render();toast('🗑️ Article supprimé')}
+function delDoublons(){let seen={};let avant=PRODS.length;PRODS=PRODS.filter(p=>{let k=(p.name||'')+'|'+p.price;if(seen[k])return false;seen[k]=1;return true});saveProds();renderAdmin();render();toast('🧹 '+(avant-PRODS.length)+' doublons supprimés')}
+function saveProd(){let nom=document.getElementById('fNom').value.trim();let prix=Number(document.getElementById('fPrix').value);if(!nom||!prix){toast('❌ Nom et prix obligatoires');return}let img=TMPIMG||document.getElementById('imgPrev').src;if(!img||!img.startsWith('data:image')){if(EDITID){let old=PRODS.find(x=>x.id==EDITID);img=old?old.img:''}if(!img){toast('❌ Photo obligatoire');return}}let id=EDITID||'prod_'+Date.now();let ex=PRODS.find(x=>x.id==id);let data={id,name:nom,price:prix,cat:document.getElementById('fCat').value,brand:document.getElementById('fBrand').value,img,publie:true};if(ex)Object.assign(ex,data);else PRODS.unshift(data);saveProds();TMPIMG='';EDITID='';document.getElementById('fNom').value='';document.getElementById('fPrix').value='';document.getElementById('imgPrev').style.display='none';renderAdmin();render();toast('✅ Article PUBLIÉ ! Visible en haut page d’accueil')}
+document.getElementById('fPhoto').addEventListener('change',function(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=function(ev){let img=new Image();img.onload=function(){let c=document.createElement('canvas');let k=Math.min(1,800/Math.max(img.width,img.height));c.width=img.width*k;c.height=img.height*k;c.getContext('2d').drawImage(img,0,0,c.width,c.height);TMPIMG=c.toDataURL('image/jpeg',0.7);let pv=document.getElementById('imgPrev');pv.src=TMPIMG;pv.style.display='block';toast('✅ Photo chargée')};img.src=ev.target.result};r.readAsDataURL(f)});
+document.getElementById('q').addEventListener('input',render);
+setInterval(()=>{let n=18+Math.floor(Math.random()*20);let el=document.getElementById('proof');if(el)el.textContent='👀 '+n+' personnes sur BOUBA STOR en ce moment';},10000);
+load();
+</script>
+</body></html>
