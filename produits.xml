@@ -1,20 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">
-  <channel>
-    <title>BOuba STOR</title>
-    <link>https://bouba-stor.vercel.app/</link>
-    <description>Boutique en ligne de vêtements et accessoires</description>
-    
-    <item>
-      <g:id>mv03d7488j78k</g:id>
-      <g:title>Ensemble femme</g:title>
-      <g:description>Blanc / vert / xxl 3xl</g:description>
-      <g:link>https://bouba-stor.vercel.app/</g:link>
-      <g:image_link>https://bouba-stor.vercel.app/icon-512.png</g:image_link>
-      <g:price>8000 XOF</g:price>
-      <g:availability>in stock</g:availability>
-      <g:condition>new</g:condition>
-    </item>
-
-  </channel>
+<channel>
+<title>BOUBA STOR</title>
+<link>https://bouba-stor.vercel.app/</link>
+<description>BOUBA STOR - Boutique en ligne à Abidjan. Vêtements, Maillots, Chaussures, Électrique. Livraison 24H. Paiement Wave / Orange Money.</description>
+<item>
+<g:id>mv03d7488j78k</g:id>
+<g:title>Ensemble femme - Blanc / vert / xxl 3xl - BOUBA STOR</g:title>
+<g:description>Ensemble femme Blanc / vert / xxl 3xl. Livraison 24H à Abidjan. Paiement Wave / Orange Money.</g:description>
+<g:link>https://bouba-stor.vercel.app/</g:link>
+<g:image_link>https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600&amp;q=80</g:image_link>
+<g:price>8000 XOF</g:price>
+<g:availability>in_stock</g:availability>
+<g:condition>new</g:condition>
+<g:brand>BOUBA STOR</g:brand>
+<g:product_type>Vêtements</g:product_type>
+</item>
+<item>
+<g:id>1</g:id>
+<g:title>Ensemble homme XL Orange - BOUBA STOR</g:title>
+<g:description>Ensemble homme XL Orange. Livraison 24H à Abidjan.</g:description>
+<g:link>https://bouba-stor.vercel.app/</g:link>
+<g:image_link>https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=600&amp;q=80</g:image_link>
+<g:price>9000 XOF</g:price>
+<g:availability>in_stock</g:availability>
+<g:condition>new</g:condition>
+<g:brand>BOUBA STOR</g:brand>
+<g:product_type>Vêtements</g:product_type>
+</item>
+<item>
+<g:id>2</g:id>
+<g:title>Ensemble 2 pièce 3XL blanc noir - BOUBA STOR</g:title>
+<g:description>Ensemble 2 pièces 3XL blanc noir. Livraison 24H à Abidjan.</g:description>
+<g:link>https://bouba-stor.vercel.app/</g:link>
+<g:image_link>https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&amp;q=80</g:image_link>
+<g:price>8000 XOF</g:price>
+<g:availability>in_stock</g:availability>
+<g:condition>new</g:condition>
+<g:brand>BOUBA STOR</g:brand>
+<g:product_type>Vêtements</g:product_type>
+</item>
+<item>
+<g:id>3</g:id>
+<g:title>Robe longue - BOUBA STOR</g:title>
+<g:description>Robe longue élégante. Livraison 24H à Abidjan.</g:description>
+<g:link>https://bouba-stor.vercel.app/</g:link>
+<g:image_link>https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600&amp;q=80</g:image_link>
+<g:price>10000 XOF</g:price>
+<g:availability>in_stock</g:availability>
+<g:condition>new</g:condition>
+<g:brand>BOUBA STOR</g:brand>
+<g:product_type>Vêtements</g:product_type>
+</item>
+<item>
+<g:id>4</g:id>
+<g:title>Maillot Real Madrid - BOUBA STOR</g:title>
+<g:description>Maillot Real Madrid. Livraison 24H à Abidjan.</g:description>
+<g:link>https://bouba-stor.vercel.app/</g:link>
+<g:image_link>https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=600&amp;q=80</g:image_link>
+<g:price>12000 XOF</g:price>
+<g:availability>in_stock</g:availability>
+<g:condition>new</g:condition>
+<g:brand>Real Madrid</g:brand>
+<g:product_type>Maillots</g:product_type>
+</item>
+<item>
+<g:id>5</g:id>
+<g:title>Nike Air Chaussures - BOUBA STOR</g:title>
+<g:description>Nike Air Chaussures. Livraison 24H à Abidjan.</g:description>
+<g:link>https://bouba-stor.vercel.app/</g:link>
+<g:image_link>https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&amp;q=80</g:image_link>
+<g:price>25000 XOF</g:price>
+<g:availability>in_stock</g:availability>
+<g:condition>new</g:condition>
+<g:brand>Nike</g:brand>
+<g:product_type>Chaussures</g:product_type>
+</item>
+</channel>
 </rss>
