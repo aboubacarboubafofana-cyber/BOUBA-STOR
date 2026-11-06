@@ -1347,6 +1347,35 @@ onValue(reviewsRef, (snapshot) => {
     });
 });
  </script>
+ <script>
+// Remplit la page "Marques" avec les marques disponibles
+function renderBrandsPage() {
+  const usedBrands = [...new Set(prods().map(p => p.brand).filter(Boolean))];
+  const allBrands = [...new Set([...BRANDS_PRESET, ...usedBrands])];
+  const grid = document.getElementById('brandGrid');
+  
+  if (!grid) return;
+  
+  grid.innerHTML = ['all', ...allBrands].map(b => {
+    const isActive = (b === brand);
+    return `
+      <div class="card" style="padding:20px 10px; text-align:center; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-direction:column; background:${isActive ? 'gold' : '#111'}; color:${isActive ? '#000' : '#fff'}; border-color:${isActive ? 'gold' : '#333'};" 
+           onclick="selectBrand('${esc(b)}')">
+        <span style="font-size:24px; margin-bottom:5px;">${b === 'all' ? '🌍' : '🏷️'}</span>
+        <b style="font-size:14px; line-height:1.2;">${b === 'all' ? 'Toutes les marques' : esc(b)}</b>
+      </div>
+    `;
+  }).join('');
+}
+
+// Quand on clique sur une marque
+function selectBrand(b) {
+  brand = b;
+  closeAll(); // Ferme la page marques
+  renderStore(); // Met à jour l'accueil avec le filtre
+  toast('Filtre appliqué : ' + (b === 'all' ? 'Toutes les marques' : b));
+}
+ </script>
 </body>
 </html>
 
