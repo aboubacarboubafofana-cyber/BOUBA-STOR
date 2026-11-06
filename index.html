@@ -1347,34 +1347,61 @@ onValue(reviewsRef, (snapshot) => {
     });
 });
  </script>
- <script>
-// Remplit la page "Marques" avec les marques disponibles
+<script>
 function renderBrandsPage() {
-  const usedBrands = [...new Set(prods().map(p => p.brand).filter(Boolean))];
-  const allBrands = [...new Set([...BRANDS_PRESET, ...usedBrands])];
   const grid = document.getElementById('brandGrid');
-  
   if (!grid) return;
-  
-  grid.innerHTML = ['all', ...allBrands].map(b => {
-    const isActive = (b === brand);
-    return `
-      <div class="card" style="padding:20px 10px; text-align:center; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-direction:column; background:${isActive ? 'gold' : '#111'}; color:${isActive ? '#000' : '#fff'}; border-color:${isActive ? 'gold' : '#333'};" 
-           onclick="selectBrand('${esc(b)}')">
-        <span style="font-size:24px; margin-bottom:5px;">${b === 'all' ? '🌍' : '🏷️'}</span>
-        <b style="font-size:14px; line-height:1.2;">${b === 'all' ? 'Toutes les marques' : esc(b)}</b>
-      </div>
-    `;
-  }).join('');
+
+  try {
+    let brands = [];
+    if (typeof prods === 'function') {
+      brands = [...new Set(prods().map(p => p.brand).filter(Boolean))];
+    }
+    
+    // Si aucune marque n'est trouvée, on affiche cette liste par défaut
+    if (brands.length === 0) {
+      brands = ['Nike', 'Adidas', 'Zara', 'Shein', 'LV', 'Gucci', 'Dior', 'Jordan', 'PSG', 'Real Madrid', 'Côte d\'Ivoire'];
+    }
+
+    const currentBrand = (typeof brand !== 'undefined') ? brand : 'all';
+    let html = '';
+    const allBrands = ['all', ...brands];
+    
+    for (let i = 0; i < allBrands.length; i++) {
+      let b = allBrands[i];
+      const isActive = (b === currentBrand);
+      const bgColor = isActive ? 'gold' : '#111';
+      const txtColor = isActive ? '#000' : '#fff';
+      const borderColor = isActive ? 'gold' : '#333';
+      const label = (b === 'all') ? 'Toutes les marques' : b;
+      const icon = (b === 'all') ? '🌍' : '🏷️';
+      const safeB = b.replace(/'/g, "\\'"); 
+
+      html += '<div class="card" style="padding:20px 10px; text-align:center; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-direction:column; background:' + bgColor + '; color:' + txtColor + '; border-color:' + borderColor + ';" onclick="selectBrand(\'' + safeB + '\')">' +
+              '<span style="font-size:24px; margin-bottom:5px;">' + icon + '</span>' +
+              '<b style="font-size:14px; line-height:1.2;">' + label + '</b>' +
+              '</div>';
+    }
+    
+    grid.innerHTML = html;
+  } catch (e) {
+    grid.innerHTML = '<p style="color:red;padding:20px;text-align:center;">Erreur : ' + e.message + '</p>';
+  }
 }
 
-// Quand on clique sur une marque
 function selectBrand(b) {
-  brand = b;
-  closeAll(); // Ferme la page marques
-  renderStore(); // Met à jour l'accueil avec le filtre
-  toast('Filtre appliqué : ' + (b === 'all' ? 'Toutes les marques' : b));
+  if (typeof brand !== 'undefined') {
+    brand = b;
+  }
+  closeAll();
+  if (typeof renderStore === 'function') {
+    renderStore();
+  }
+  if (typeof toast === 'function') {
+    toast('Filtre appliqué : ' + (b === 'all' ? 'Toutes les marques' : b));
+  }
 }
+</script>
  </script>
 </body>
 </html>
