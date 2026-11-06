@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Ajouter Articles - BOUBA STOR</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial}
+body{background:#000;color:#fff;padding:16px;padding-bottom:90px}
+h1{color:gold;text-align:center;margin:10px 0}
+.card{background:#111;border:1px solid gold;border-radius:14px;padding:16px;max-width:480px;margin:0 auto}
+label{display:block;margin:10px 0 4px;font-size:13px;color:#ccc}
+input,select,textarea{width:100%;padding:12px;border-radius:8px;border:1px solid #555;background:#222;color:#fff;font-size:14px}
+select{background:#222}
+.btn{width:100%;margin-top:12px;padding:14px;border-radius:12px;border:0;background:linear-gradient(gold,#b8860b);color:#000;font-weight:900;font-size:14px;cursor:pointer}
+.btn2{width:100%;margin-top:8px;padding:10px;border-radius:8px;border:1px solid #333;background:#111;color:#888;font-size:12px;cursor:pointer}
+#preview{width:100%;max-height:200px;object-fit:cover;border-radius:10px;margin-top:10px;display:none}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.item{background:#111;border:1px solid #222;border-radius:10px;padding:8px;font-size:12px}
+.item img{width:100%;height:100px;object-fit:cover;border-radius:8px}
+.item b{color:gold;display:block;margin-top:4px}
+</style>
+</head>
+<body>
+
+<h1>➕ Ajouter Article BOUBA STOR</h1>
+
+<div class="card">
+  <label>📸 Photo de l'article *</label>
+  <input type="file" id="file" accept="image/*">
+  <img id="preview">
+
+  <label>Nom de l'article *</label>
+  <input id="name" placeholder="Ex: Robe longue / XXL">
+
+  <label>Prix (F CFA) *</label>
+  <input id="price" type="number" placeholder="Ex: 10000">
+
+  <label>🌍 Onglet Marque Mondiale *</label>
+  <select id="cat">
+    <option value="vetements">👗 Vêtements</option>
+    <option value="maillots">⚽ Maillots</option>
+    <option value="chaussures">👟 Chaussures</option>
+    <option value="electrique">📱 Électrique</option>
+    <option value="sacs">👜 Sacs</option>
+    <option value="beaute">💄 Beauté</option>
+    <option value="montres">⌚ Montres</option>
+    <option value="maison">🏠 Maison</option>
+  </select>
+
+  <label>🏷️ Marque précise *</label>
+  <select id="brand">
+    <!-- rempli par JS -->
+  </select>
+
+  <label>Couleur / Description</label>
+  <input id="desc" placeholder="Ex: Blanc, Taille XXL">
+
+  <label>Boutique</label>
+  <select id="shop"><option value="">Chargement...</option></select>
+
+  <button class="btn" onclick="addArticle()">✅ Ajouter l'article dans la boutique</button>
+  <button class="btn2" onclick="location.href='data:text/html;base64,PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImZyIj4KPGhlYWQ+CjxtZXRhIGNoYXJzZXQ9IlVURi04Ij4KPG1ldGEgaHR0cC1lcXVpdj0icmVmcmVzaCIgY29udGVudD0iMDsgdXJsPWFtaXMuaHRtbCI+Cjx0aXRsZT5SZWRpcmVjdGlvbi4uLjwvdGl0bGU+CjxzY3JpcHQ+bG9jYXRpb24ucmVwbGFjZSgnYW1pcy5odG1sJyk7PC9zY3JpcHQ+CjwvaGVhZD4KPGJvZHk+UmVkaXJlY3Rpb24gdmVycyBhbWlzLi4uPC9ib2R5Pgo8L2h0bWw+Cg=='">← Retour à la boutique</button>
+  
+  <div id="msg" style="text-align:center;margin-top:10px;font-size:13px;min-height:18px"></div>
+</div>
+
+<div style="max-width:480px;margin:16px auto">
+  <h3 style="color:gold;margin-bottom:8px">📦 Articles récents (22)</h3>
+  <div class="grid" id="list"></div>
+</div>
+
+<script type="module">
+import { list, put, mode, esc, money, uid, compress } from './bouba-data.js';
+
+const BRANDS = {
+  vetements:['Nike','Adidas','Zara','Shein','H&M','LV','Gucci','Dior','Balenciaga','Uniqlo','Polo','Lacoste'],
+  maillots:['Real Madrid','Barcelone','PSG','Man City','Arsenal','Inter Miami','Sénégal','Côte d’Ivoire','Maroc','France','Brésil'],
+  chaussures:['Nike','Jordan','Adidas','New Balance','Yeezy','Puma','Crocs','Timberland'],
+  electrique:['iPhone','Samsung','JBL','Sony','Tecno','Infinix','Oraimo','Anker','HP','MacBook','PS5'],
+  sacs:['LV','Gucci','Chanel','Dior','Hermès','Michael Kors','Zara'],
+  beaute:['Fenty','MAC','Maybelline','Nivea','Dove'],
+  montres:['Rolex','Casio','G-Shock','Apple Watch'],
+  maison:['IKEA Style','Philips','Tefal','Nasco']
+};
+
+let imgData='';
+const $=id=>document.getElementById(id);
+const catEl=$('cat'), brandEl=$('brand'), shopEl=$('shop');
+
+function fillBrands(){
+  const cat=catEl.value;
+  brandEl.innerHTML=(BRANDS[cat]||[]).map(b=>`<option value="${b}">${b}</option>`).join('');
+}
+catEl.onchange=fillBrands;
+fillBrands();
+
+$('file').onchange=async e=>{
+  const f=e.target.files[0];
+  if(!f) return;
+  imgData=await compress(f, 800);
+  $('preview').src=imgData;
+  $('preview').style.display='block';
+};
+
+async function loadShops(){
+  const shops=await list('boutiques');
+  shopEl.innerHTML=shops.map(s=>`<option value="${s.id}">${esc(s.name||'Boutique')} - ${esc(s.owner||'')}</option>`).join('') || '<option>Aucune boutique</option>';
+  if(shops[0]) shopEl.value=shops[0].id;
+  renderList();
+}
+async function renderList(){
+  const arts=await list('articles');
+  $('list').innerHTML=arts.slice(-6).reverse().map(a=>`
+    <div class="item"><img src="${a.img||''}"><b>${esc(a.name||'')}</b><small>${money(a.price||0)}<br>${esc(a.brand||'')||esc(a.cat||'')}</small></div>
+  `).join('');
+}
+
+window.addArticle=async()=>{
+  const name=$('name').value.trim();
+  const price=Number($('price').value);
+  const cat=catEl.value;
+  const brand=brandEl.value;
+  const desc=$('desc').value.trim();
+  const shopId=shopEl.value;
+  if(!name||!price||!imgData){ $('msg').textContent='❌ Remplis nom, prix et photo'; $('msg').style.color='#ff6666'; return; }
+  
+  const shops=await list('boutiques');
+  const shop=shops.find(s=>s.id===shopId);
+  
+  const article={
+    id: uid(),
+    name,
+    price,
+    cat,
+    brand,
+    desc,
+    img: imgData,
+    shopId,
+    shopName: shop?shop.name:'Boutique',
+    owner: shop?shop.owner:'',
+    phone: shop?shop.phone:'',
+    date: Date.now()
+  };
+  
+  $('msg').textContent='⏳ Ajout en cours...'; $('msg').style.color='#aaa';
+  try{
+    await put('articles', article);
+    $('msg').textContent='✅ Article ajouté ! Il apparaît dans Boutiques → glisse ('+cat+' / '+brand+')';
+    $('msg').style.color='#25D366';
+    $('name').value=''; $('price').value=''; $('desc').value=''; $('file').value=''; $('preview').style.display='none'; imgData='';
+    renderList();
+    if(navigator.vibrate) navigator.vibrate(50);
+  }catch(e){
+    $('msg').textContent='❌ Erreur: '+e.message;
+    $('msg').style.color='#ff6666';
+  }
+};
+
+loadShops();
+</script>
+
+</body>
+</html>
