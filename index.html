@@ -425,7 +425,7 @@ async function adminLogin(){
 }
 function adminLogout(){fb.AU.signOut(fb.auth);closeAll()}
 function setTab(t){tab=t;renderAdmin()}
-const TABS=[['stats','📊 Stats'],['orders','🧾 Commandes'],['prods','🛍️ Produits'],['clients','👥 Clients'],['sup','🌍 Fournisseurs'],['radar','📡 Radar'],['set','⚙️ Réglages']];
+const TABS=[['stats','📊 Stats'],['orders','🧾 Commandes'],['returns','↩️ Retours'],['prods','🛍️ Produits'],['clients','👥 Clients'],['sup','🌍 Fournisseurs'],['radar','📡 Radar'],['set','⚙️ Réglages']];
 const STAT=['en attente','confirmée','livrée','annulée'];
 const orders=()=>Object.values(S.orders||{}).filter(o=>o&&o.id).sort((a,b)=>b.date-a.date);
 
