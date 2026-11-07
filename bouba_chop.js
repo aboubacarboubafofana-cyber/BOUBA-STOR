@@ -1,24 +1,24 @@
 document.addEventListener("DOMContentLoaded", function() {
-    if (document.getElementById('bouba-shop')) return;
+    if (document.getElementById('btn-open-bouba')) return;
 
     const style = document.createElement('style');
     style.innerHTML = `
-        /* 🎯 LE BOUTON EST PLACÉ ICI (Ajuste le "bottom" si besoin) */
-        .bouba-fab {
-            position: fixed; 
-            bottom: 230px; /* <-- C'est ici qu'on le remonte pour le mettre au-dessus de Conseils */
-            left: 20px;    /* <-- Aligné à gauche comme Conseils */
-            background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; 
+        /* LE BOUTON BOUTIQUE */
+        #btn-open-bouba {
+            position: fixed;
+            bottom: 145px; /* Position juste au-dessus de Conseils */
+            left: 20px;
+            background: linear-gradient(135deg, #FFD700, #FFA500); color: #000;
             border: 2px solid #00FF00; border-radius: 50px; padding: 10px 15px; font-weight: bold; font-size: 14px;
             display: flex; align-items: center; gap: 8px; cursor: pointer;
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.8); z-index: 99999;
-            animation: shop-pulse 1.5s infinite alternate; transition: transform 0.1s;
+            animation: pulseBouba 1.5s infinite alternate; transition: transform 0.1s;
             white-space: nowrap;
         }
-        .bouba-fab:active { transform: scale(0.9); box-shadow: 0 0 25px #00FF00; }
-        @keyframes shop-pulse { 0% { box-shadow: 0 0 10px #FFD700; } 100% { box-shadow: 0 0 25px #00FF00, inset 0 0 10px #FFD700; } }
+        #btn-open-bouba:active { transform: scale(0.9); box-shadow: 0 0 25px #00FF00; }
+        @keyframes pulseBouba { 0% { box-shadow: 0 0 10px #FFD700; } 100% { box-shadow: 0 0 25px #00FF00, inset 0 0 10px #FFD700; } }
 
-        /* L'interface de la boutique */
+        /* LA BOUTIQUE (Interface) */
         .bouba-shop-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #000; z-index: 100000; display: none;
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const appContainer = document.createElement('div');
     appContainer.innerHTML = `
-        <button id="btn-open-bouba" class="bouba-fab">🛍️ BOUTIQUE ✨</button>
+        <button id="btn-open-bouba">🛍️ BOUTIQUE ✨</button>
         <div id="bouba-shop" class="bouba-shop-overlay">
             <div class="bouba-header">
                 <h2 class="bouba-title">👑 BOUBA STOR</h2>
@@ -72,10 +72,10 @@ document.addEventListener("DOMContentLoaded", function() {
     `;
     document.body.appendChild(appContainer);
 
-    // Ouverture / Fermeture
     document.getElementById('btn-open-bouba').addEventListener('click', () => {
         document.getElementById('bouba-shop').classList.add('active');
     });
+    
     document.getElementById('btn-close-bouba').addEventListener('click', () => {
         document.getElementById('bouba-shop').classList.remove('active');
     });
