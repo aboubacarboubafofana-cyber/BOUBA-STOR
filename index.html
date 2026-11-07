@@ -259,7 +259,6 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
 let S=LS('b_state',null)||{};
 S.info=S.info||{};S.products=S.products||{};S.users=S.users||{};S.orders=S.orders||{};
 let outbox=LS('b_out',[]),cart=LS('b_cart',[]),me=LS('b_me',null);
-let isAdmin=false,cat='all',brand='all',q='',online=false,fb=null,flushing=false,adminSub=false,tab='stats';
 window.LITE=!!(navigator.connection&&(navigator.connection.saveData||/(^|-)2g$/.test(navigator.connection.effectiveType||'')));
 let SHOWN=LITE?12:24,_rt=0;
 function renderSoon(){if(_rt)return;_rt=setTimeout(()=>{_rt=0;renderAll()},150)}
