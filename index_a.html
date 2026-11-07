@@ -1340,152 +1340,129 @@ onValue(reviewsRef, (snapshot) => {
     });
 });
  </script>
- 
-     <!-- Ton script boutique existant -->
+     <!-- LE SCRIPT DE TA BOUTIQUE (Garde-le) -->
     <script src="bouba-shop.js"></script> 
 
-    <!-- 👇 AJOUTE LE RADAR ICI 👇 -->
+    <!-- 👇 LE RADAR (UNIQUEMENT SUR LA PAGE CONTRÔLE) 👇 -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // 1. LE CSS DU RADAR (Design BOUBA STOR)
+            
+            // 1. LE CSS DU RADAR
             const style = document.createElement('style');
             style.innerHTML = `
-                .radar-btn {
-                    position: fixed; bottom: 150px; left: 20px;
-                    background: #111; color: #FFD700;
-                    border: 2px solid #FFD700; border-radius: 50px;
-                    padding: 10px 15px; font-weight: bold; font-size: 14px;
-                    display: flex; align-items: center; gap: 8px;
-                    cursor: pointer; z-index: 99998;
-                    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-                    transition: all 0.3s ease;
-                }
-                .radar-btn:hover { background: #FFD700; color: #000; box-shadow: 0 0 20px rgba(0, 255, 0, 0.6); }
-
+                /* Le panneau du Radar */
                 .radar-panel {
-                    position: fixed; top: 10%; left: 5%; width: 90%; max-width: 400px;
-                    background: #050505; border: 2px solid #00FF00; border-radius: 15px;
-                    padding: 20px; z-index: 100002; display: none; flex-direction: column;
-                    box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
-                    font-family: sans-serif; color: white;
+                    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
+                    width: 90%; max-width: 400px; background: #050505; 
+                    border: 2px solid #FFD700; border-radius: 15px;
+                    padding: 20px; z-index: 100005; display: none; flex-direction: column;
+                    box-shadow: 0 0 40px rgba(255, 215, 0, 0.4);
+                    font-family: monospace; color: #00FF00; opacity: 0;
+                    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
                 }
-                .radar-panel.active { display: flex; }
-                .radar-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #FFD700; padding-bottom: 10px; margin-bottom: 15px; }
-                .radar-title { color: #FFD700; margin: 0; font-size: 18px; }
-                .radar-close { background: none; border: none; color: #00FF00; font-size: 20px; cursor: pointer; }
+                .radar-panel.active { display: flex; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                
+                .radar-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #FFD700; padding-bottom: 10px; margin-bottom: 15px; }
+                .radar-title { color: #FFD700; margin: 0; font-size: 16px; text-shadow: 0 0 5px #FFD700; }
+                .radar-close { background: none; border: none; color: #FF0000; font-size: 24px; cursor: pointer; font-weight: bold; }
+                .radar-close:active { transform: scale(0.8); }
 
-                .radar-progress-bar { width: 100%; height: 10px; background: #222; border-radius: 5px; margin-bottom: 15px; overflow: hidden; }
-                .radar-progress-fill { height: 100%; background: linear-gradient(90deg, #FFD700, #00FF00); width: 0%; transition: width 0.5s ease; }
+                .radar-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; font-size: 13px; }
+                .radar-item { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 5px; background: #111; border-left: 3px solid #333; transition: all 0.2s; }
+                
+                .status-ok { color: #00FF00; border-left-color: #00FF00; text-shadow: 0 0 5px #00FF00; }
+                .status-error { color: #FF3333; border-left-color: #FF3333; animation: shake 0.4s; }
+                .status-wait { color: #FFD700; border-left-color: #FFD700; }
 
-                .radar-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
-                .radar-item { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 1.4; color: #ccc; cursor: pointer; }
-                .radar-item input[type="checkbox"] { margin-top: 3px; accent-color: #00FF00; transform: scale(1.3); cursor: pointer; }
-                .radar-item.completed { color: #555; text-decoration: line-through; }
-                .radar-item.completed input { opacity: 0.5; }
+                @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
 
-                .radar-footer { margin-top: 20px; text-align: center; font-size: 12px; color: #888; }
+                .radar-btn-action {
+                    margin-top: 20px; background: #FFD700; color: #000; border: none; padding: 12px; 
+                    border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase;
+                    transition: all 0.1s; font-size: 14px;
+                }
+                .radar-btn-action:active { transform: scale(0.95); background: #00FF00; }
             `;
             document.head.appendChild(style);
 
-            // 2. LE HTML DU RADAR
-            const radarHTML = `
-                <button id="open-radar" class="radar-btn">📡 Radar de Mission</button>
-
+            // 2. LE HTML DU RADAR (Caché au départ, sans le bouton flottant !)
+            const div = document.createElement('div');
+            div.innerHTML = `
                 <div id="radar-panel" class="radar-panel">
                     <div class="radar-header">
-                        <h2 class="radar-title">🎯 Ce qu'il te reste à faire</h2>
+                        <h2 class="radar-title">⚡ CONTRÔLE TOTAL ⚡</h2>
                         <button id="close-radar" class="radar-close">✕</button>
                     </div>
-                    
-                    <div class="radar-progress-bar">
-                        <div id="radar-progress" class="radar-progress-fill"></div>
+                    <div class="radar-list" id="radar-checks">
+                        <li class="radar-item status-wait">⏳ Initialisation du scan...</li>
                     </div>
-
-                    <ul class="radar-list" id="radar-list">
-                        <!-- Les tâches seront générées ici par JS -->
-                    </ul>
-                    
-                    <div class="radar-footer">
-                        Les progrès sont sauvegardés automatiquement.
-                    </div>
+                    <button class="radar-btn-action" onclick="location.reload()">🔄 Recharger le site</button>
                 </div>
             `;
-            
-            const div = document.createElement('div');
-            div.innerHTML = radarHTML;
             document.body.appendChild(div);
 
-            // 3. LA LOGIQUE DU RADAR
-            const taches = [
-                "Vérifier que le fichier s'appelle bien index_a.html",
-                "Vérifier que le bouton Boutique 🎁 s'affiche en bas à droite",
-                "Cliquer sur le bouton Boutique pour tester l'ouverture",
-                "Ouvrir bouba-shop.js et changer les images des produits",
-                "Changer les prix et les noms dans le fichier bouba-shop.js",
-                "Vider le cache du navigateur (Ctrl+F5) pour voir les changements",
-                "Mettre à jour le code sur GitHub (Commit & Push)"
+            // 3. LA LOGIQUE DE SCAN
+            const checks = [
+                { text: "Script Boutique chargé ?", selector: 'script[src="bouba-shop.js"]' },
+                { text: "Bouton Boutique (🎁) prêt ?", selector: '#btn-open-bouba' },
+                { text: "Interface Panier prête ?", selector: '#bouba-shop' },
+                { text: "Menu de navigation détecté ?", selector: 'nav, .bottom-nav, .tab-bar, [class*="nav"]' },
+                { text: "Connexion Firebase OK ?", selector: 'script[src*="firebase"]' }
             ];
 
-            const listeElement = document.getElementById('radar-list');
-            const progressBar = document.getElementById('radar-progress');
-            
-            // Charger les tâches depuis la mémoire du navigateur
-            let tachesValidees = JSON.parse(localStorage.getItem('bouba_radar_tasks')) || [];
-
-            function afficherTaches() {
-                listeElement.innerHTML = '';
-                let completees = 0;
-
-                taches.forEach((tache, index) => {
-                    const estValidee = tachesValidees.includes(index);
-                    if (estValidee) completees++;
-
+            function runRadar() {
+                const list = document.getElementById('radar-checks');
+                list.innerHTML = ''; 
+                
+                checks.forEach((check, index) => {
                     const li = document.createElement('li');
-                    li.className = `radar-item ${estValidee ? 'completed' : ''}`;
+                    li.className = 'radar-item status-wait';
+                    li.innerHTML = `⏳ Scan : ${check.text}`;
+                    list.appendChild(li);
                     
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.checked = estValidee;
-                    
-                    // Événement quand on coche/décoche
-                    checkbox.addEventListener('change', () => {
-                        if (checkbox.checked) {
-                            tachesValidees.push(index);
+                    setTimeout(() => {
+                        const element = document.querySelector(check.selector);
+                        if (element) {
+                            li.className = 'radar-item status-ok';
+                            li.innerHTML = `✅ ${check.text}`;
                         } else {
-                            tachesValidees = tachesValidees.filter(id => id !== index);
+                            li.className = 'radar-item status-error';
+                            li.innerHTML = `❌ ERREUR : ${check.text}`;
                         }
-                        localStorage.setItem('bouba_radar_tasks', JSON.stringify(tachesValidees));
-                        afficherTaches(); // Rafraîchir l'affichage
-                    });
-
-                    const span = document.createElement('span');
-                    span.innerText = tache;
-                    span.addEventListener('click', () => { checkbox.click(); }); // Cliquer sur le texte coche la case
-
-                    li.appendChild(checkbox);
-                    li.appendChild(span);
-                    listeElement.appendChild(li);
+                    }, 400 * (index + 1));
                 });
-
-                // Mettre à jour la barre de progression
-                const pourcentage = (completees / taches.length) * 100;
-                progressBar.style.width = pourcentage + '%';
             }
 
-            // Ouvrir / Fermer le radar
-            document.getElementById('open-radar').addEventListener('click', () => {
-                document.getElementById('radar-panel').classList.add('active');
+            // 4. CONNEXION AU BOUTON "RADAR DE MISSION" EXISTANT
+            // On cherche le bouton qui contient le texte "Radar de Mission" (celui de ta page contrôle)
+            const tousLesBoutons = document.querySelectorAll('button, div, a, span');
+            let monBoutonRadar = null;
+
+            tousLesBoutons.forEach(btn => {
+                if (btn.innerText && btn.innerText.includes('Radar de Mission')) {
+                    monBoutonRadar = btn;
+                }
             });
+
+            if (monBoutonRadar) {
+                // On dit au bouton d'ouvrir le panneau quand on clique dessus
+                monBoutonRadar.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('radar-panel').classList.add('active');
+                    runRadar(); 
+                });
+            }
+
+            // Fermeture
             document.getElementById('close-radar').addEventListener('click', () => {
                 document.getElementById('radar-panel').classList.remove('active');
             });
-
-            // Lancer l'affichage initial
-            afficherTaches();
         });
     </script>
-    <!-- 👆 FIN DU RADAR 👆 -->
-
+</body>
+</html>
+     
+     
 </body>
 </html>
 
