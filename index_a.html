@@ -108,27 +108,41 @@ body.gated>*:not(#gate):not(script):not(style):not(link):not(meta){visibility:hi
 .cat{font-size:15px;padding:10px 18px}
 .gold{font-size:16px}
 </style></head><body><script>try{if(!localStorage.getItem('b_me'))document.body.classList.add('gated')}catch(e){}</script><div id="gate"><div class="gateBox">
-<h2 style="color:gold">👑 BOUBA STOR</h2>
-<p style="font-size:14px;color:#ffd700;margin:8px 0;font-weight:800">Crée ton compte gratuit pour visiter la boutique</p>
-<p style="font-size:12px;color:#aaa;margin:4px 0 10px">🎁 -10 % sur ta 1ère commande • ⚡ Ventes flash • 🎡 Jeux et cadeaux</p>
-<input id="uName" class="input" placeholder="Nom complet">
-<select id="uCc" class="input" aria-label="Indicatif du pays"></select>
-<input id="uPhone" class="input" placeholder="Ton numéro (sans l'indicatif)" type="tel" inputmode="tel">
-<input id="uCity" class="input" placeholder="Ville / Quartier">
-<button class="gold" onclick="doRegister()">✅ Entrer</button>
- </div></div>
+<div id="gate"><div class="gateBox">
+  <h2 style="color:gold">👑 BOUBA STOR</h2>
+  <p style="font-size:14px;color:#ffd700;margin:8px 0;font-weight:800">Crée ton compte gratuit pour visiter la boutique</p>
+  <p style="font-size:12px;color:#aaa;margin:4px 0 10px">🎁 -10 % sur ta 1ère commande • ⚡ Ventes flash • 🎡 Jeux et cadeaux</p>
+  <input id="uName" class="input" placeholder="Nom complet">
+  <select id="uCc" class="input" aria-label="Indicatif du pays"></select>
+  <input id="uPhone" class="input" placeholder="Ton numéro (sans l'indicatif)" type="tel" inputmode="tel">
+  <input id="uCity" class="input" placeholder="Ville / Quartier">
+  <button class="gold" onclick="doRegister()">✅ Entrer</button>
+</div></div>
+
 <script>
-const CC_DATA="CI|Côte d'Ivoire|225;FR|France|33;US|États-Unis|1;SN|Sénégal|221;ML|Mali|223;BF|Burkina Faso|226;TG|Togo|228;BJ|Bénin|229;CM|Cameroun|237;CA|Canada|1;BE|Belgique|32;CH|Suisse|41;GB|Royaume-Uni|44;DE|Allemagne|49;ES|Espagne|34;IT|Italie|39;MA|Maroc|212;DZ|Algérie|213;TN|Tunisie|216;NG|Nigeria|234;GH|Ghana|233";
-function ccFlag(i){return String.fromCodePoint.apply(null,i.split('').map(c=>127397+c.charCodeAt(0)))}
+// Liste des pays pour l'indicatif
+const CC_DATA = "CI|Côte d'Ivoire|225;FR|France|33;US|États-Unis|1;SN|Sénégal|221;ML|Mali|223;BF|Burkina Faso|226;TG|Togo|228;BJ|Bénin|229;CM|Cameroun|237;CA|Canada|1;BE|Belgique|32;CH|Suisse|41;GB|Royaume-Uni|44;DE|Allemagne|49;ES|Espagne|34;IT|Italie|39;MA|Maroc|212;DZ|Algérie|213;TN|Tunisie|216;NG|Nigeria|234;GH|Ghana|233";
+
+function ccFlag(i){
+  return String.fromCodePoint.apply(null,i.split('').map(c=>127397+c.charCodeAt(0)));
+}
 
 function fillCc(){
-  const s=document.getElementById('uCc');
+  const s = document.getElementById('uCc');
   if(!s) return;
-  const l = CC_DATA.split(';').map(x=>x.split('|'));
-  s.innerHTML = l.map(x=>'<option value="'+x[2]+'">'+ccFlag(x[0])+' '+x[1]+' (+'+x[2]+')</option>').join('');
-  s.value = LS('b_cc','225');
-  if(!s.value) s.value='225';
+  try {
+    const l = CC_DATA.split(';').map(x=>x.split('|'));
+    s.innerHTML = l.map(x=>'<option value="'+x[2]+'">'+ccFlag(x[0])+' '+x[1]+' (+'+x[2]+')</option>').join('');
+    let saved = '225';
+    try { saved = JSON.parse(localStorage.getItem('b_cc')) || '225'; } catch(e){}
+    s.value = saved;
+    if(!s.value) s.value = '225';
+  } catch(e) {
+    s.innerHTML = '<option value="225">🇨🇮 Côte d\'Ivoire (+225)</option>';
+  }
 }
+fillCc(); // On lance le remplissage de la liste
+
 function doRegister(){
   try {
     const n = document.getElementById('uName').value.trim();
@@ -163,20 +177,22 @@ function doRegister(){
     const ph = '+' + full;
     const userObj = { key: key, name: n, phone: ph, city: city, date: Date.now() };
     
-    // On sauvegarde directement dans le téléphone
+    // On sauvegarde
     localStorage.setItem('b_cc', JSON.stringify(dial));
     localStorage.setItem('b_me', JSON.stringify(userObj));
     
-    // ON RECHARGE LA PAGE POUR ENTRER DANS LA BOUTIQUE
+    // Si Firebase est dispo, on envoie
+    if(typeof write === 'function') {
+      try { write('users/' + key, userObj); } catch(e) {}
+    }
+
+    // On recharge la page
     window.location.reload();
     
   } catch (err) {
     alert("Erreur : " + err.message);
   }
 }
-
-
-</script>
 </script>
  <div style="background:#000;padding:10px;text-align:center;border-bottom:2px solid gold">
   <a href="bouton.html" target="_blank" style="display:inline-block;background:gold;color:#000;padding:14px 25px;border-radius:25px;font-weight:900;text-decoration:none;width:90%">🏪 + CRÉER MA BOUTIQUE</a>
