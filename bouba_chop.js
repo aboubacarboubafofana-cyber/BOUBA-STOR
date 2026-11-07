@@ -3,9 +3,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const style = document.createElement('style');
     style.innerHTML = `
-        /* Le bouton Boutique */
+        /* 🎯 LE BOUTON EST PLACÉ ICI (Ajuste le "bottom" si besoin) */
         .bouba-fab {
             position: fixed; 
+            bottom: 230px; /* <-- C'est ici qu'on le remonte pour le mettre au-dessus de Conseils */
+            left: 20px;    /* <-- Aligné à gauche comme Conseils */
             background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; 
             border: 2px solid #00FF00; border-radius: 50px; padding: 10px 15px; font-weight: bold; font-size: 14px;
             display: flex; align-items: center; gap: 8px; cursor: pointer;
@@ -69,40 +71,6 @@ document.addEventListener("DOMContentLoaded", function() {
         </div>
     `;
     document.body.appendChild(appContainer);
-
-    // --- PLACEMENT INTELLIGENT ---
-    function positionnerBouton() {
-        const btnShop = document.getElementById('btn-open-bouba');
-        const tousLesElements = document.querySelectorAll('div, button, span'); // On cherche partout
-        let btnConseils = null;
-
-        tousLesElements.forEach(el => {
-            // On cherche un élément qui contient le mot "Conseils" (peu importe l'émoji)
-            if (el.innerText && el.innerText.includes('Conseils') && !el.closest('#bouba-shop')) {
-                // On vérifie que c'est bien le bouton flottant (largeur > 0)
-                if (el.getBoundingClientRect().width > 0) {
-                     if (!btnConseils || el.getBoundingClientRect().top > btnConseils.getBoundingClientRect().top) {
-                        btnConseils = el;
-                    }
-                }
-            }
-        });
-
-        if (btnConseils) {
-            const rect = btnConseils.getBoundingClientRect();
-            // On le place juste 10 pixels au-dessus du bouton Conseils
-            btnShop.style.bottom = (window.innerHeight - rect.top + 10) + 'px';
-            btnShop.style.left = rect.left + 'px';
-        } else {
-            // Si vraiment il ne trouve pas, on le met par défaut en bas à gauche
-            btnShop.style.bottom = '140px';
-            btnShop.style.left = '20px';
-        }
-    }
-
-    // On lance le positionnement dès que la page est prête
-    setTimeout(positionnerBouton, 500); 
-    window.addEventListener('resize', positionnerBouton);
 
     // Ouverture / Fermeture
     document.getElementById('btn-open-bouba').addEventListener('click', () => {
