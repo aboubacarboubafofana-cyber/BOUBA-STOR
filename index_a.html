@@ -889,37 +889,42 @@ setInterval(function(){
   if(n)n.style.display=(typeof isAdmin!=='undefined'&&isAdmin)?'':'none';
 },1000);
 var tapN=0,tapT;
-document.getElementById('shopName').addEventListener('click',function(){
-  tapN++;clearTimeout(tapT);
-  tapT=setTimeout(function(){tapN=0},2000);
-  if(tapN>=5){tapN=0;openPage('adminPage');renderAdmin();}
-});
+const shopNameEl = document.getElementById('shopName');
+if(shopNameEl) {
+  shopNameEl.addEventListener('click',function(){
+    tapN++;clearTimeout(tapT);
+    tapT=setTimeout(function(){tapN=0},2000);
+    if(tapN>=5){tapN=0;openPage('adminPage');renderAdmin();}
+  });
+}
 let dp=null;
 const ib=document.getElementById('installBtn');
 const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
 const isApp=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
 if(!isApp){
- if(isIOS)ib.style.display='block';
- window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;ib.style.display='block'});
+ if(isIOS && ib)ib.style.display='block';
+ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;if(ib)ib.style.display='block'});
 }
-ib.onclick=async()=>{
- if(dp){dp.prompt();await dp.userChoice;dp=null;ib.style.display='none'}
- else alert("iPhone : touchez Partager, puis « Sur l'écran d'accueil ».");
-};
-window.addEventListener('appinstalled',()=>ib.style.display='none');
- if(location.hash==='#admin')setTimeout(function(){openPage('adminPage');renderAdmin()},800);
+if(ib) {
+  ib.onclick=async()=>{
+   if(dp){dp.prompt();await dp.userChoice;dp=null;ib.style.display='none'}
+   else alert("iPhone : touchez Partager, puis « Sur l'écran d'accueil ».");
+  };
+}
+window.addEventListener('appinstalled',()=>{if(ib)ib.style.display='none'});
+if(location.hash==='#admin')setTimeout(function(){openPage('adminPage');renderAdmin()},800);
 document.addEventListener('click',function(e){
  if(!e.target.closest('#shopName'))return;
  tapN++;clearTimeout(tapT);
  tapT=setTimeout(function(){tapN=0},2000);
  if(tapN>=5){tapN=0;openPage('adminPage');renderAdmin()}
-});</script>
+});
+</script>
  <script type="module" src="alertes.js"></script>
  <script src="amis5.js"></script>
 <script>document.addEventListener('click',function(e){var n=e.target.closest('#chats,.nav>*');if(n&&(n.id==='chats'||/Amis/.test(n.textContent))){e.stopPropagation();e.preventDefault();location.href='amis.html'}},true);</script>
 <script src="bouba-chat.js"></script>
-<script>
 /* Enveloppe rapide : seul le nécessaire se charge au démarrage ; le reste arrive à la demande */
 (function(){
 var CORE=["promos","features","aide","fun","suite","bonus","more","pro","vibes","accueil","menu"],ADM=["commandes","vitesse","stats","republier","partage"],P={};
