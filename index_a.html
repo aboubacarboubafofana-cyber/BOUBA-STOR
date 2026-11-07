@@ -117,7 +117,59 @@ body.gated>*:not(#gate):not(script):not(style):not(link):not(meta){visibility:hi
 <input id="uCity" class="input" placeholder="Ville / Quartier">
 <button class="gold" onclick="register()">✅ Entrer</button>
  </div></div>
+<script>
+const CC_DATA="CI|Côte d'Ivoire|225;FR|France|33;US|États-Unis|1;SN|Sénégal|221;ML|Mali|223;BF|Burkina Faso|226;TG|Togo|228;BJ|Bénin|229;CM|Cameroun|237;CA|Canada|1;BE|Belgique|32;CH|Suisse|41;GB|Royaume-Uni|44;DE|Allemagne|49;ES|Espagne|34;IT|Italie|39;MA|Maroc|212;DZ|Algérie|213;TN|Tunisie|216;NG|Nigeria|234;GH|Ghana|233";
+function ccFlag(i){return String.fromCodePoint.apply(null,i.split('').map(c=>127397+c.charCodeAt(0)))}
 
+function fillCc(){
+  const s=document.getElementById('uCc');
+  if(!s) return;
+  const l = CC_DATA.split(';').map(x=>x.split('|'));
+  s.innerHTML = l.map(x=>'<option value="'+x[2]+'">'+ccFlag(x[0])+' '+x[1]+' (+'+x[2]+')</option>').join('');
+  s.value = LS('b_cc','225');
+  if(!s.value) s.value='225';
+}
+fillCc();
+
+function register(){
+  const n = document.getElementById('uName').value.trim();
+  const raw = document.getElementById('uPhone').value.trim();
+  const city = document.getElementById('uCity').value.trim();
+  const selectCc = document.getElementById('uCc');
+  const dial = selectCc ? (selectCc.value || '225') : '225';
+
+  if(!n || !raw || !city){
+    alert('Remplis tous les champs pour continuer !');
+    return;
+  }
+
+  let local = raw.replace(/\D/g,'');
+  let full;
+
+  if(/^(\+|00)/.test(raw)){
+    full = local.replace(/^00/,'');
+  } else {
+    if(dial !== '225') {
+      local = local.replace(/^0+/, '');
+    }
+    full = dial + local;
+  }
+
+  if(full.length < 8 || full.length > 15){
+    alert('Numéro invalide');
+    return;
+  }
+
+  SV('b_cc', dial);
+  const key = full;
+  const ph = '+' + full;
+  me = { key: key, name: n, phone: ph, city: city, date: Date.now() };
+  
+  SV('b_me', me);
+  write('users/' + key, me);
+  checkGate();
+}
+</script>
  <div style="background:#000;padding:10px;text-align:center;border-bottom:2px solid gold">
   <a href="bouton.html" target="_blank" style="display:inline-block;background:gold;color:#000;padding:14px 25px;border-radius:25px;font-weight:900;text-decoration:none;width:90%">🏪 + CRÉER MA BOUTIQUE</a>
  </div>
