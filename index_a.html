@@ -1370,25 +1370,15 @@ onValue(reviewsRef, (snapshot) => {
         0% { box-shadow: 0 0 10px #FFD700; }
         100% { box-shadow: 0 0 25px #00FF00, inset 0 0 10px #FFD700; }
     }
-</style>
+    <!-- Tes autres scripts (Firebase, etc.) restent au-dessus -->
 
-<button id="btn-open-bouba">🛍️ BOUTIQUE ✨</button>
-
-<!-- Le script qui gère l'ouverture de la boutique -->
-<script>
-    document.getElementById('btn-open-bouba').addEventListener('click', function() {
-        // On cherche la boutique et on l'affiche
-        const shop = document.getElementById('bouba-shop');
-        if(shop) {
-            shop.classList.add('active');
-        } else {
-            alert("La boutique charge... Essaie encore.");
-        }
-    });
-</script>
-<!-- 👆 FIN DU BOUTON 👆 -->
+    <!-- 👇 C'EST TOUT CE QU'IL TE FAUT 👇 -->
+    <script src="bouba-shop.js"></script>
+    <script src="radar.js"></script>
 </body>
 </html>
+
+
 
  
 
