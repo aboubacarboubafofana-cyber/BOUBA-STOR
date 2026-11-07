@@ -262,7 +262,7 @@ S.info=S.info||{};S.products=S.products||{};S.users=S.users||{};S.orders=S.order
 let outbox=LS('b_out',[]),cart=LS('b_cart',[]),me=LS('b_me',null);
 
 // 👇 C'EST ICI QUE SE TROUVAIT LE BUG, MAINTENANT C'EST CORRIGÉ 👇
-let isAdmin=false,cat='all',brand='all',q='',online=false,fb=null,flushing=false,adminSub=false,tab='stats';
+
 
 window.LITE=!!(navigator.connection&&(navigator.connection.saveData||/(^|-)2g$/.test(navigator.connection.effectiveType||'')));
 let SHOWN=LITE?12:24,_rt=0;
