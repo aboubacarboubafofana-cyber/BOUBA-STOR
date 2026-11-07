@@ -475,6 +475,7 @@ function renderAdmin(){
  }
 }
 function setStatus(id,s){write('orders/'+id+'/status',s);toast('Statut : '+s)}
+ function setStatus(id,s){write('orders/'+id+'/status',s);toast('Statut : '+s)}
 function delOrder(id){if(confirm('Supprimer la commande ?'))write('orders/'+id,null)}
 function delClient(k){if(confirm('Supprimer ce client ?'))write('users/'+k,null)}
 function delProd(id){if(confirm('Supprimer ce produit ?'))write('products/'+id,null)}
