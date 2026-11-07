@@ -1442,7 +1442,10 @@ function openProduct(id) {
         Catégorie : <b>${esc(p.cat)}</b> <br> Marque : <b>${esc(p.brand || 'Autre')}</b>
       </div>
       
-      <button class="gold" style="padding:15px; font-size:16px; width:100%;" onclick="addCart('${p.id}')">🛒 Ajouter au panier</button>
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button class="gold" style="padding:15px; font-size:16px; flex:1;" onclick="addCart('${p.id}')">🛒 Panier</button>
+        <button class="gold" style="padding:15px; font-size:16px; flex:1; background:#25D366; color:#fff;" onclick="commanderDirectChat('${p.id}')">⚡ Achat Rapide</button>
+      </div>
     </div>
     <hr style="border-color:#333; margin:20px 0;">
     <h3 style="color:gold; margin-bottom:10px;">✨ Vous aimerez aussi (${esc(p.cat)})</h3>
@@ -1468,6 +1471,38 @@ function openProduct(id) {
 
   // 3. On ouvre la page
   openPage('productPage');
+}
+
+function commanderDirectChat(id) {
+  const p = S.products[id];
+  if (!p) return;
+  
+  // 1. On enregistre la commande dans la base Firebase
+  const orderId = uid();
+  const o = {
+    id: orderId, 
+    date: Date.now(), 
+    status: 'en attente', 
+    total: p.price, 
+    name: me ? me.name : 'Client', 
+    phone: me ? me.phone : '', 
+    city: me ? me.city : '',
+    items: [{id: p.id, name: p.name, price: p.price, qty: 1}]
+  };
+  write('orders/' + orderId, o);
+
+  // 2. On prépare le message pour le chat
+  const msg = `Bonjour, je veux commander cet article tout de suite : ${p.name} (${fmt(p.price)} F). Commande #${orderId}`;
+  
+  // 3. On sauvegarde le message pour que la page du chat puisse le lire
+  localStorage.setItem('b_chat_draft', msg);
+  
+  toast('Redirection vers le chat...');
+  
+  // 4. On redirige vers le chat interne (amis.html)
+  setTimeout(() => {
+    location.href = 'amis.html';
+  }, 800);
 }
 </script>
 </body>
