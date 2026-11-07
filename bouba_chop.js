@@ -1,10 +1,9 @@
 document.addEventListener("DOMContentLoaded", function() {
     if (document.getElementById('bouba-shop')) return;
 
-    // 1. On crée le style du bouton et de la boutique
     const style = document.createElement('style');
     style.innerHTML = `
-        /* Le bouton Boutique qui va se coller au-dessus de "Conseils" */
+        /* Le bouton Boutique */
         .bouba-fab {
             position: fixed; 
             background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; 
@@ -44,7 +43,6 @@ document.addEventListener("DOMContentLoaded", function() {
         { id: 2, nom: "Ensemble Marrón", prix: "12 000 F", img: "https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=400" }
     ];
 
-    // 2. On injecte le bouton et la boutique dans la page
     const appContainer = document.createElement('div');
     appContainer.innerHTML = `
         <button id="btn-open-bouba" class="bouba-fab">🛍️ BOUTIQUE ✨</button>
@@ -72,41 +70,41 @@ document.addEventListener("DOMContentLoaded", function() {
     `;
     document.body.appendChild(appContainer);
 
-    // 3. LA MAGIE : On place le bouton juste au-dessus de "Conseils"
+    // --- PLACEMENT INTELLIGENT ---
     function positionnerBouton() {
         const btnShop = document.getElementById('btn-open-bouba');
-        
-        // On cherche le bouton "Conseils" sur ta page
-        const tousLesElements = document.querySelectorAll('*');
+        const tousLesElements = document.querySelectorAll('div, button, span'); // On cherche partout
         let btnConseils = null;
 
         tousLesElements.forEach(el => {
-            // On cherche l'élément qui contient exactement "Conseils" et qui est visible
-            if (el.innerText && el.innerText.trim() === 'Conseils' && el.getBoundingClientRect().width > 0) {
-                // On s'assure de prendre le bouton le plus bas (le vrai bouton flottant)
-                if (!btnConseils || el.getBoundingClientRect().top > btnConseils.getBoundingClientRect().top) {
-                    btnConseils = el;
+            // On cherche un élément qui contient le mot "Conseils" (peu importe l'émoji)
+            if (el.innerText && el.innerText.includes('Conseils') && !el.closest('#bouba-shop')) {
+                // On vérifie que c'est bien le bouton flottant (largeur > 0)
+                if (el.getBoundingClientRect().width > 0) {
+                     if (!btnConseils || el.getBoundingClientRect().top > btnConseils.getBoundingClientRect().top) {
+                        btnConseils = el;
+                    }
                 }
             }
         });
 
         if (btnConseils) {
             const rect = btnConseils.getBoundingClientRect();
-            // On place notre bouton Shop 10px au-dessus du bouton Conseils
+            // On le place juste 10 pixels au-dessus du bouton Conseils
             btnShop.style.bottom = (window.innerHeight - rect.top + 10) + 'px';
             btnShop.style.left = rect.left + 'px';
         } else {
-            // Si "Conseils" n'est pas trouvé, on le met par défaut en bas à gauche
+            // Si vraiment il ne trouve pas, on le met par défaut en bas à gauche
             btnShop.style.bottom = '140px';
             btnShop.style.left = '20px';
         }
     }
 
-    // On lance le positionnement, et on le refait si la taille de l'écran change
-    setTimeout(positionnerBouton, 500); // Petit délai pour laisser la page charger
+    // On lance le positionnement dès que la page est prête
+    setTimeout(positionnerBouton, 500); 
     window.addEventListener('resize', positionnerBouton);
 
-    // 4. Ouverture / Fermeture de la boutique
+    // Ouverture / Fermeture
     document.getElementById('btn-open-bouba').addEventListener('click', () => {
         document.getElementById('bouba-shop').classList.add('active');
     });
