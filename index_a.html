@@ -1340,6 +1340,53 @@ onValue(reviewsRef, (snapshot) => {
     });
 });
  </script>
+ <!-- 👇 LE BOUTON BOUTIQUE À PLACER 👇 -->
+<style>
+    #btn-open-bouba {
+        position: fixed;
+        bottom: 210px; /* C'est ce chiffre qui décide de la hauteur. Si c'est trop haut, baisse-le (ex: 190px). S'il cache Conseils, augmente-le (ex: 230px) */
+        left: 20px;    /* Aligné à gauche, comme le bouton Conseils */
+        background: linear-gradient(135deg, #FFD700, #FFA500);
+        color: #000;
+        border: 2px solid #00FF00;
+        border-radius: 50px;
+        padding: 10px 15px;
+        font-weight: bold;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+        z-index: 999999; /* Pour passer au-dessus de tout */
+        animation: pulseBouba 1.5s infinite alternate;
+    }
+
+    #btn-open-bouba:active {
+        transform: scale(0.9);
+    }
+
+    @keyframes pulseBouba {
+        0% { box-shadow: 0 0 10px #FFD700; }
+        100% { box-shadow: 0 0 25px #00FF00, inset 0 0 10px #FFD700; }
+    }
+</style>
+
+<button id="btn-open-bouba">🛍️ BOUTIQUE ✨</button>
+
+<!-- Le script qui gère l'ouverture de la boutique -->
+<script>
+    document.getElementById('btn-open-bouba').addEventListener('click', function() {
+        // On cherche la boutique et on l'affiche
+        const shop = document.getElementById('bouba-shop');
+        if(shop) {
+            shop.classList.add('active');
+        } else {
+            alert("La boutique charge... Essaie encore.");
+        }
+    });
+</script>
+<!-- 👆 FIN DU BOUTON 👆 -->
 </body>
 </html>
 
