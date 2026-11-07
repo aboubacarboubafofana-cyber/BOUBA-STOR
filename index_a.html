@@ -644,6 +644,31 @@ async function shareProd(id){
  }
 }
 
+function renderStore(){
+ const info=S.info||{};
+ $('shopName').textContent=info.name||'BOUBA STOR';
+ if(info.banner)$('bannerText').textContent=info.banner;
+ if(info.logo)$('logo').src=info.logo;
+ const cs=['all',...new Set(prods().map(p=>p.cat).filter(Boolean))];
+ $('cats').innerHTML=cs.map(c=>'<button class="cat'+(c===cat?' active':'')+'" onclick="cat=\''+esc(c)+'\';renderStore()">'+(c==='all'?'Tout':esc(c))+'</button>').join('');
+ 
+ const t=q.toLowerCase();
+ const l=prods().filter(p=>
+  (cat==='all'||p.cat===cat) &&
+  (brand==='all'||p.brand===brand) &&
+  (p.name||'').toLowerCase().includes(t)
+ );
+ const sig=cat+'|'+brand+'|'+q;if(sig!==window._ssig){window._ssig=sig;SHOWN=LITE?12:24}
+ 
+ $('grid').innerHTML=l.length?l.slice(0,SHOWN).map(p=>'<div class="card" style="cursor:pointer;" onclick="openProduct(\''+p.id+'\')">'+
+  (p.stock===false?'<span class="badge">ÉPUISÉ</span>':'')+
+  '<img loading="lazy" decoding="async" src="'+safeImg(p.img)+'">'+
+  '<div class="info"><b>'+esc(p.name)+'</b><br><span style="color:gold">'+fmt(p.price)+' F</span>'+
+  '<button class="btn" '+(p.stock===false?'disabled':'')+' onclick="event.stopPropagation();addCart(\''+p.id+'\')">🛒 Ajouter</button></div></div>').join('')+
+  (l.length>SHOWN?'<div id="moreS" style="grid-column:1/3;text-align:center"><button class="gold" style="width:100%" onclick="SHOWN+=30;renderStore()">Afficher la suite ('+(l.length-SHOWN)+' articles)</button></div>':'')+
+  '': '<p style="grid-column:1/3;text-align:center;color:#888;padding:30px">Aucun article</p>';
+}
+
 function addShare(){
  document.querySelectorAll('#grid .card').forEach(c=>{
   if(c.querySelector('.shb'))return;
@@ -689,7 +714,7 @@ function sendIA(){
   r=h.length?'Voici ce que j\'ai trouvé 👇'+iaCards(h):'Je n\'ai pas trouvé 😕. Voici nos nouveautés :'+iaCards(all);
  }else r='Je peux chercher un article, ou te donner les infos livraison, paiement et contact.';
  setTimeout(()=>iaSay(r),300);
-}
+ }
 /* ===== ASSISTANTE V2 ===== */
 const IA_INFO={
  livraison:'🚚 Livraison en 24H à Abidjan. Indique ton quartier en commandant, on te confirme le tarif sur WhatsApp.',
