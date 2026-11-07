@@ -1,48 +1,41 @@
 document.addEventListener("DOMContentLoaded", function() {
-    // Si le bouton existe déjà, on ne le recrée pas
-    if (document.getElementById('btn-open-bouba')) return;
+    if (document.getElementById('bouba-shop')) return;
 
+    // 1. On crée le style du bouton et de la boutique
     const style = document.createElement('style');
     style.innerHTML = `
-        /* BOUTON BOUTIQUE VITALITÉ */
+        /* Le bouton Boutique qui va se coller au-dessus de "Conseils" */
         .bouba-fab {
-            position: fixed; bottom: 85px; right: 15px;
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            color: #000; border: 2px solid #00FF00; border-radius: 50px;
-            padding: 10px 15px; font-weight: bold; font-size: 14px;
+            position: fixed; 
+            background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; 
+            border: 2px solid #00FF00; border-radius: 50px; padding: 10px 15px; font-weight: bold; font-size: 14px;
             display: flex; align-items: center; gap: 8px; cursor: pointer;
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.8); z-index: 99999;
-            animation: shop-pulse 1.5s infinite alternate;
-            transition: all 0.1s;
+            animation: shop-pulse 1.5s infinite alternate; transition: transform 0.1s;
+            white-space: nowrap;
         }
         .bouba-fab:active { transform: scale(0.9); box-shadow: 0 0 25px #00FF00; }
-        @keyframes shop-pulse { 
-            0% { box-shadow: 0 0 10px #FFD700; } 
-            100% { box-shadow: 0 0 25px #00FF00, inset 0 0 10px #FFD700; } 
-        }
+        @keyframes shop-pulse { 0% { box-shadow: 0 0 10px #FFD700; } 100% { box-shadow: 0 0 25px #00FF00, inset 0 0 10px #FFD700; } }
 
-        /* OVERLAY BOUTIQUE */
+        /* L'interface de la boutique */
         .bouba-shop-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #000; z-index: 100000; display: none;
             flex-direction: column; overflow-y: auto; opacity: 0; transition: opacity 0.2s;
         }
         .bouba-shop-overlay.active { display: flex; opacity: 1; }
-        
         .bouba-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 2px solid #FFD700; }
         .bouba-title { color: #FFD700; font-size: 20px; margin: 0; text-shadow: 0 0 10px #FFD700; }
-        .bouba-close-btn { background: #FFD700; color: #000; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; }
-        
+        .bouba-close-btn { background: #FFD700; color: #000; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; }
         .bouba-search-container { padding: 15px; }
-        .bouba-search { width: 100%; padding: 12px; border-radius: 30px; border: 2px solid #00FF00; background: #111; color: white; outline: none; }
-        
+        .bouba-search { width: 100%; padding: 12px; border-radius: 30px; border: 2px solid #00FF00; background: #111; color: white; outline: none; box-sizing: border-box; }
         .bouba-products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; padding-bottom: 100px; }
         .bouba-card { background: #111; border: 1px solid #FFD700; border-radius: 10px; overflow: hidden; }
         .bouba-card-img { width: 100%; height: 150px; object-fit: cover; }
         .bouba-card-content { padding: 10px; }
         .bouba-card-title { color: white; font-size: 12px; margin: 0; }
         .bouba-card-price { color: #FFD700; font-weight: bold; font-size: 14px; margin: 5px 0; }
-        .bouba-btn-add { background: #00FF00; color: #000; border: none; border-radius: 5px; padding: 8px; font-weight: bold; width: 100%; margin-top: 5px; }
+        .bouba-btn-add { background: #00FF00; color: #000; border: none; border-radius: 5px; padding: 8px; font-weight: bold; width: 100%; margin-top: 5px; cursor: pointer; }
     `;
     document.head.appendChild(style);
 
@@ -51,9 +44,10 @@ document.addEventListener("DOMContentLoaded", function() {
         { id: 2, nom: "Ensemble Marrón", prix: "12 000 F", img: "https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=400" }
     ];
 
+    // 2. On injecte le bouton et la boutique dans la page
     const appContainer = document.createElement('div');
     appContainer.innerHTML = `
-        <button id="btn-open-bouba" class="bouba-fab">🎁 BOUTIQUE ✨</button>
+        <button id="btn-open-bouba" class="bouba-fab">🛍️ BOUTIQUE ✨</button>
         <div id="bouba-shop" class="bouba-shop-overlay">
             <div class="bouba-header">
                 <h2 class="bouba-title">👑 BOUBA STOR</h2>
@@ -78,6 +72,41 @@ document.addEventListener("DOMContentLoaded", function() {
     `;
     document.body.appendChild(appContainer);
 
+    // 3. LA MAGIE : On place le bouton juste au-dessus de "Conseils"
+    function positionnerBouton() {
+        const btnShop = document.getElementById('btn-open-bouba');
+        
+        // On cherche le bouton "Conseils" sur ta page
+        const tousLesElements = document.querySelectorAll('*');
+        let btnConseils = null;
+
+        tousLesElements.forEach(el => {
+            // On cherche l'élément qui contient exactement "Conseils" et qui est visible
+            if (el.innerText && el.innerText.trim() === 'Conseils' && el.getBoundingClientRect().width > 0) {
+                // On s'assure de prendre le bouton le plus bas (le vrai bouton flottant)
+                if (!btnConseils || el.getBoundingClientRect().top > btnConseils.getBoundingClientRect().top) {
+                    btnConseils = el;
+                }
+            }
+        });
+
+        if (btnConseils) {
+            const rect = btnConseils.getBoundingClientRect();
+            // On place notre bouton Shop 10px au-dessus du bouton Conseils
+            btnShop.style.bottom = (window.innerHeight - rect.top + 10) + 'px';
+            btnShop.style.left = rect.left + 'px';
+        } else {
+            // Si "Conseils" n'est pas trouvé, on le met par défaut en bas à gauche
+            btnShop.style.bottom = '140px';
+            btnShop.style.left = '20px';
+        }
+    }
+
+    // On lance le positionnement, et on le refait si la taille de l'écran change
+    setTimeout(positionnerBouton, 500); // Petit délai pour laisser la page charger
+    window.addEventListener('resize', positionnerBouton);
+
+    // 4. Ouverture / Fermeture de la boutique
     document.getElementById('btn-open-bouba').addEventListener('click', () => {
         document.getElementById('bouba-shop').classList.add('active');
     });
