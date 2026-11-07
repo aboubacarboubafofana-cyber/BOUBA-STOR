@@ -487,34 +487,58 @@ const msg='Commande #'+id+'\n'+l.map(x=>'• '+x.p.name+' x'+x.qty+' = '+fmt(x.p
 
 /* ----- compte client ----- */
 function checkGate(){if(me){$('gate').style.display='none';document.body.classList.remove('gated');loadProfile()}else{$('gate').style.display='flex';document.body.classList.add('gated')}}
-/* ----- indicatifs de tous les pays (choix) ----- */
-const CC_DATA="CI|Côte d'Ivoire|225;ZA|Afrique du Sud|27;AL|Albanie|355;DZ|Algérie|213;DE|Allemagne|49;AD|Andorre|376;AO|Angola|244;AG|Antigua-et-Barbuda|1268;SA|Arabie saoudite|966;AR|Argentine|54;AM|Arménie|374;AU|Australie|61;AT|Autriche|43;AZ|Azerbaïdjan|994;BS|Bahamas|1242;BH|Bahreïn|973;BD|Bangladesh|880;BB|Barbade|1246;BE|Belgique|32;BZ|Belize|501;BJ|Bénin|229;BT|Bhoutan|975;BY|Biélorussie|375;MM|Birmanie (Myanmar)|95;BO|Bolivie|591;BA|Bosnie-Herzégovine|387;BW|Botswana|267;BR|Brésil|55;BN|Brunei|673;BG|Bulgarie|359;BF|Burkina Faso|226;BI|Burundi|257;KH|Cambodge|855;CM|Cameroun|237;CA|Canada|1;CV|Cap-Vert|238;CL|Chili|56;CN|Chine|86;CY|Chypre|357;CO|Colombie|57;KM|Comores|269;CG|Congo-Brazzaville|242;CD|RD Congo|243;KR|Corée du Sud|82;KP|Corée du Nord|850;CR|Costa Rica|506;HR|Croatie|385;CU|Cuba|53;DK|Danemark|45;DJ|Djibouti|253;DM|Dominique|1767;EG|Égypte|20;SV|Salvador|503;AE|Émirats arabes unis|971;EC|Équateur|593;ER|Érythrée|291;ES|Espagne|34;EE|Estonie|372;SZ|Eswatini|268;US|États-Unis|1;ET|Éthiopie|251;FJ|Fidji|679;FI|Finlande|358;FR|France|33;GA|Gabon|241;GM|Gambie|220;GE|Géorgie|995;GH|Ghana|233;GR|Grèce|30;GD|Grenade|1473;GP|Guadeloupe|590;GT|Guatemala|502;GN|Guinée|224;GQ|Guinée équatoriale|240;GW|Guinée-Bissau|245;GY|Guyana|592;GF|Guyane française|594;HT|Haïti|509;HN|Honduras|504;HK|Hong Kong|852;HU|Hongrie|36;IN|Inde|91;ID|Indonésie|62;IQ|Irak|964;IR|Iran|98;IE|Irlande|353;IS|Islande|354;IL|Israël|972;IT|Italie|39;JM|Jamaïque|1876;JP|Japon|81;JO|Jordanie|962;KZ|Kazakhstan|7;KE|Kenya|254;KG|Kirghizistan|996;KI|Kiribati|686;XK|Kosovo|383;KW|Koweït|965;LA|Laos|856;LS|Lesotho|266;LV|Lettonie|371;LB|Liban|961;LR|Libéria|231;LY|Libye|218;LI|Liechtenstein|423;LT|Lituanie|370;LU|Luxembourg|352;MO|Macao|853;MK|Macédoine du Nord|389;MG|Madagascar|261;MY|Malaisie|60;MW|Malawi|265;MV|Maldives|960;ML|Mali|223;MT|Malte|356;MA|Maroc|212;MQ|Martinique|596;MU|Maurice|230;MR|Mauritanie|222;MX|Mexique|52;FM|Micronésie|691;MD|Moldavie|373;MC|Monaco|377;MN|Mongolie|976;ME|Monténégro|382;MZ|Mozambique|258;NA|Namibie|264;NR|Nauru|674;NP|Népal|977;NI|Nicaragua|505;NE|Niger|227;NG|Nigeria|234;NO|Norvège|47;NC|Nouvelle-Calédonie|687;NZ|Nouvelle-Zélande|64;OM|Oman|968;UG|Ouganda|256;UZ|Ouzbékistan|998;PK|Pakistan|92;PW|Palaos|680;PS|Palestine|970;PA|Panama|507;PG|Papouasie-Nouvelle-Guinée|675;PY|Paraguay|595;NL|Pays-Bas|31;PE|Pérou|51;PH|Philippines|63;PL|Pologne|48;PF|Polynésie française|689;PR|Porto Rico|1787;PT|Portugal|351;QA|Qatar|974;CF|Centrafrique|236;DO|République dominicaine|1809;CZ|Tchéquie|420;RE|La Réunion|262;RO|Roumanie|40;GB|Royaume-Uni|44;RU|Russie|7;RW|Rwanda|250;KN|Saint-Kitts-et-Nevis|1869;SM|Saint-Marin|378;VC|Saint-Vincent-et-les-Grenadines|1784;LC|Sainte-Lucie|1758;SB|Îles Salomon|677;WS|Samoa|685;ST|Sao Tomé-et-Principe|239;SN|Sénégal|221;RS|Serbie|381;SC|Seychelles|248;SL|Sierra Leone|232;SG|Singapour|65;SK|Slovaquie|421;SI|Slovénie|386;SO|Somalie|252;SD|Soudan|249;SS|Soudan du Sud|211;LK|Sri Lanka|94;SE|Suède|46;CH|Suisse|41;SR|Suriname|597;SY|Syrie|963;TJ|Tadjikistan|992;TW|Taïwan|886;TZ|Tanzanie|255;TD|Tchad|235;TH|Thaïlande|66;TL|Timor oriental|670;TG|Togo|228;TO|Tonga|676;TT|Trinité-et-Tobago|1868;TN|Tunisie|216;TM|Turkménistan|993;TR|Turquie|90;TV|Tuvalu|688;UA|Ukraine|380;UY|Uruguay|598;VU|Vanuatu|678;VA|Vatican|379;VE|Venezuela|58;VN|Vietnam|84;YE|Yémen|967;ZM|Zambie|260;ZW|Zimbabwe|263";
-function ccFlag(i){return String.fromCodePoint.apply(null,i.split('').map(c=>127397+c.charCodeAt(0)))}
+
+const CC_DATA="CI|Côte d'Ivoire|225;FR|France|33;US|États-Unis|1;SN|Sénégal|221;ML|Mali|223;BF|Burkina Faso|226;TG|Togo|228;BJ|Bénin|229;CM|Cameroun|237;CA|Canada|1;BE|Belgique|32;CH|Suisse|41;GB|Royaume-Uni|44;DE|Allemagne|49;ES|Espagne|34;IT|Italie|39;MA|Maroc|212;DZ|Algérie|213;TN|Tunisie|216;NG|Nigeria|234;GH|Ghana|233";
+
+function ccFlag(i){
+  return String.fromCodePoint.apply(null,i.split('').map(c=>127397+c.charCodeAt(0)));
+}
+
 function fillCc(){
- const s=$('uCc');if(!s)return;
- const l=CC_DATA.split(';').map(x=>x.split('|')),first=l.shift();
- l.sort((a,b)=>a[1].localeCompare(b[1],'fr'));l.unshift(first);
- s.innerHTML=l.map(x=>'<option value="'+x[2]+'">'+ccFlag(x[0])+' '+x[1]+' (+'+x[2]+')</option>').join('');
- s.value=LS('b_cc','225');if(!s.value)s.value='225';
+  const s = document.getElementById('uCc');
+  if(!s) return;
+  try {
+    const l = CC_DATA.split(';').map(x=>x.split('|'));
+    s.innerHTML = l.map(x=>'<option value="'+x[2]+'">'+ccFlag(x[0])+' '+x[1]+' (+'+x[2]+')</option>').join('');
+    let saved = '225';
+    try { saved = JSON.parse(localStorage.getItem('b_cc')) || '225'; } catch(e){}
+    s.value = saved;
+    if(!s.value) s.value = '225';
+  } catch(e) {
+    s.innerHTML = '<option value="225">🇨🇮 Côte d\'Ivoire (+225)</option>';
+  }
 }
 fillCc();
-function register(){
- const n=$('uName').value.trim(),raw=$('uPhone').value.trim(),city=$('uCity').value.trim(),dial=$('uCc').value||'225';
- if(!n||!raw||!city){alert('Remplis tout BOSS !');return}
- let local=raw.replace(/\D/g,''),full;
- if(/^(\+|00)/.test(raw))full=local.replace(/^00/,'');
- else{if(dial!=='225')local=local.replace(/^0+/,'');full=dial+local}
- if(full.length<8||full.length>15){alert('Numéro invalide');return}
- SV('b_cc',dial);
- const key=full,ph='+'+full;
- me={key,name:n,phone:ph,city,date:Date.now()};SV('b_me',me);
- write('users/'+key,me);checkGate();
+
+function doRegister(){
+  try {
+    const n = document.getElementById('uName').value.trim();
+    const raw = document.getElementById('uPhone').value.trim();
+    const city = document.getElementById('uCity').value.trim();
+    const selectCc = document.getElementById('uCc');
+    const dial = selectCc ? (selectCc.value || '225') : '225';
+    if(!n || !raw || !city){ alert('Remplis tous les champs pour continuer !'); return; }
+    let local = raw.replace(/\D/g,'');
+    let full;
+    if(/^(\+|00)/.test(raw)){ full = local.replace(/^00/,''); } else { if(dial !== '225') { local = local.replace(/^0+/, ''); } full = dial + local; }
+    if(full.length < 8 || full.length > 15){ alert('Numéro invalide'); return; }
+    const key = full;
+    const ph = '+' + full;
+    me = { key: key, name: n, phone: ph, city: city, date: Date.now() };
+    SV('b_cc', dial);
+    SV('b_me', me);
+    if(typeof write === 'function') { try { write('users/' + key, me); } catch(e) {} }
+    window.location.reload();
+  } catch (err) {
+    alert("Erreur : " + err.message);
+  }
 }
+
 function loadProfile(){$('eName').value=me.name;$('ePhone').value=me.phone;$('eCity').value=me.city}
 function saveProfile(){
- me.name=$('eName').value.trim()||me.name;me.phone=$('ePhone').value.trim()||me.phone;me.city=$('eCity').value.trim()||me.city;
- SV('b_me',me);write('users/'+me.key,me);toast('✅ Profil sauvé');
-}
+  me.name=$('eName').value.trim()||me.name;me.phone=$('ePhone').value.trim()||me.phone;me.city=$('eCity').value.trim()||me.city;
+  SV('b_me',me);write('users/'+me.key,me);toast('✅ Profil sauvé');
+ }
 function logout(){me=null;localStorage.removeItem('b_me');closeAll();checkGate()}
 </script><script>
 /* ----- ADMIN ----- */
