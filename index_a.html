@@ -962,9 +962,7 @@ async function partagerAvecPhoto(nomProduit, base64Image) {
 }
  </script>
  <script>
-alert('Bouton cliqué ! L\'ID est : ' + id);
-
-  // Si l'image est cassée ou en Base64, on partage juste le texte et le lien
+// Si l'image est cassée ou en Base64, on partage juste le texte et le lien
   if (navigator.share) {
     await navigator.share({ title: 'BOuba STOR', text: textePartage });
   } else {
