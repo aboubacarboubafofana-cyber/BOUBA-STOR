@@ -271,7 +271,7 @@ function renderSoon(){if(_rt)return;_rt=setTimeout(()=>{_rt=0;renderAll()},150)}
 const _io=('IntersectionObserver' in window)?new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){_io.disconnect();SHOWN+=30;renderStore()}},{rootMargin:'900px'}):null;
 function watchMore(){if(!_io)return;const s=document.getElementById('moreS');if(s)_io.observe(s)}
 if(_io&&document.getElementById('grid'))new MutationObserver(watchMore).observe(document.getElementById('grid'),{childList:true});
-</script>
+
 let _svt=0;
 function saveState(){clearTimeout(_svt);_svt=0;try{localStorage.setItem('b_state',JSON.stringify(S))}catch(e){try{localStorage.setItem('b_state',JSON.stringify(S,(k,v)=>((k==='img'||k==='cover'||k==='av')&&typeof v==='string'&&v.length>2000)?undefined:v))}catch(e2){}}}
 function save(){SV('b_out',outbox);if(!_svt)_svt=setTimeout(saveState,900)}
