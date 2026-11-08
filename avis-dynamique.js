@@ -57,3 +57,80 @@
   setAvisStars(5);
 
   window.closeAvisModal = function() { modal.classList.remove('show'); };
+
+  // 3. Envoi de l'avis vers Firebase
+  window.submitAvis = function() {
+    var name = document.getElementById('amName').value.trim();
+    var city = document.getElementById('amCity').value.trim();
+    var text = document.getElementById('amText').value.trim();
+
+    if (!name || !text) {
+      alert("Veuillez remplir votre nom et votre message.");
+      return;
+    }
+
+    var id = 'av_' + Date.now();
+    var avisObj = {
+      id: id, name: name, city: city || 'Abidjan',
+      text: text, stars: currentStars, date: Date.now()
+    };
+
+    if (typeof window.write === 'function') {
+      window.write('reviews/' + id, avisObj);
+      alert('✅ Merci ! Votre avis a bien été enregistré.');
+      closeAvisModal();
+      document.getElementById('amName').value = '';
+      document.getElementById('amCity').value = '';
+      document.getElementById('amText').value = '';
+    } else {
+      alert("Erreur : impossible d'enregistrer l'avis pour le moment.");
+    }
+  };
+
+  // 4. Affichage des avis
+  function renderAvis() {
+    var container = document.getElementById('avis-container');
+    if (!container) return;
+
+    var S = window.S || {};
+    var allAvis = S.reviews || {};
+    var list = Object.values(allAvis).filter(function(a) { return a && a.name && a.text; });
+    list.sort(function(a, b) { return b.date - a.date; });
+
+    var html = '<h3 class="avis-title">⭐ Ce que disent nos clients</h3>';
+    
+    if (list.length === 0) {
+      html += '<p style="color:#888; text-align:center; font-size:13px;">Aucun avis pour le moment. Soyez le premier !</p>';
+    } else {
+      html += '<div class="avis-scroll">';
+      list.slice(0, 10).forEach(function(a) {
+        var stars = '';
+        for (var i = 0; i < 5; i++) { stars += (i < a.stars) ? '★' : '☆'; }
+        html += `
+          <div class="avis-card">
+            <div class="avis-stars">${stars}</div>
+            <p class="avis-text">"${a.text}"</p>
+            <span class="avis-name">- ${a.name}, ${a.city}</span>
+          </div>
+        `;
+      });
+      html += '</div>';
+    }
+    html += `<button class="avis-btn-add" onclick="document.getElementById('avisModal').classList.add('show')">✍️ Laisser un avis</button>`;
+    container.innerHTML = html;
+  }
+
+  // 5. Écoute Firebase
+  setTimeout(function() {
+    if (window.fb && window.fb.D && window.fb.db) {
+      window.fb.D.onValue(window.fb.D.ref(window.fb.db, 'reviews'), function(snap) {
+        if (!window.S) window.S = {};
+        window.S.reviews = snap.val() || {};
+        renderAvis();
+      });
+    } else {
+      setTimeout(renderAvis, 2000);
+    }
+  }, 1500);
+
+})();
