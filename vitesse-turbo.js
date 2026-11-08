@@ -1,10 +1,6 @@
-/* =============================================================
-   PONT FIRESTORE INTELLIGENT (Injecte les articles dans l'index)
-   ============================================================= */
 (function() {
   'use strict';
 
-  // 1. On attend 2 secondes que le site principal charge
   setTimeout(async function() {
     try {
       const B = "https://www.gstatic.com/firebasejs/12.19.0/";
@@ -12,75 +8,61 @@
       const FS = await import(B + "firebase-firestore.js");
 
       let app;
-      try { app = A.getApp(); } catch(e) { console.log('Firebase non initialisé'); return; }
+      try { app = A.getApp(); } catch(e) { return; }
       const db = FS.getFirestore(app);
-
-      // On s'assure que le cache global existe
       window.__baData = window.__baData || {};
 
-      // Fonction pour ajouter un article dans le système du site
       function addProductToGlobal(p, prefix) {
         const id = prefix + p.id; 
+        // ON CHERCHE LA PHOTO PARTOUT !
+        const imgUrl = p.img || p.image || p.photo || p.pic || p.avatar || '';
+        
         const prodObj = {
           id: id,
           name: p.name,
           price: p.price,
           cat: p.cat || p.category || 'Autres',
-          img: p.img || p.image || '',
+          img: imgUrl,
           stock: p.stock !== false,
           date: p.date || Date.now()
         };
 
-        // 🔥 LA CLÉ EST ICI : On l'ajoute dans la variable S de ton index.html
         if (typeof S !== 'undefined' && S.products) {
           S.products[id] = prodObj;
         }
-        // On l'ajoute aussi dans le cache de secours (pour le panier)
         window.__baData[id] = { a: prodObj };
       }
 
-      // Fonction pour redessiner la boutique
       function refreshStore() {
-        if (typeof renderStore === 'function') {
-          renderStore(); // Ton site va se mettre à jour tout seul !
-        }
+        if (typeof renderStore === 'function') renderStore();
       }
 
-      // 2. ÉCOUTE DES ARTICLES (Collection "articles")
       FS.onSnapshot(FS.collection(db, 'articles'), (snap) => {
         snap.forEach(doc => {
           const p = doc.data();
-          if (p.name && p.price) {
-            addProductToGlobal({...p, id: doc.id}, 'fs_art_');
-          }
+          if (p.name && p.price) addProductToGlobal({...p, id: doc.id}, 'fs_art_');
         });
         refreshStore();
       });
 
-      // 3. ÉCOUTE DES BOUTIQUES (Collection "boutiques")
       FS.onSnapshot(FS.collection(db, 'boutiques'), (snap) => {
         snap.forEach(doc => {
           const p = doc.data();
-          // Parfois un document boutique contient un tableau de produits
           if (p.products && Array.isArray(p.products)) {
              p.products.forEach((prod, i) => {
                addProductToGlobal({...prod, id: doc.id + '_' + i}, 'fs_bou_');
              });
-          }
-          // Parfois le doc lui-même est un article
-          else if (p.name && p.price) {
+          } else if (p.name && p.price) {
             addProductToGlobal({...p, id: doc.id}, 'fs_bou_');
           }
         });
         refreshStore();
       });
 
-    } catch(e) {
-      console.log('Erreur Pont Firestore:', e);
-    }
-  }, 2500); // 2.5s de délai pour laisser le site charger ses propres articles
+    } catch(e) { console.log('Erreur Pont:', e); }
+  }, 2000);
 
-  // --- BOUTONS ON/OFF (Catalogue & Turbo) ---
+  // --- BOUTONS ON/OFF ---
   var isCatOn = localStorage.getItem('mod_catalogue') !== 'off';
   var isTurboOn = localStorage.getItem('mod_turbo') !== 'off';
 
