@@ -14,7 +14,7 @@
 
       function addProductToGlobal(p, prefix) {
         const id = prefix + p.id; 
-        // ON CHERCHE LA PHOTO PARTOUT !
+        // On cherche la photo sous tous les noms possibles
         const imgUrl = p.img || p.image || p.photo || p.pic || p.avatar || '';
         
         const prodObj = {
@@ -62,7 +62,6 @@
     } catch(e) { console.log('Erreur Pont:', e); }
   }, 2000);
 
-  // --- BOUTONS ON/OFF ---
   var isCatOn = localStorage.getItem('mod_catalogue') !== 'off';
   var isTurboOn = localStorage.getItem('mod_turbo') !== 'off';
 
