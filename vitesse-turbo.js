@@ -4,49 +4,80 @@
 (function() {
   'use strict';
 
-  // 1. Fonction pour aller chercher les articles sur Firestore (Boutons boutiques)
-  async function chargerArticlesFirestore() {
+  // 1. Pont Firestore
+  async function initBridge() {
+    if (window._bridgeInitialized) return;
+    window._bridgeInitialized = true;
+
     try {
-      // On importe la config de ton site
       const cfg = await import('./firebase-config.js');
-      const app = cfg.app || (cfg.db && cfg.db.app);
-      if (!app) return console.log('Pont: App Firebase introuvable');
-      
+      const db = cfg.db || cfg.default || window.db;
+      if (!db) return console.log('Pont: Firebase introuvable');
+
       const fs = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
-      const db = fs.getFirestore(app);
-      
-      // On écoute les collections où tes boutiques enregistrent leurs articles
-      const collections = ['articles', 'products', 'boutiques'];
-      
-      collections.forEach(colName => {
-        fs.onSnapshot(fs.collection(db, colName), (snap) => {
-          if (!window.S) window.S = {};
-          if (!window.S.products) window.S.products = {};
-          
+      window.__baData = window.__baData || {};
+
+      const cols = ['articles', 'products', 'boutiques'];
+
+      cols.forEach(col => {
+        fs.onSnapshot(fs.collection(db, col), (snap) => {
           snap.forEach(doc => {
             const p = doc.data();
-            // On vérifie que c'est bien un article avec un nom et un prix
             if (p.name && p.price) {
-              const id = 'fs_' + doc.id; // On ajoute 'fs_' pour ne pas écraser tes propres articles
-              window.S.products[id] = {
+              const id = 'fs_' + doc.id;
+              window.__baData[id] = { a: {
                 id: id,
                 name: p.name,
                 price: p.price,
                 cat: p.cat || p.category || 'Autres',
                 img: p.img || p.image || '',
                 stock: p.stock !== false,
-                date: p.date || Date.now(),
-                isFirestore: true
-              };
+                date: p.date || Date.now()
+              }};
             }
           });
-          
-          // On demande à ton site de se mettre à jour pour afficher ces nouveaux articles
-          if (typeof window.renderStore === 'function') {
-            window.renderStore();
-          }
+          if (window.renderStore) window.renderStore();
         });
       });
+
+      // On enveloppe le renderStore pour ajouter nos articles à la suite
+      if (window.renderStore && !window._bridgePatched) {
+        window._bridgePatched = true;
+        const _orig = window.renderStore;
+        window.renderStore = function() {
+          _orig.apply(this, arguments);
+          
+          const grid = document.getElementById('grid');
+          if (!grid) return;
+
+          const activeCatBtn = document.querySelector('#cats .cat.active');
+          const activeCat = activeCatBtn ? (activeCatBtn.textContent === 'Tout' ? 'all' : activeCatBtn.textContent) : 'all';
+          const searchVal = (document.getElementById('qIn')?.value || '').toLowerCase();
+
+          const fsItems = Object.values(window.__baData).filter(x => {
+            let p = x.a;
+            if (activeCat !== 'all' && p.cat !== activeCat) return false;
+            if (searchVal && !p.name.toLowerCase().includes(searchVal)) return false;
+            return true;
+          }).map(x => x.a);
+
+          if (fsItems.length === 0) return;
+
+          const fsHtml = fsItems.map(p => `
+            <div class="card" data-pid="${p.id}">
+              ${p.stock === false ? '<span class="badge">ÉPUISÉ</span>' : ''}
+              <img loading="lazy" decoding="async" src="${p.img}">
+              <div class="info">
+                <b>${p.name}</b><br>
+                <span style="color:gold">${Number(p.price).toLocaleString('fr-FR')} F</span>
+                <button class="btn" ${p.stock === false ? 'disabled' : ''} onclick="addCart('${p.id}')">🛒 Ajouter</button>
+              </div>
+            </div>
+          `).join('');
+          
+          grid.innerHTML += fsHtml;
+        };
+      }
     } catch(e) {
       console.log('Erreur Pont Firestore:', e);
     }
@@ -56,21 +87,16 @@
   var isCatOn = localStorage.getItem('mod_catalogue') !== 'off';
   var isTurboOn = localStorage.getItem('mod_turbo') !== 'off';
 
-  // 3. Chargement des scripts
   window.addEventListener('load', function() {
     setTimeout(function() {
-      
-      // On active le pont pour les autres boutiques
-      chargerArticlesFirestore();
+      initBridge(); // On active le pont
 
-      // Si le bouton Catalogue est sur ON
       if (isCatOn) {
         var catScript = document.createElement('script');
         catScript.src = "catalogue-articles.js";
         document.body.appendChild(catScript);
       }
 
-      // Si le bouton Turbo est sur ON
       if (isTurboOn) {
         var ads = document.createElement('script');
         ads.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6646794626292067";
@@ -91,10 +117,10 @@
         chat.src = "bouba-chat.js";
         document.body.appendChild(chat);
       }
-    }, 2000); // On attend 2 secondes que la page principale charge
+    }, 1500);
   });
 
-  // 4. Fonctions pour les boutons ON/OFF
+  // 3. Boutons
   window.toggleModule = function(mod) {
     var key = mod === 'cat' ? 'mod_catalogue' : 'mod_turbo';
     var current = localStorage.getItem(key) !== 'off';
@@ -112,5 +138,4 @@
   };
   
   setInterval(window.updateButtons, 1000);
-
 })();
