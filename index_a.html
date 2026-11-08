@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOUBA STOR - Boutique Mondiale</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#0a0a0a;color:#fff}
+header{background:#000;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;border-bottom:2px solid #d4af37}
+.logo{font-size:24px;font-weight:bold;color:#d4af37} .logo span{color:#fff}
+nav a{color:#fff;text-decoration:none;margin:0 10px}
+.cart-btn{background:#d4af37;color:#000;padding:10px 18px;border:none;border-radius:20px;font-weight:bold;cursor:pointer}
+.hero{text-align:center;padding:40px 15px;background:linear-gradient(180deg,#1a1500,#000)}
+.hero h1{font-size:38px;color:#d4af37} .hero p{margin:10px 0;color:#ddd}
+.search-bar{max-width:600px;margin:20px auto;display:flex;gap:8px}
+.search-bar input{flex:1;padding:13px;border-radius:25px;border:none;outline:none}
+.search-bar button{padding:13px 20px;border-radius:25px;background:#d4af37;border:none;font-weight:bold}
+.filters{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:10px}
+.filters button{padding:8px 18px;border-radius:20px;border:1px solid #d4af37;background:transparent;color:#d4af37;cursor:pointer}
+.filters button.active,.filters button:hover{background:#d4af37;color:#000}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:15px;padding:20px}
+.card{background:#111;border:1px solid #222;border-radius:15px;overflow:hidden;text-align:center;padding-bottom:12px}
+.card img{width:100%;height:180px;object-fit:cover}
+.card h3{font-size:15px;margin:8px 5px} .card .price{color:#d4af37;font-weight:bold;font-size:18px}
+.card .old{color:#888;text-decoration:line-through;font-size:13px}
+.card button{margin-top:8px;background:#d4af37;border:none;padding:9px 15px;border-radius:20px;font-weight:bold;cursor:pointer;width:85%}
+.badge{background:red;color:#fff;font-size:11px;padding:3px 8px;border-radius:10px;position:absolute}
+#cartDrawer{position:fixed;right:-100%;top:0;width:320px;max-width:90%;height:100%;background:#111;z-index:200;padding:20px;transition:.3s;overflow-y:auto}
+#cartDrawer.open{right:0}
+.cart-item{display:flex;gap:10px;margin:12px 0;align-items:center}
+.cart-item img{width:55px;height:55px;object-fit:cover;border-radius:8px}
+.qty button{padding:2px 8px}
+.checkout{background:#25D366;color:#fff;width:100%;padding:13px;border:none;border-radius:10px;font-weight:bold;margin-top:10px;cursor:pointer}
+.pay{margin-top:12px;background:#222;padding:12px;border-radius:10px;font-size:13px}
+.pay label{display:block;margin:6px 0}
+footer{text-align:center;padding:25px;color:#aaa;border-top:1px solid #222;margin-top:20px}
+.float-wa{position:fixed;bottom:20px;right:20px;background:#25D366;color:#fff;width:55px;height:55px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;text-decoration:none;z-index:300}
+@media(max-width:600px){.hero h1{font-size:28px}}
+</style>
+</head>
+<body>
+
+<header>
+<div class="logo">👑 BOUBA <span>STOR</span></div>
+<nav><a href="#">Accueil</a><a href="#products">Boutique</a><a href="#contact">Contact</a></nav>
+<button class="cart-btn" onclick="toggleCart()">🛒 Panier (<span id="cartCount">0</span>)</button>
+</header>
+
+<section class="hero">
+<h1>BOUBA STOR - Boutique Mondiale 🌍</h1>
+<p>L'Excellence au Meilleur Prix | Livraison 24H Abidjan | Livraison Partout dans le Monde</p>
+<div class="search-bar">
+<input id="search" placeholder="Rechercher : ensemble, parfum, montre..." oninput="filterProducts()">
+<button onclick="filterProducts()">🔍</button>
+</div>
+<div class="filters">
+<button class="active" onclick="setCat('all',this)">Tout</button>
+<button onclick="setCat('ensemble',this)">Ensembles</button>
+<button onclick="setCat('parfum',this)">Parfums</button>
+<button onclick="setCat('montre',this)">Montres</button>
+<button onclick="setCat('accessoire',this)">Accessoires</button>
+</div>
+</section>
+
+<section id="products" class="products"></section>
+
+<!-- PANIER -->
+<div id="cartDrawer">
+<h2>🛒 Ton Panier</h2>
+<button onclick="toggleCart()" style="float:right;background:red;color:#fff;border:none;padding:5px 10px;border-radius:5px">X</button>
+<div id="cartItems"></div>
+<p style="margin-top:15px"><b>Total : <span id="total">0</span> FCFA</b></p>
+<div class="pay">
+<b>💳 Mode de Paiement :</b>
+<label><input type="radio" name="pay" value="Wave" checked> Wave</label>
+<label><input type="radio" name="pay" value="Orange Money"> Orange Money</label>
+<label><input type="radio" name="pay" value="Espèces à la livraison"> Espèces à la livraison</label>
+<label>📍 Ville / Quartier : <input id="ville" placeholder="Ex: Abidjan, Cocody" style="width:100%;padding:8px;border-radius:8px;border:none;margin-top:5px"></label>
+<label>📞 Téléphone : <input id="tel" placeholder="Ton numéro" style="width:100%;padding:8px;border-radius:8px;border:none;margin-top:5px"></label>
+</div>
+<button class="checkout" onclick="checkoutWA()">Commander sur WhatsApp ✅</button>
+<button class="checkout" style="background:#d4af37;color:#000" onclick="checkoutSite()">Payer sur le Site 💳</button>
+<p style="font-size:12px;color:#aaa;margin-top:10px">Livraison 24H Abidjan - Expédition mondiale 3 à 7 jours.</p>
+</div>
+
+<a href="https://wa.me/2250700000000" class="float-wa">💬</a>
+
+<footer id="contact">
+<h3>👑 BOUBA STOR</h3>
+<p>Abidjan, Côte d'Ivoire | WhatsApp : +225 07 00 00 00 00 | Email : contact@boubastor.com</p>
+<p>© 2026 BOUBA STOR - Tous droits réservés | Suivez-nous sur Facebook, TikTok, Instagram</p>
+</footer>
+
+<script>
+const WHATSAPP = "2250700000000"; // <-- CHANGE TON NUMERO ICI
+const products = [
+{id:1,name:"Ensemble Élégant Beige Luxe",price:25000,old:35000,cat:"ensemble",img:"https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=500"},
+{id:2,name:"Parfum Or - 100ml",price:18000,old:25000,cat:"parfum",img:"https://images.unsplash.com/photo-1541643600914-78b084683601?w=500"},
+{id:3,name:"Montre Dorée Premium",price:32000,old:45000,cat:"montre",img:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500"},
+{id:4,name:"Lunettes + Ceinture + Bracelet Pack",price:15000,old:22000,cat:"accessoire",img:"https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500"},
+{id:5,name:"Ensemble Noir Classique",price:27000,old:38000,cat:"ensemble",img:"https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=500"},
+{id:6,name:"Parfum Nuit Éternelle",price:20000,old:28000,cat:"parfum",img:"https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=500"},
+{id:7,name:"Montre Noire Sport Luxe",price:29000,old:40000,cat:"montre",img:"https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=500"},
+{id:8,name:"Accessoires Pack Royal",price:12000,old:18000,cat:"accessoire",img:"https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500"},
+];
+let cart = [], currentCat='all';
+function render(){
+let q=document.getElementById('search').value.toLowerCase();
+let list=products.filter(p=>(currentCat=='all'||p.cat==currentCat)&&p.name.toLowerCase().includes(q));
+document.getElementById('products').innerHTML=list.map(p=>`
+<div class="card">
+<img src="${p.img}"><h3>${p.name}</h3>
+<p><span class="old">${p.old} F</span> <span class="price">${p.price} FCFA</span></p>
+<button onclick="addToCart(${p.id})">🛒 Ajouter</button>
+<button onclick="buyNow(${p.id})" style="background:#25D366;color:#fff">Acheter Direct</button>
+</div>`).join('');
+}
+function setCat(c,el){currentCat=c;document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('active'));el.classList.add('active');render();}
+function filterProducts(){render();}
+function addToCart(id){let f=cart.find(i=>i.id==id);if(f)f.qty++;else{let p=products.find(x=>x.id==id);cart.push({...p,qty:1});}updateCart();}
+function buyNow(id){addToCart(id);toggleCart();}
+function updateCart(){
+document.getElementById('cartCount').innerText=cart.reduce((a,b)=>a+b.qty,0);
+let total=cart.reduce((a,b)=>a+b.price*b.qty,0);
+document.getElementById('total').innerText=total.toLocaleString();
+document.getElementById('cartItems').innerHTML=cart.length==0?"<p>Panier vide</p>":cart.map((it,idx)=>`
+<div class="cart-item"><img src="${it.img}"><div style="flex:1"><b>${it.name}</b><br>${it.price} F x ${it.qty}</div>
+<div class="qty"><button onclick="changeQty(${idx},-1)">-</button>${it.qty}<button onclick="changeQty(${idx},1)">+</button></div>
+<button onclick="removeItem(${idx})" style="background:red;color:#fff;border:none;padding:5px;border-radius:5px">🗑️</button></div>`).join('');
+}
+function changeQty(i,d){cart[i].qty+=d;if(cart[i].qty<=0)cart.splice(i,1);updateCart();}
+function removeItem(i){cart.splice(i,1);updateCart();}
+function toggleCart(){document.getElementById('cartDrawer').classList.toggle('open');}
+function checkoutWA(){
+if(cart.length==0){alert("Panier vide !");return;}
+let pay=document.querySelector('input[name="pay"]:checked').value;
+let ville=document.getElementById('ville').value||"Non précisé";
+let tel=document.getElementById('tel').value||"Non précisé";
+let msg="👑 NOUVELLE COMMANDE BOUBA STOR%0A%0A"+cart.map(c=>`• ${c.name} x${c.qty} = ${c.price*c.qty} FCFA`).join('%0A');
+msg+=`%0A%0A💰 Total: ${document.getElementById('total').innerText} FCFA%0A💳 Paiement: ${pay}%0A📍 Ville: ${ville}%0A📞 Tel: ${tel}`;
+window.open(`https://wa.me/${WHATSAPP}?text=${msg}`,'_blank');
+}
+function checkoutSite(){alert("Redirection vers paiement Wave / Orange Money..."); checkoutWA();}
+render(); updateCart();
+</script>
+</body>
+</html>
