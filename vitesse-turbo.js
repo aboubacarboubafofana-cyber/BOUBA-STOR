@@ -34,7 +34,10 @@
       document.body.appendChild(chat);
 
       console.log('🚀 Turbo Vitesse : Scripts lourds chargés en arrière-plan !');
-      
+      // 5. On charge le catalogue dynamique (fiche article)
+var catalogue = document.createElement('script');
+catalogue.src = "catalogue-articles.js";
+document.body.appendChild(catalogue);
     }, 2000); // Délai de 2 secondes
   });
 })();
