@@ -7,6 +7,7 @@
   // 1. Création du design de la fenêtre (CSS)
   var style = document.createElement('style');
   style.innerHTML = `
+    #imgViewer { display: none !important; } /* Désactive l'ancien agrandisseur d'image */
     #prodModal { position:fixed; inset:0; background:rgba(0,0,0,.95); z-index:9999; display:none; overflow-y:auto; padding:15px; backdrop-filter: blur(4px); }
     #prodModal.show { display:block; }
     .pm-box { background:#111; border:1px solid gold; border-radius:20px; max-width:480px; margin:20px auto; padding:15px; color:#fff; position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.8); }
@@ -35,7 +36,6 @@
   modal.innerHTML = '<div class="pm-box" id="pmContent"></div>';
   document.body.appendChild(modal);
 
-  // Fermer en cliquant à côté
   modal.addEventListener('click', function(e) {
     if(e.target === modal) closeModal();
   });
@@ -44,19 +44,16 @@
     modal.classList.remove('show');
     document.body.style.overflow = '';
   }
-  window.closePm = closeModal; // Pour le bouton ✕
+  window.closePm = closeModal;
 
   // 3. La logique pour afficher l'article
   function openProduct(id) {
-    // On récupère les données de la boutique globale (S)
     var S = window.S || {};
     var prods = S.products || {};
     var p = prods[id];
     if(!p) return;
 
     var content = document.getElementById('pmContent');
-    
-    // On cherche 4 articles de la MÊME catégorie
     var related = Object.values(prods).filter(function(x) {
       return x.cat === p.cat && x.id !== p.id;
     }).slice(0, 4);
@@ -64,7 +61,6 @@
     var wa = (S.info && S.info.whatsapp) ? S.info.whatsapp.replace(/\D/g,'') : '2250787619717';
     var waMsg = encodeURIComponent('Bonjour, je suis intéressé par : ' + p.name + ' (' + p.price + ' F)');
 
-    // On construit le HTML de la fiche
     var html = `
       <button class="pm-close" onclick="closePm()">✕</button>
       <img class="pm-img" src="${p.img || ''}">
@@ -75,7 +71,6 @@
       <a href="https://wa.me/${wa}?text=${waMsg}" target="_blank" class="pm-btn pm-wa" style="text-decoration:none; display:block; text-align:center;">📲 Commander sur WhatsApp</a>
     `;
 
-    // On ajoute les articles similaires s'il y en a
     if(related.length) {
       html += `<div class="pm-related"><div class="pm-rel-title">👀 Vous aimerez aussi</div><div class="pm-rel-grid">`;
       related.forEach(function(r) {
@@ -92,26 +87,52 @@
 
     content.innerHTML = html;
     modal.classList.add('show');
-    document.body.style.overflow = 'hidden'; // Bloque le défilement derrière
+    document.body.style.overflow = 'hidden';
     modal.scrollTop = 0;
   }
-  window.openPm = openProduct; // Permet d'ouvrir depuis les articles similaires
+  window.openPm = openProduct;
 
-  // 4. Le Radar : Détecter le clic sur un article dans la grille !
+  // 4. Détecter le clic sur un article (Partie Texte)
   document.addEventListener('click', function(e) {
     var card = e.target.closest('.card');
     if(!card) return;
-    
-    // Si on clique sur un bouton (Ajouter, Partager, etc.), on ne fait rien (on laisse le bouton faire son travail)
     if(e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
 
-    var id = card.getAttribute('data-pid');
-    if(id) {
-      e.preventDefault();
-      e.stopPropagation();
-      openProduct(id);
+    // Si on clique sur le texte (pas l'image), on ouvre direct
+    if (e.target.tagName !== 'IMG') {
+      var id = card.getAttribute('data-pid');
+      if(id) {
+        e.preventDefault();
+        e.stopPropagation();
+        openProduct(id);
+      }
     }
   }, true);
+
+  // 5. Détourner l'ancien agrandisseur d'image (Partie Image)
+  // Quand l'ancien code va essayer d'afficher l'image en grand, on l'intercepte pour ouvrir notre catalogue
+  setTimeout(function() {
+    var imgViewerPic = document.getElementById('imgViewerPic');
+    if (imgViewerPic) {
+      var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.attributeName === 'src') {
+            var src = mutation.target.getAttribute('src');
+            var S = window.S || {};
+            var prods = S.products || {};
+            var prodId = null;
+            for (var id in prods) {
+              if (prods[id].img === src) { prodId = id; break; }
+            }
+            if (prodId) {
+              openProduct(prodId);
+            }
+          }
+        });
+      });
+      observer.observe(imgViewerPic, { attributes: true });
+    }
+  }, 2500);
 
   console.log('🛍️ Catalogue Dynamique chargé !');
 })();
