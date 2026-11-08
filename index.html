@@ -244,6 +244,17 @@ body.gated>*:not(#gate):not(script):not(style):not(link):not(meta){visibility:hi
 <div id="adminBody"></div>
 <button class="ghost" onclick="adminLogout()" style="color:#f44;border-color:#f44">🚪 Déconnexion admin</button>
  <button class="gold" style="width:100%; margin-bottom:10px; background:#333; color:#ffd700; border:1px solid #ffd700;" onclick="SPEED.open()">⚡ Vitesse & connexion</button>
+ <!-- BOUTON MODULE CATALOGUE -->
+<div style="margin: 10px 0; padding: 12px; background: #111; border-radius: 10px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
+  <b style="color: #fff; font-size: 14px;">🛍️ Catalogue Articles</b>
+  <button id="btn-mod-cat" onclick="toggleModule('cat')" style="padding: 8px 16px; border-radius: 6px; border: none; font-weight: 900; cursor: pointer;">...</button>
+</div>
+
+<!-- BOUTON MODULE TURBO -->
+<div style="margin: 10px 0; padding: 12px; background: #111; border-radius: 10px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
+  <b style="color: #fff; font-size: 14px;">🚀 Vitesse Turbo</b>
+  <button id="btn-mod-turbo" onclick="toggleModule('turbo')" style="padding: 8px 16px; border-radius: 6px; border: none; font-weight: 900; cursor: pointer;">...</button>
+</div>
 </div>
 </div><script>
 const ADMIN_UID="7W5OEzTeTNbFLzULLO9VsuDKZFN2";
