@@ -1,7 +1,6 @@
 (function() {
   'use strict';
 
-  // 1. Le design
   var style = document.createElement('style');
   style.innerHTML = `
     #imgViewer { display: none !important; }
@@ -25,7 +24,6 @@
   `;
   document.head.appendChild(style);
 
-  // 2. La fenêtre
   var modal = document.createElement('div');
   modal.id = 'prodModal';
   modal.innerHTML = '<div class="pm-box" id="pmContent"></div>';
@@ -36,20 +34,32 @@
     document.body.style.overflow = '';
   };
 
-  // 3. Affichage de la fiche
   function openProduct(id) {
     var S = window.S || {};
     var prods = S.products || {};
     var p = prods[id];
+    
+    // 🔥 C'EST ICI QUE LA MAGIE OPÈRE : on cherche aussi dans le pont Firestore !
+    if(!p && window.__baData && window.__baData[id]) {
+      p = window.__baData[id].a;
+    }
+    
     if(!p) return;
 
     var related = Object.values(prods).filter(function(x) { return x.cat === p.cat && x.id !== p.id; }).slice(0, 4);
+    
+    if(related.length === 0 && window.__baData) {
+      related = Object.values(window.__baData).map(x=>x.a).filter(function(x) { return x.cat === p.cat && x.id !== p.id; }).slice(0, 4);
+    }
+
     var wa = (S.info && S.info.whatsapp) ? S.info.whatsapp.replace(/\D/g,'') : '2250787619717';
     var waMsg = encodeURIComponent('Bonjour, je suis intéressé par : ' + p.name + ' (' + p.price + ' F)');
+    
+    var imgSrc = p.img || p.image || p.photo || 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
 
     var html = `
       <button class="pm-close" onclick="closePm()">✕</button>
-      <img class="pm-img" src="${p.img || ''}">
+      <img class="pm-img" src="${imgSrc}">
       <div class="pm-name">${p.name}</div>
       <div class="pm-price">${Number(p.price).toLocaleString('fr-FR')} F CFA</div>
       <button class="pm-btn pm-add" onclick="addCart('${p.id}'); closePm();">🛒 Ajouter au panier</button>
@@ -71,11 +81,10 @@
   }
   window.openPm = openProduct;
 
-  // 4. Clic sur l'article (Texte ou Image)
   document.addEventListener('click', function(e) {
     var card = e.target.closest('.card');
     if(!card) return;
-    if(e.target.tagName === 'BUTTON' || e.target.closest('button')) return; // Ignore les boutons
+    if(e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
 
     var id = card.getAttribute('data-pid');
     if(id) {
@@ -84,25 +93,4 @@
       openProduct(id);
     }
   }, true);
-
-  // 5. Neutralise l'ancien système d'image
-  setTimeout(function() {
-    var imgViewerPic = document.getElementById('imgViewerPic');
-    if (imgViewerPic) {
-      var observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-          if (mutation.attributeName === 'src') {
-            var src = mutation.target.getAttribute('src');
-            var S = window.S || {};
-            var prods = S.products || {};
-            for (var id in prods) {
-              if (prods[id].img === src) { openProduct(id); break; }
-            }
-          }
-        });
-      });
-      observer.observe(imgViewerPic, { attributes: true });
-    }
-  }, 2000);
-
 })();
