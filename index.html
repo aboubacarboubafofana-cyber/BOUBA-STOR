@@ -1384,6 +1384,23 @@ window.confirmPayInApp = async function () {
 };
 </script>
  <script src="radar_total.js"></script>
+ <script>
+function toggleModule(mod) {
+  var key = mod === 'cat' ? 'mod_catalogue' : 'mod_turbo';
+  var current = localStorage.getItem(key) !== 'off';
+  localStorage.setItem(key, current ? 'off' : 'on');
+  location.reload();
+}
+function updateButtons() {
+  var cOn = localStorage.getItem('mod_catalogue') !== 'off';
+  var tOn = localStorage.getItem('mod_turbo') !== 'off';
+  var bCat = document.getElementById('btn-mod-cat');
+  var bTur = document.getElementById('btn-mod-turbo');
+  if (bCat) { bCat.innerText = cOn ? 'ON' : 'OFF'; bCat.style.background = cOn ? '#25D366' : '#ff4444'; bCat.style.color = '#000'; }
+  if (bTur) { bTur.innerText = tOn ? 'ON' : 'OFF'; bTur.style.background = tOn ? '#25D366' : '#ff4444'; bTur.style.color = '#000'; }
+}
+setInterval(updateButtons, 1000);
+ </script>
 </body>
  </html>
 
