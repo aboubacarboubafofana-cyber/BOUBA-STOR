@@ -39,7 +39,7 @@
     var prods = S.products || {};
     var p = prods[id];
     
-    // On cherche aussi dans les articles des boutiques (Firestore)
+    // 🔥 C'EST ICI QUE LA MAGIE OPÈRE : on cherche aussi dans le pont Firestore !
     if(!p && window.__baData && window.__baData[id]) {
       p = window.__baData[id].a;
     }
@@ -54,10 +54,12 @@
 
     var wa = (S.info && S.info.whatsapp) ? S.info.whatsapp.replace(/\D/g,'') : '2250787619717';
     var waMsg = encodeURIComponent('Bonjour, je suis intéressé par : ' + p.name + ' (' + p.price + ' F)');
+    
+    var imgSrc = p.img || p.image || p.photo || 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
 
     var html = `
       <button class="pm-close" onclick="closePm()">✕</button>
-      <img class="pm-img" src="${p.img || ''}">
+      <img class="pm-img" src="${imgSrc}">
       <div class="pm-name">${p.name}</div>
       <div class="pm-price">${Number(p.price).toLocaleString('fr-FR')} F CFA</div>
       <button class="pm-btn pm-add" onclick="addCart('${p.id}'); closePm();">🛒 Ajouter au panier</button>
