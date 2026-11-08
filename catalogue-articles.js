@@ -1,10 +1,6 @@
-/* =============================================================
-   CATALOGUE DYNAMIQUE — Fiche article & Articles similaires
-   ============================================================= */
 (function() {
   'use strict';
 
-  // 1. Le design
   var style = document.createElement('style');
   style.innerHTML = `
     #imgViewer { display: none !important; }
@@ -28,7 +24,6 @@
   `;
   document.head.appendChild(style);
 
-  // 2. La fenêtre
   var modal = document.createElement('div');
   modal.id = 'prodModal';
   modal.innerHTML = '<div class="pm-box" id="pmContent"></div>';
@@ -39,14 +34,25 @@
     document.body.style.overflow = '';
   };
 
-  // 3. Affichage de la fiche
   function openProduct(id) {
     var S = window.S || {};
     var prods = S.products || {};
     var p = prods[id];
+    
+    // NOUVEAU : On cherche aussi dans les articles Firestore !
+    if(!p && window.__baData && window.__baData[id]) {
+      p = window.__baData[id].a;
+    }
+    
     if(!p) return;
 
     var related = Object.values(prods).filter(function(x) { return x.cat === p.cat && x.id !== p.id; }).slice(0, 4);
+    
+    // Si l'article n'a pas d'articles similaires locaux, on cherche dans Firestore
+    if(related.length === 0 && window.__baData) {
+      related = Object.values(window.__baData).map(x=>x.a).filter(function(x) { return x.cat === p.cat && x.id !== p.id; }).slice(0, 4);
+    }
+
     var wa = (S.info && S.info.whatsapp) ? S.info.whatsapp.replace(/\D/g,'') : '2250787619717';
     var waMsg = encodeURIComponent('Bonjour, je suis intéressé par : ' + p.name + ' (' + p.price + ' F)');
 
@@ -74,7 +80,6 @@
   }
   window.openPm = openProduct;
 
-  // 4. Clic sur l'article
   document.addEventListener('click', function(e) {
     var card = e.target.closest('.card');
     if(!card) return;
