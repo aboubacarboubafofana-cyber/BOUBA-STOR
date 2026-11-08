@@ -13,6 +13,7 @@
 
   /* Capture d'erreurs */
   window.addEventListener('error', function (e) {
+     if (e.message === 'Script error.' || !e.message) return;
     ERRORS.push({ t: Date.now(), msg: String(e.message || 'Erreur').slice(0, 200) });
     if (ERRORS.length > 60) ERRORS.shift();
   });
