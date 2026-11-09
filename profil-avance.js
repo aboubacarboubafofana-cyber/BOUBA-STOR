@@ -1,5 +1,5 @@
 /* =============================================================
-   ESPACE CLIENT COMPLET & HISTORIQUE DES COMMANDES (1/2)
+   ESPACE CLIENT COMPLET & HISTORIQUE DES COMMANDES
    ============================================================= */
 (function() {
   'use strict';
@@ -7,13 +7,13 @@
   // 1. Création du design (Thème Noir & Or)
   var style = document.createElement('style');
   style.innerHTML = `
-    /* --- PAGE PROFIL --- */
     #profilAvancePage { position:fixed; inset:0; background:#000; z-index:99999; display:none; flex-direction:column; overflow-y:auto; font-family: Arial, sans-serif; color: #fff; padding-bottom: 80px; }
     #profilAvancePage.show { display: flex; }
     .pa-header { background: #111; padding: 15px; border-bottom: 1px solid #333; display: flex; align-items: center; gap: 10px; position: sticky; top:0; z-index: 10; }
     .pa-close { background: #333; color: #fff; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 14px; }
     .pa-user { padding: 20px 15px; background: #111; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #333; }
-    .pa-avatar { width: 60px; height: 60px; border-radius: 50%; background: gold; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #000; font-weight: bold; }
+    .pa-avatar { width: 60px; height: 60px; border-radius: 50%; background: gold; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #000; font-weight: bold; overflow: hidden; }
+    .pa-avatar img { width: 100%; height: 100%; object-fit: cover; }
     .pa-user-info h3 { margin: 0; font-size: 18px; color: gold; }
     .pa-user-info p { margin: 4px 0 0; font-size: 13px; color: #aaa; }
     .pa-credit { padding: 15px; background: #1a1500; border-bottom: 1px solid #333; display: flex; align-items: center; gap: 10px; color: gold; font-weight: bold; font-size: 14px; }
@@ -30,7 +30,6 @@
     .pa-item-arrow { color: #555; font-size: 18px; }
     .pa-logout { text-align: center; color: #ff4444; font-weight: bold; padding: 20px; font-size: 16px; cursor: pointer; background: #111; border: 1px solid #ff4444; border-radius: 10px; width: calc(100% - 30px); margin: 15px auto; display: block; }
 
-    /* --- PAGE COMMANDES --- */
     #myOrdersPage { position:fixed; inset:0; background:#000; z-index:100000; display:none; flex-direction:column; overflow-y:auto; font-family: Arial, sans-serif; color: #fff; padding-bottom: 20px; }
     #myOrdersPage.show { display: flex; }
     .mo-tabs { display: flex; background: #111; border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 10; }
@@ -87,12 +86,12 @@
         <div class="pa-item-text">Mes messages</div>
         <div class="pa-item-arrow">›</div>
       </div>
-      <div class="pa-item" onclick="location.href='avis.html'">
+      <div class="pa-item" onclick="document.getElementById('avisModal').classList.add('show'); closeProfilAvance();">
         <div class="pa-item-icon">⭐</div>
         <div class="pa-item-text">Mes avis et notes</div>
         <div class="pa-item-arrow">›</div>
       </div>
-      <div class="pa-item" onclick="openPage('sharePage')">
+      <div class="pa-item" onclick="openPage('sharePage'); closeProfilAvance();">
         <div class="pa-item-icon">❤️</div>
         <div class="pa-item-text">Mes favoris</div>
         <div class="pa-item-arrow">›</div>
@@ -105,7 +104,7 @@
         <div class="pa-item-text">Modifier mon profil</div>
         <div class="pa-item-arrow">›</div>
       </div>
-      <div class="pa-item" onclick="location.href='confidentialite.html'">
+      <div class="pa-item" onclick="alert('Toutes vos données sont sécurisées sur BOuba-STOR.')">
         <div class="pa-item-icon">🔒</div>
         <div class="pa-item-text">Confidentialité</div>
         <div class="pa-item-arrow">›</div>
@@ -132,12 +131,20 @@
     </div>
   `;
   document.body.appendChild(ordersPage);
-    // 4. Logique de la page Profil
+
+  // 4. Logique de la page Profil
   window.openProfilAvance = function() {
     if (typeof me !== 'undefined' && me) {
       document.getElementById('pa-name').innerText = 'Bienvenue, ' + (me.name || 'Client') + ' !';
       document.getElementById('pa-phone').innerText = me.phone || '';
-      document.getElementById('pa-avatar-txt').innerText = (me.name || 'C').charAt(0).toUpperCase();
+      
+      var avatarBox = document.getElementById('pa-avatar-txt');
+      var photoUrl = me.photo || me.img || me.avatar;
+      if (photoUrl) {
+        avatarBox.innerHTML = '<img src="' + photoUrl + '">';
+      } else {
+        avatarBox.innerText = (me.name || 'C').charAt(0).toUpperCase();
+      }
     } else {
       document.getElementById('pa-name').innerText = 'Bienvenue !';
       document.getElementById('pa-phone').innerText = 'Connectez-vous pour voir vos infos';
@@ -176,12 +183,10 @@
     var list = document.getElementById('ordersList');
     list.innerHTML = '<div class="mo-empty">Recherche de vos commandes...</div>';
 
-    // On récupère les commandes depuis la mémoire de ton site
     var S = window.S || {};
     var allOrders = S.orders || {};
     var myPhone = (me.phone || '').replace(/\D/g, '');
     
-    // On filtre pour ne garder que les commandes de ce client
     var userOrders = Object.values(allOrders).filter(function(o) {
       return o && o.phone && o.phone.replace(/\D/g, '') === myPhone;
     }).sort(function(a, b) { return b.date - a.date; });
@@ -202,15 +207,12 @@
 
       var isCancelled = (o.status === 'annulée' || o.status === 'retour');
       
-      // Gestion des onglets
       if (currentOrderTab === 'cours' && isCancelled) return;
       if (currentOrderTab === 'annule' && !isCancelled) return;
 
-      // Image du premier article
       var firstItem = o.items && o.items[0] ? o.items[0] : {};
       var imgSrc = '';
       
-      // On cherche la photo de l'article
       if (firstItem.id && S.products && S.products[firstItem.id]) {
         imgSrc = S.products[firstItem.id].img;
       } else if (firstItem.id && window.__baData && window.__baData[firstItem.id]) {
