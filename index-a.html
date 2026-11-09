@@ -1374,6 +1374,32 @@ window.confirmPayInApp = async function () {
 };
 </script>
  <script src="retours.js" defer></script>
+ <script>
+/* Gestion des boutons flottants (Visibles uniquement sur l'accueil) */
+(function(){
+ function syncBtns() {
+    // On vérifie si une page est ouverte (Panier, Contrôle, etc.)
+    var isHome = !document.querySelector('.page.active'); 
+    
+    // On liste les boutons à cacher/afficher
+    var btns = ['avisFab', 'conseilsFab', 'retourFab'];
+    
+    btns.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) {
+        // Sur l'accueil on affiche (flex), ailleurs on cache (none)
+        el.style.display = isHome ? 'flex' : 'none';
+      }
+    });
+ }
+
+ // On vérifie en permanence (toutes les 500 millisecondes)
+ setInterval(syncBtns, 500);
+
+ // On le fait aussi dès le chargement
+ document.addEventListener('DOMContentLoaded', syncBtns);
+})();
+ </script>
 </body>
  </html>
 
