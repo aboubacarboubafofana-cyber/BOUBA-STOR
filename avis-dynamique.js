@@ -1,12 +1,12 @@
 /* =============================================================
-   AVIS CLIENTS DYNAMIQUES (Version Sécurisée)
+   AVIS CLIENTS DYNAMIQUES (Version Affichage Instantané)
    ============================================================= */
 (function() {
   'use strict';
 
   // 1. On crée la fenêtre immédiatement au chargement
   document.addEventListener('DOMContentLoaded', function() {
-    if (document.getElementById('avisModal')) return; // Déjà créée
+    if (document.getElementById('avisModal')) return;
 
     var style = document.createElement('style');
     style.innerHTML = `
@@ -20,7 +20,6 @@
       .am-btn { width:100%; padding:14px; background:gold; color:#000; border:none; border-radius:8px; font-weight:900; font-size:15px; cursor:pointer; margin-bottom:8px; }
       .am-close { width:100%; padding:12px; background:#333; color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer; }
       
-      /* Style de l'affichage des avis */
       .avis-title { color: gold; margin: 0 0 10px 0; font-size: 16px; text-align: center; font-weight: bold; }
       .avis-scroll { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 10px; }
       .avis-card { background: #222; padding: 15px; border-radius: 8px; border-left: 3px solid gold; flex: 0 0 85%; scroll-snap-align: start; }
@@ -52,7 +51,7 @@
     `;
     document.body.appendChild(modal);
 
-    window.setAvisStars(5); // Initialise les étoiles
+    window.setAvisStars(5);
   });
 
   // 2. Fonctions
@@ -79,7 +78,15 @@
     var avisObj = { id: id, name: name, city: city || 'Abidjan', text: text, stars: currentStars, date: Date.now() };
 
     if (typeof window.write === 'function') {
+      // On sauvegarde dans Firebase
       window.write('reviews/' + id, avisObj);
+      
+      // 🔥 C'EST ICI LA MAGIE : On l'ajoute directement à l'écran pour un affichage instantané !
+      if (!window.S) window.S = {};
+      if (!window.S.reviews) window.S.reviews = {};
+      window.S.reviews[id] = avisObj;
+      renderAvis(); 
+
       alert('✅ Merci ! Votre avis a bien été enregistré.');
       document.getElementById('avisModal').classList.remove('show');
       document.getElementById('amName').value = '';
@@ -123,16 +130,16 @@
     container.innerHTML = html;
   }
 
-  // 4. Écouter les changements Firebase en temps réel
+  // 4. Écouter les changements Firebase pour les autres visiteurs
   setTimeout(function() {
     if (window.fb && window.fb.D && window.fb.db) {
       window.fb.D.onValue(window.fb.D.ref(window.fb.db, 'reviews'), function(snap) {
         if (!window.S) window.S = {};
         window.S.reviews = snap.val() || {};
-        renderAvis();
+        renderAvis(); // On met à jour quand quelqu'un d'autre poste un avis
       });
     } else {
-      setTimeout(renderAvis, 2000);
+      setTimeout(renderAvis, 2000); // Sécurité
     }
   }, 1500);
 
