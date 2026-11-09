@@ -1268,15 +1268,15 @@ window.radarRender=function(b){
 };
 function blacklistAdd(phone){write('blacklist/'+phone,{date:Date.now()});renderAdmin()}
 function blacklistDel(phone){write('blacklist/'+phone,null);renderAdmin()}
-</script>
 <script>
-/* Les boutons flottants ⭐ et 💡 Conseils ne s'affichent que sur l'accueil */
+/* Les boutons flottants ⭐, 💡 et 🔄 ne s'affichent que sur l'accueil */
 (function(){
  function sync(){
   var onHome=!document.querySelector('.page.active');
-  var a=document.getElementById('avisFab'), c=document.getElementById('conseilsFab');
+  var a=document.getElementById('avisFab'), c=document.getElementById('conseilsFab'), r=document.getElementById('retourFab');
   if(a)a.style.display=onHome?'flex':'none';
   if(c)c.style.display=onHome?'flex':'none';
+  if(r)r.style.display=onHome?'flex':'none';
  }
  var _op=window.openPage, _ca=window.closeAll;
  window.openPage=function(id){_op(id);sync()};
