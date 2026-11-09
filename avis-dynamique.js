@@ -1,10 +1,15 @@
 /* =============================================================
-   AVIS CLIENTS DYNAMIQUES (BOuba-STOR)
+   AVIS CLIENTS DYNAMIQUES (Version Corrigée)
    ============================================================= */
 (function() {
   'use strict';
 
-  // 1. Style et Fenêtre Modale
+  let localAvis = {};
+  let dbInstance = null;
+  let firebaseRef = null;
+  let firebaseSet = null;
+
+  // 1. Style
   var style = document.createElement('style');
   style.innerHTML = `
     .avis-title { color: gold; margin: 0 0 10px 0; font-size: 16px; text-align: center; font-weight: bold; }
@@ -26,14 +31,14 @@
   `;
   document.head.appendChild(style);
 
-  // 2. Création de la fenêtre d'ajout d'avis
+  // 2. Modale
   var modal = document.createElement('div');
   modal.id = 'avisModal';
   modal.innerHTML = `
     <div class="am-box">
       <h3>⭐ Laisser un avis</h3>
-      <input type="text" id="amName" class="am-input" placeholder="Votre nom (ex: Kouassi)">
-      <input type="text" id="amCity" class="am-input" placeholder="Votre quartier (ex: Cocody)">
+      <input type="text" id="amName" class="am-input" placeholder="Votre nom">
+      <input type="text" id="amCity" class="am-input" placeholder="Votre quartier">
       <div class="am-stars" id="amStars">
         <span onclick="setAvisStars(1)">★</span>
         <span onclick="setAvisStars(2)">★</span>
@@ -58,16 +63,34 @@
 
   window.closeAvisModal = function() { modal.classList.remove('show'); };
 
-  // 3. Envoi de l'avis vers Firebase
-  window.submitAvis = function() {
+  // 3. Initialisation Firebase
+  setTimeout(async function() {
+    try {
+      const B = "https://www.gstatic.com/firebasejs/12.19.0/";
+      const A = await import(B + "firebase-app.js");
+      const D = await import(B + "firebase-database.js");
+      let app;
+      try { app = A.getApp(); } catch(e) { return; }
+      
+      dbInstance = D.getDatabase(app);
+      firebaseSet = D.set;
+      firebaseRef = D.ref;
+      
+      // On écoute les avis en temps réel
+      D.onValue(D.ref(dbInstance, 'reviews'), (snap) => {
+        localAvis = snap.val() || {};
+        renderAvis();
+      });
+    } catch(e) { console.log('Erreur chargement avis', e); }
+  }, 1500);
+
+  // 4. Envoi de l'avis
+  window.submitAvis = async function() {
     var name = document.getElementById('amName').value.trim();
     var city = document.getElementById('amCity').value.trim();
     var text = document.getElementById('amText').value.trim();
 
-    if (!name || !text) {
-      alert("Veuillez remplir votre nom et votre message.");
-      return;
-    }
+    if (!name || !text) { alert("Veuillez remplir votre nom et votre message."); return; }
 
     var id = 'av_' + Date.now();
     var avisObj = {
@@ -75,26 +98,30 @@
       text: text, stars: currentStars, date: Date.now()
     };
 
-    if (typeof window.write === 'function') {
-      window.write('reviews/' + id, avisObj);
-      alert('✅ Merci ! Votre avis a bien été enregistré.');
-      closeAvisModal();
-      document.getElementById('amName').value = '';
-      document.getElementById('amCity').value = '';
-      document.getElementById('amText').value = '';
+    if (dbInstance && firebaseSet && firebaseRef) {
+      try {
+        await firebaseSet(firebaseRef(dbInstance, 'reviews/' + id), avisObj);
+        localAvis[id] = avisObj;
+        renderAvis();
+        alert('✅ Merci ! Votre avis a bien été enregistré.');
+        closeAvisModal();
+        document.getElementById('amName').value = '';
+        document.getElementById('amCity').value = '';
+        document.getElementById('amText').value = '';
+      } catch(e) {
+        alert('Erreur : ' + e.message);
+      }
     } else {
-      alert("Erreur : impossible d'enregistrer l'avis pour le moment.");
+      alert("Erreur : base de données non connectée.");
     }
   };
 
-  // 4. Affichage des avis
+  // 5. Affichage
   function renderAvis() {
     var container = document.getElementById('avis-container');
     if (!container) return;
 
-    var S = window.S || {};
-    var allAvis = S.reviews || {};
-    var list = Object.values(allAvis).filter(function(a) { return a && a.name && a.text; });
+    var list = Object.values(localAvis).filter(function(a) { return a && a.name && a.text; });
     list.sort(function(a, b) { return b.date - a.date; });
 
     var html = '<h3 class="avis-title">⭐ Ce que disent nos clients</h3>';
@@ -120,17 +147,12 @@
     container.innerHTML = html;
   }
 
-  // 5. Écoute Firebase
+  // 6. Correction bouton Stars (menu bas)
   setTimeout(function() {
-    if (window.fb && window.fb.D && window.fb.db) {
-      window.fb.D.onValue(window.fb.D.ref(window.fb.db, 'reviews'), function(snap) {
-        if (!window.S) window.S = {};
-        window.S.reviews = snap.val() || {};
-        renderAvis();
-      });
-    } else {
-      setTimeout(renderAvis, 2000);
-    }
-  }, 1500);
+    window.STAR = window.STAR || {};
+    window.STAR.open = function() {
+      alert("La fonctionnalité 'Stars' (Créateurs) arrive très bientôt sur BOuba-STOR !");
+    };
+  }, 3000);
 
 })();
