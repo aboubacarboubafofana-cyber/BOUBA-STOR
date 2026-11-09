@@ -1,158 +1,207 @@
 /* =============================================================
-   AVIS CLIENTS DYNAMIQUES (Version Corrigée)
+   GESTION DES RETOURS (Version Corrigée pour Admin & Client)
    ============================================================= */
 (function() {
   'use strict';
 
-  let localAvis = {};
-  let dbInstance = null;
-  let firebaseRef = null;
-  let firebaseSet = null;
-
-  // 1. Style
+  // 1. Styles
   var style = document.createElement('style');
   style.innerHTML = `
-    .avis-title { color: gold; margin: 0 0 10px 0; font-size: 16px; text-align: center; font-weight: bold; }
-    .avis-scroll { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 10px; }
-    .avis-card { background: #222; padding: 15px; border-radius: 8px; border-left: 3px solid gold; flex: 0 0 85%; scroll-snap-align: start; }
-    .avis-stars { color: #ffd700; font-size: 14px; margin-bottom: 5px; }
-    .avis-text { margin: 5px 0; font-size: 13px; color: #ddd; font-style: italic; }
-    .avis-name { font-size: 11px; color: #888; }
-    .avis-btn-add { display: block; width: 100%; padding: 10px; margin-top: 10px; background: gold; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-align: center; }
+    /* Bouton Client (Bien visible, au-dessus des autres) */
+    #retourClientBtn { position:fixed; bottom:195px; left:15px; z-index:1005; background:#ff4444; color:#fff; padding:12px 18px; border-radius:20px; font-weight:bold; font-family:Arial, sans-serif; font-size:14px; box-shadow:0 4px 8px rgba(0,0,0,0.5); display:flex; align-items:center; gap:5px; cursor:pointer; border:none; }
     
-    #avisModal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; }
-    #avisModal.show { display: flex; }
-    .am-box { background: #111; border: 1px solid gold; border-radius: 15px; width: 100%; max-width: 400px; padding: 20px; }
-    .am-box h3 { color: gold; text-align: center; margin-bottom: 15px; }
-    .am-input { width: 100%; padding: 10px; margin-bottom: 10px; background: #000; border: 1px solid #333; color: #fff; border-radius: 8px; font-size: 14px; }
-    .am-stars { display: flex; gap: 5px; justify-content: center; font-size: 30px; cursor: pointer; margin-bottom: 15px; color: #555; }
-    .am-stars span.active { color: gold; }
-    .am-close { background: #333; color: #fff; border: none; padding: 10px; border-radius: 8px; width: 100%; margin-top: 10px; cursor: pointer; }
+    /* Modale Client */
+    #retourModal { position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:99999; display:none; align-items:center; justify-content:center; padding:15px; }
+    #retourModal.show { display:flex; }
+    .rm-box { background:#111; border:1px solid gold; border-radius:15px; width:100%; max-width:450px; max-height:90vh; overflow-y:auto; padding:20px; color:#fff; font-family:Arial, sans-serif; }
+    .rm-box h3 { color:gold; text-align:center; margin-bottom:15px; font-size:18px; }
+    .rm-label { display:block; margin-bottom:5px; font-size:13px; color:#aaa; }
+    .rm-select, .rm-input, .rm-textarea { width:100%; padding:12px; margin-bottom:15px; background:#000; border:1px solid #333; color:#fff; border-radius:8px; font-size:14px; }
+    .rm-checkbox-group { background:#1a1a1a; padding:10px; border-radius:8px; margin-bottom:15px; border:1px solid #333; }
+    .rm-checkbox-item { display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:13px; cursor:pointer; }
+    .rm-checkbox-item input { width:18px; height:18px; accent-color:gold; cursor:pointer; }
+    .rm-btn-submit { width:100%; padding:14px; background:gold; color:#000; border:none; border-radius:8px; font-weight:900; font-size:15px; cursor:pointer; margin-bottom:10px; }
+    .rm-btn-close { width:100%; padding:12px; background:#333; color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer; }
+
+    /* Admin */
+    .rt-card { background:#111; border:1px solid #333; border-radius:10px; padding:12px; margin-bottom:10px; color:#fff; }
+    .rt-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid #222; padding-bottom:8px; }
+    .rt-title { color:gold; font-weight:bold; font-size:14px; }
+    .rt-status { font-size:11px; padding:3px 8px; border-radius:5px; font-weight:bold; }
+    .rt-status.attente { background:#f39c12; color:#000; }
+    .rt-status.approuve { background:#25D366; color:#000; }
+    .rt-status.refuse { background:#ff4444; color:#fff; }
+    .rt-info { font-size:12px; color:#aaa; margin-bottom:5px; }
+    .rt-reason { background:#1a1a1a; padding:8px; border-radius:6px; font-size:12px; color:#ddd; margin:8px 0; border-left:3px solid gold; }
+    .rt-actions { display:flex; gap:8px; margin-top:10px; }
+    .rt-btn { flex:1; padding:10px; border:none; border-radius:6px; font-weight:bold; font-size:12px; cursor:pointer; }
+    .rt-btn-remb { background:#25D366; color:#000; }
+    .rt-btn-echange { background:gold; color:#000; }
+    .rt-btn-refus { background:#ff4444; color:#fff; }
   `;
   document.head.appendChild(style);
 
-  // 2. Modale
+  // 2. Bouton Client (Injecté au chargement)
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      if (!document.getElementById('retourClientBtn')) {
+        var btn = document.createElement('button');
+        btn.id = 'retourClientBtn';
+        btn.innerHTML = '🔄 Retourner un article';
+        btn.onclick = window.openRetourModal;
+        document.body.appendChild(btn);
+      }
+    }, 1000);
+  });
+
+  // 3. Modale Client
   var modal = document.createElement('div');
-  modal.id = 'avisModal';
+  modal.id = 'retourModal';
   modal.innerHTML = `
-    <div class="am-box">
-      <h3>⭐ Laisser un avis</h3>
-      <input type="text" id="amName" class="am-input" placeholder="Votre nom">
-      <input type="text" id="amCity" class="am-input" placeholder="Votre quartier">
-      <div class="am-stars" id="amStars">
-        <span onclick="setAvisStars(1)">★</span>
-        <span onclick="setAvisStars(2)">★</span>
-        <span onclick="setAvisStars(3)">★</span>
-        <span onclick="setAvisStars(4)">★</span>
-        <span onclick="setAvisStars(5)">★</span>
+    <div class="rm-box">
+      <h3>🔄 Demande de retour</h3>
+      <label class="rm-label">Quel article voulez-vous retourner ?</label>
+      <select id="rtOrderSelect" class="rm-select"><option value="">Chargement...</option></select>
+
+      <label class="rm-label">Motif du retour :</label>
+      <div class="rm-checkbox-group" id="rtReasons">
+        <label class="rm-checkbox-item"><input type="radio" name="rtReason" value="Mauvaise taille"> Mauvaise taille</label>
+        <label class="rm-checkbox-item"><input type="radio" name="rtReason" value="Mauvaise couleur"> Mauvaise couleur reçue</label>
+        <label class="rm-checkbox-item"><input type="radio" name="rtReason" value="Article défectueux"> Article défectueux / Cassé</label>
+        <label class="rm-checkbox-item"><input type="radio" name="rtReason" value="Erreur de commande"> Ce n'est pas ce que j'ai commandé</label>
+        <label class="rm-checkbox-item"><input type="radio" name="rtReason" value="Article endommagé"> Endommagé à la livraison</label>
+        <label class="rm-checkbox-item"><input type="radio" name="rtReason" value="Qualité insuffisante"> Ne correspond pas à la photo</label>
+        <label class="rm-checkbox-item"><input type="radio" name="rtReason" value="Autre"> Autre (précisez en bas)</label>
       </div>
-      <textarea id="amText" class="am-input" rows="3" placeholder="Votre message..."></textarea>
-      <button class="avis-btn-add" onclick="submitAvis()">Envoyer l'avis</button>
-      <button class="am-close" onclick="closeAvisModal()">Annuler</button>
+
+      <label class="rm-label">Détails (Optionnel)</label>
+      <textarea id="rtDetails" class="rm-textarea" rows="2" placeholder="Expliquez..."></textarea>
+
+      <button class="rm-btn-submit" onclick="submitRetour()">Envoyer ma demande</button>
+      <button class="rm-btn-close" onclick="closeRetourModal()">Annuler</button>
     </div>
   `;
   document.body.appendChild(modal);
 
-  var currentStars = 5;
-  window.setAvisStars = function(n) {
-    currentStars = n;
-    var spans = document.querySelectorAll('#amStars span');
-    spans.forEach(function(s, i) { s.classList.toggle('active', i < n); });
-  };
-  setAvisStars(5);
+  window.closeRetourModal = function() { modal.classList.remove('show'); };
 
-  window.closeAvisModal = function() { modal.classList.remove('show'); };
+  window.openRetourModal = function() {
+    if (typeof me === 'undefined' || !me || !me.phone) { alert("Connectez-vous pour faire un retour."); return; }
+    var select = document.getElementById('rtOrderSelect');
+    select.innerHTML = '';
+    var allOrders = (window.S && window.S.orders) ? window.S.orders : {};
+    var myPhone = (me.phone || '').replace(/\D/g, '');
+    var userOrders = Object.values(allOrders).filter(function(o) {
+      return o && o.phone && o.phone.replace(/\D/g, '') === myPhone && o.status !== 'annulée';
+    }).sort(function(a, b) { return b.date - a.date; });
 
-  // 3. Initialisation Firebase
-  setTimeout(async function() {
-    try {
-      const B = "https://www.gstatic.com/firebasejs/12.19.0/";
-      const A = await import(B + "firebase-app.js");
-      const D = await import(B + "firebase-database.js");
-      let app;
-      try { app = A.getApp(); } catch(e) { return; }
-      
-      dbInstance = D.getDatabase(app);
-      firebaseSet = D.set;
-      firebaseRef = D.ref;
-      
-      // On écoute les avis en temps réel
-      D.onValue(D.ref(dbInstance, 'reviews'), (snap) => {
-        localAvis = snap.val() || {};
-        renderAvis();
+    if (userOrders.length === 0) { select.innerHTML = '<option value="">Aucune commande éligible.</option>'; } 
+    else {
+      select.innerHTML = '<option value="">-- Choisir l\\'article --</option>';
+      userOrders.forEach(function(o) {
+        var item = (o.items && o.items[0]) ? o.items[0].name : 'Article';
+        var opt = document.createElement('option'); opt.value = o.id; opt.text = 'Cmd #' + o.id.slice(-4) + ' - ' + item; select.appendChild(opt);
       });
-    } catch(e) { console.log('Erreur chargement avis', e); }
-  }, 1500);
-
-  // 4. Envoi de l'avis
-  window.submitAvis = async function() {
-    var name = document.getElementById('amName').value.trim();
-    var city = document.getElementById('amCity').value.trim();
-    var text = document.getElementById('amText').value.trim();
-
-    if (!name || !text) { alert("Veuillez remplir votre nom et votre message."); return; }
-
-    var id = 'av_' + Date.now();
-    var avisObj = {
-      id: id, name: name, city: city || 'Abidjan',
-      text: text, stars: currentStars, date: Date.now()
-    };
-
-    if (dbInstance && firebaseSet && firebaseRef) {
-      try {
-        await firebaseSet(firebaseRef(dbInstance, 'reviews/' + id), avisObj);
-        localAvis[id] = avisObj;
-        renderAvis();
-        alert('✅ Merci ! Votre avis a bien été enregistré.');
-        closeAvisModal();
-        document.getElementById('amName').value = '';
-        document.getElementById('amCity').value = '';
-        document.getElementById('amText').value = '';
-      } catch(e) {
-        alert('Erreur : ' + e.message);
-      }
-    } else {
-      alert("Erreur : base de données non connectée.");
     }
+    modal.classList.add('show');
   };
 
-  // 5. Affichage
-  function renderAvis() {
-    var container = document.getElementById('avis-container');
-    if (!container) return;
+  // 4. Envoi Client
+  window.submitRetour = async function() {
+    var orderId = document.getElementById('rtOrderSelect').value;
+    var reasonInput = document.querySelector('input[name="rtReason"]:checked');
+    var details = document.getElementById('rtDetails').value.trim();
 
-    var list = Object.values(localAvis).filter(function(a) { return a && a.name && a.text; });
-    list.sort(function(a, b) { return b.date - a.date; });
-
-    var html = '<h3 class="avis-title">⭐ Ce que disent nos clients</h3>';
+    if (!orderId) { alert("Sélectionnez l'article."); return; }
+    if (!reasonInput) { alert("Cochez un motif."); return; }
     
-    if (list.length === 0) {
-      html += '<p style="color:#888; text-align:center; font-size:13px;">Aucun avis pour le moment. Soyez le premier !</p>';
-    } else {
-      html += '<div class="avis-scroll">';
-      list.slice(0, 10).forEach(function(a) {
-        var stars = '';
-        for (var i = 0; i < 5; i++) { stars += (i < a.stars) ? '★' : '☆'; }
-        html += `
-          <div class="avis-card">
-            <div class="avis-stars">${stars}</div>
-            <p class="avis-text">"${a.text}"</p>
-            <span class="avis-name">- ${a.name}, ${a.city}</span>
-          </div>
-        `;
-      });
-      html += '</div>';
-    }
-    html += `<button class="avis-btn-add" onclick="document.getElementById('avisModal').classList.add('show')">✍️ Laisser un avis</button>`;
-    container.innerHTML = html;
-  }
+    var order = (window.S && window.S.orders) ? window.S.orders[orderId] : null;
+    if (!order) { alert("Commande introuvable."); return; }
+    var item = (order.items && order.items[0]) ? order.items[0] : {};
 
-  // 6. Correction bouton Stars (menu bas)
-  setTimeout(function() {
-    window.STAR = window.STAR || {};
-    window.STAR.open = function() {
-      alert("La fonctionnalité 'Stars' (Créateurs) arrive très bientôt sur BOuba-STOR !");
+    var id = 'ret_' + Date.now();
+    var obj = {
+      id: id, orderId: orderId, clientName: me.name, clientPhone: me.phone,
+      productName: item.name || 'Article', amount: order.total,
+      reason: reasonInput.value, details: details, status: 'attente', date: Date.now()
     };
-  }, 3000);
+
+    if (typeof window.write === 'function') {
+      try {
+        await window.write('returns/' + id, obj);
+        alert('✅ Demande envoyée ! L\\'admin va l\\'examiner.');
+        closeRetourModal();
+      } catch (e) { alert('Erreur : ' + e.message); }
+    }
+  };
+
+  // 5. Bouton Admin (Injection sécurisée)
+  window.openAdminRetours = function() {
+    var body = document.getElementById('adminBody');
+    if (!body) return;
+
+    // On gère l'état actif des onglets
+    var tabsEl = document.getElementById('tabs');
+    if (tabsEl) {
+      // Ajoute l'onglet visuellement si pas présent
+      var hasTab = Array.from(tabsEl.children).some(c => c.innerText.includes('Retours'));
+      if (!hasTab) {
+        var btn = document.createElement('button');
+        btn.className = 'on'; btn.innerText = '🔄 Retours';
+        btn.onclick = function() { openAdminRetours(); };
+        tabsEl.appendChild(btn);
+        Array.from(tabsEl.children).forEach(c => { if (c !== btn) c.classList.remove('on'); });
+      }
+    }
+
+    var allRetours = (window.S && window.S.returns) ? window.S.returns : {};
+    var list = Object.values(allRetours).sort((a, b) => b.date - a.date);
+
+    var html = '<div style="padding:10px;">';
+    if (list.length === 0) {
+      html += '<p style="text-align:center; color:#888; padding:20px;">Aucune demande de retour.</p>';
+    } else {
+      list.forEach(r => {
+        var sTxt = 'En attente', sCls = 'attente';
+        if (r.status === 'rembourse') { sTxt = 'Remboursé'; sCls = 'approuve'; }
+        if (r.status === 'echange') { sTxt = 'Échangé'; sCls = 'approuve'; }
+        if (r.status === 'refuse') { sTxt = 'Refusé'; sCls = 'refuse'; }
+
+        html += `
+          <div class="rt-card">
+            <div class="rt-header">
+              <span class="rt-title">Cmd #${r.orderId.slice(-4)}</span>
+              <span class="rt-status ${sCls}">${sTxt}</span>
+            </div>
+            <div class="rt-info">Client : <b>${r.clientName}</b> (${r.clientPhone})</div>
+            <div class="rt-info">Article : <b>${r.productName}</b> - ${Number(r.amount).toLocaleString('fr-FR')} F</div>
+            <div class="rt-info">Motif : <b style="color:gold">${r.reason}</b></div>
+            ${r.details ? '<div class="rt-reason">" ' + r.details + ' "</div>' : ''}
+        `;
+        if (r.status === 'attente') {
+          html += `
+            <div class="rt-actions">
+              <button class="rt-btn rt-btn-remb" onclick="actionRetour('${r.id}', 'rembourse')">💸 Rembourser</button>
+              <button class="rt-btn rt-btn-echange" onclick="actionRetour('${r.id}', 'echange')">🔄 Échanger</button>
+              <button class="rt-btn rt-btn-refus" onclick="actionRetour('${r.id}', 'refuse')">❌ Refuser</button>
+            </div>
+          `;
+        }
+        html += `</div>`;
+      });
+    }
+    html += '</div>';
+    body.innerHTML = html;
+  };
+
+  // Action Admin
+  window.actionRetour = async function(id, action) {
+    if (!confirm("Confirmer cette action ?")) return;
+    if (typeof window.write === 'function') {
+      await window.write('returns/' + id + '/status', action);
+      alert('Action validée !');
+      window.openAdminRetours(); // Rafraîchit la page
+    }
+  };
 
 })();
