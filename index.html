@@ -1367,6 +1367,16 @@ window.confirmPayInApp = async function () {
  <script src="avis-dynamique.js" defer></script>
  <script src="profil-avance.js" defer></script>
  <script src="retours.js" defer></script>
+ <script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "5672576c-c60f-4364-9bb3-316526fcd35e",
+    });
+    // Affiche la petite fenêtre pour s'abonner
+    OneSignal.Slidedown.promptPush(); 
+  });
+ </script>
 </body>
  </html>
 
