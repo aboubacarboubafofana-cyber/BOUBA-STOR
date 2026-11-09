@@ -875,17 +875,7 @@ function bar(){if(document.getElementById('updBar'))return;var d=document.create
  setTimeout(showBtns, 1000); // Sécurité après chargement
 })();
 </script>
- 
- // On s'assure que ça s'active à chaque fois qu'on ouvre/ferme une page
- var _op = window.openPage, _ca = window.closeAll;
- window.openPage = function(id){ _op(id); setTimeout(sync, 50); };
- window.closeAll = function(){ _ca(); setTimeout(sync, 50); };
- 
- // On lance au démarrage
- document.addEventListener('DOMContentLoaded', sync);
- setTimeout(sync, 1000); // Sécurité après chargement
-})();
-</script>
+
 <script>
 function envoyerNotif() {
   if (!isAdmin) { toast("Action réservée à l'administrateur"); return; }
@@ -895,12 +885,11 @@ function envoyerNotif() {
   if (!msg) return;
   
   toast("📢 Envoi en cours...");
-  // Ici, on utilise Firebase Cloud Messaging (FCM) pour envoyer à tous
-  // Pour l'instant, on simule l'envoi en local
   setTimeout(() => {
     toast("✅ Notification envoyée à tous les clients !");
   }, 1500);
 }
+</script>
 
 // Afficher le bouton admin quand on est connecté
 setInterval(() => {
