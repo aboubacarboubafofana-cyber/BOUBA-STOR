@@ -840,8 +840,6 @@ navigator.serviceWorker.addEventListener('message',function(e){if(e.data&&e.data
 function bar(){if(document.getElementById('updBar'))return;var d=document.createElement('div');d.id='updBar';d.style.cssText='position:fixed;left:10px;right:10px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:1600;background:#ffd700;color:#000;border-radius:14px;padding:12px 14px;font-weight:800;display:flex;gap:10px;align-items:center;box-shadow:0 2px 14px #000';d.innerHTML='<span style="flex:1">🔄 Nouvelle version prête</span><button style="background:#000;color:#ffd700;border:0;border-radius:10px;padding:9px 14px;font-weight:800" onclick="location.reload()">Actualiser</button>';document.body.appendChild(d)}
 })();
 </script>
-
-
 <script>
 /* Gestion des boutons flottants (Visibles sur l'accueil, cachés ailleurs) */
 (function(){
@@ -890,6 +888,158 @@ function envoyerNotif() {
   }, 1500);
 }
 </script>
+ <script>
+setInterval(() => {
+  const btn = document.getElementById('adminNotifBtn');
+  if (btn) {
+    btn.style.display = isAdmin ? 'block' : 'none';
+  }
+}, 2000);
+</script>
+
+<script>
+/* Chargement des scripts externes */
+async function partagerAvecPhoto(nomProduit, base64Image) {
+  try {
+    const res = await fetch(base64Image);
+    const blob = await res.blob();
+    const file = new File([blob], "produit.jpg", { type: "image/jpeg" });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'BOuba STOR', text: 'Découvrez cet article sur BOuba STOR : ' + nomProduit });
+    } else {
+      await navigator.share({ title: 'BOuba STOR', text: 'Découvrez cet article sur BOuba STOR : ' + nomProduit + '\nhttps://bouba-stor.vercel.app/' });
+    }
+  } catch (error) {
+    navigator.clipboard.writeText('Découvrez BOuba STOR : https://bouba-stor.vercel.app/');
+    alert('Le partage direct a échoué. Le lien a été copié !');
+  }
+}
+</script>
+
+<script>
+/* Mémoire des images */
+(function(){
+  var CN='bouba-img-v1', MAX=250;
+  if(window.caches){
+    var done={};
+    function keep(img){
+      var u=img.currentSrc||img.src;
+      if(!/^https?:/.test(u)||done[u])return; done[u]=1;
+      caches.open(CN).then(function(c){
+        return c.match(u).then(function(hit){
+          if(hit)return;
+          return fetch(u,{mode:'cors'}).then(function(r){
+            if(!r.ok)return;
+            return c.put(u,r.clone()).then(function(){
+              return c.keys().then(function(k){ if(k.length>MAX)c.delete(k[0]) });
+            });
+          });
+        });
+      }).catch(function(){});
+    }
+    function fromCache(img){
+      var u=img.getAttribute('data-orig')||img.src;
+      if(!/^https?:/.test(u))return;
+      img.setAttribute('data-orig',u);
+      caches.open(CN).then(function(c){return c.match(u)}).then(function(r){
+        if(!r)return; return r.blob().then(function(b){img.src=URL.createObjectURL(b)});
+      }).catch(function(){});
+    }
+    document.addEventListener('load',function(e){ var i=e.target; if(i&&i.tagName==='IMG')keep(i); },true);
+    document.addEventListener('error',function(e){ var i=e.target; if(i&&i.tagName==='IMG')fromCache(i); },true);
+  }
+
+  if(!window.indexedDB||typeof S==='undefined')return;
+  var seen={};
+  function open(){ return new Promise(function(ok,ko){ var r=indexedDB.open('bouba-pimg',1); r.onupgradeneeded=function(){r.result.createObjectStore('p')}; r.onsuccess=function(){ok(r.result)}; r.onerror=function(){ko(r.error)}; }); }
+  function backup(){
+    open().then(function(db){
+      var tx=db.transaction('p','readwrite'), st=tx.objectStore('p');
+      Object.keys(S.products||{}).forEach(function(id){
+        var im=S.products[id]&&S.products[id].img;
+        if(typeof im==='string'&&im.indexOf('data:image')===0&&seen[id]!==im.length){
+          seen[id]=im.length; st.put(im,id);
+        }
+      });
+    }).catch(function(){});
+  }
+  var _s=window.saveState;
+  if(typeof _s==='function')window.saveState=function(){_s.apply(this,arguments);backup()};
+})();
+</script>
+
+<script>
+/* Partage avec photo (Interceptor) */
+document.addEventListener('click', async function(e) {
+  const btn = e.target.closest('button');
+  if (!btn || !btn.innerText.includes('Partager avec la photo')) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  const modal = btn.closest('div[style*="background"]') || btn.parentElement.parentElement;
+  const imgEl = modal.querySelector('img');
+  const nameEl = modal.querySelector('b');
+  
+  const nom = nameEl ? nameEl.innerText : 'Article BOuba';
+  const imgSrc = imgEl ? imgEl.src : '';
+  const textePartage = `Découvrez cet article sur BOuba STOR :\n\n👉 ${nom}\n\n🛒 Commandez ici : https://bouba-stor.vercel.app/`;
+
+  if (imgSrc && /^(https?:|data:image|blob:)/.test(imgSrc)) {
+    try {
+      const res = await fetch(imgSrc);
+      const blob = await res.blob();
+      const file = new File([blob], "produit.jpg", { type: blob.type && blob.type.indexOf('image/') === 0 ? blob.type : "image/jpeg" });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'BOuba STOR', text: textePartage });
+        return;
+      }
+    } catch (err) {
+      if (err && err.name === 'AbortError') return;
+    }
+  }
+
+  if (navigator.share) {
+    await navigator.share({ title: 'BOuba STOR', text: textePartage });
+  } else {
+    navigator.clipboard.writeText(textePartage);
+    alert('Lien copié ! Vous pouvez le coller sur WhatsApp.');
+  }
+}, true);
+</script>
+
+<style>
+img[data-ok="0"]{opacity:0}
+img[data-ok="1"]{opacity:1;transition:opacity .25s}
+.card img,.iaCard img,.row img{background:#1a1a1a}
+</style>
+
+<script>
+/* Gestion des images en erreur */
+(function(){
+  function bad(i){i.setAttribute('data-ok','0')}
+  function good(i){i.setAttribute('data-ok','1')}
+  function check(i){
+    if(i.id==='logo'||i.getAttribute('data-chk'))return;
+    var src=i.getAttribute('src')||'';
+    if(!src){bad(i);return}
+    i.setAttribute('data-chk','1');
+    if(i.complete&&i.naturalWidth>0){good(i);return}
+    bad(i);
+  }
+  document.addEventListener('load',function(e){ var i=e.target;if(i&&i.tagName==='IMG'&&i.id!=='logo')good(i); },true);
+  document.addEventListener('error',function(e){ var i=e.target;if(!i||i.tagName!=='IMG'||i.id==='logo')return; bad(i);
+      if(!i.getAttribute('data-retry')&&/^https?:/.test(i.src)){ i.setAttribute('data-retry','1'); var u=i.src;setTimeout(function(){i.src=u},3000); }
+  },true);
+  function scan(root){(root.querySelectorAll?root.querySelectorAll('img'):[]).forEach(check)}
+  new MutationObserver(function(ms){ms.forEach(function(m){m.addedNodes.forEach(function(n){if(n.tagName==='IMG')check(n);else if(n.querySelectorAll)scan(n)});if(m.type==='attributes'&&m.target.tagName==='IMG'){m.target.removeAttribute('data-chk');check(m.target)}})}).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['src']});
+  document.addEventListener('DOMContentLoaded',function(){scan(document)});
+})();
+</script>
+
+<script>
+/* Interception des clics pour le chat */
+document.addEventListener('click',function(e){var n=e.target.closest('#chats,.nav>*');if(n&&(n.id==='chats'||/Amis/.test(n.textContent))){e.stopPropagation();e.preventDefault();location.href='amis.html'}},true);
+</script
 
 // Afficher le bouton admin quand on est connecté
 setInterval(() => {
