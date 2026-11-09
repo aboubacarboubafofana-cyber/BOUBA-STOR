@@ -842,41 +842,39 @@ function bar(){if(document.getElementById('updBar'))return;var d=document.create
 </script>
 
 
- <script src="maj.js" defer></script>
-<script type="module" src="articles-accueil.js" defer></script>
-<script src="images.js" defer></script>
-<div id="imgViewer" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:99999;align-items:center;justify-content:center;flex-direction:column">
-  <img id="imgViewerPic" alt="" style="max-width:100%;max-height:88%;object-fit:contain">
-  <div style="color:#ffd700;padding:14px;font-weight:bold">✕ Fermer</div>
-</div>
-<style>img{cursor:pointer}</style>
 <script>
-document.addEventListener('click',function(e){
-  var t=e.target;
-  if(!t||t.tagName!=='IMG')return;
-  var v=document.getElementById('imgViewer');
-  if(v.contains(t)){v.style.display='none';return;}
-  e.preventDefault();e.stopPropagation();
-  document.getElementById('imgViewerPic').src=t.src;
-  v.style.display='flex';
-},true);
-document.getElementById('imgViewer').addEventListener('click',function(){this.style.display='none';});
-  </script>
-<script>
-/* Gestion des boutons flottants (Accueil uniquement) */
+/* Gestion des boutons flottants (Visibles sur l'accueil, cachés ailleurs) */
 (function(){
- function sync(){
-  // On vérifie si on est sur l'accueil (aucune page active)
-  var onHome = !document.querySelector('.page.active');
-  
-  var a = document.getElementById('avisFab'); 
-  var c = document.getElementById('conseilsFab'); 
-  var r = document.getElementById('retourFab');
-  
-  if(a) a.style.display = onHome ? 'flex' : 'none';
-  if(c) c.style.display = onHome ? 'flex' : 'none';
-  if(r) r.style.display = onHome ? 'flex' : 'none';
+ function showBtns() {
+    var a = document.getElementById('avisFab'); 
+    var c = document.getElementById('conseilsFab'); 
+    var r = document.getElementById('retourFab');
+    if(a) a.style.display = 'flex';
+    if(c) c.style.display = 'flex';
+    if(r) r.style.display = 'flex';
  }
+ 
+ function hideBtns() {
+    var a = document.getElementById('avisFab'); 
+    var c = document.getElementById('conseilsFab'); 
+    var r = document.getElementById('retourFab');
+    if(a) a.style.display = 'none';
+    if(c) c.style.display = 'none';
+    if(r) r.style.display = 'none';
+ }
+
+ // On cache les boutons quand on ouvre une page (Panier, Contrôle...)
+ var _op = window.openPage, _ca = window.closeAll;
+ window.openPage = function(id){ _op(id); setTimeout(hideBtns, 50); };
+ 
+ // On affiche les boutons quand on revient à l'accueil
+ window.closeAll = function(){ _ca(); setTimeout(showBtns, 50); };
+ 
+ // Au démarrage, on affiche les boutons
+ document.addEventListener('DOMContentLoaded', showBtns);
+ setTimeout(showBtns, 1000); // Sécurité après chargement
+})();
+</script>
  
  // On s'assure que ça s'active à chaque fois qu'on ouvre/ferme une page
  var _op = window.openPage, _ca = window.closeAll;
