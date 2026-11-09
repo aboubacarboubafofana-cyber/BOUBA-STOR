@@ -1,5 +1,5 @@
 /* =============================================================
-   GESTION DES RETOURS (Version 100% Fiable)
+   GESTION DES RETOURS (Bouton Intelligent Client / Admin)
    ============================================================= */
 (function() {
   'use strict';
@@ -7,8 +7,8 @@
   // 1. Styles CSS
   var style = document.createElement('style');
   style.innerHTML = `
-    #retourModal { position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:99999; display:none; align-items:center; justify-content:center; padding:15px; }
-    #retourModal.show { display:flex; }
+    #retourModal, #retourAdminModal { position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:999999; display:none; align-items:center; justify-content:center; padding:15px; }
+    #retourModal.show, #retourAdminModal.show { display:flex; }
     .rm-box { background:#111; border:1px solid gold; border-radius:15px; width:100%; max-width:450px; max-height:90vh; overflow-y:auto; padding:20px; color:#fff; font-family:Arial, sans-serif; }
     .rm-box h3 { color:gold; text-align:center; margin-bottom:15px; font-size:18px; }
     .rm-label { display:block; margin-bottom:5px; font-size:13px; color:#aaa; }
@@ -62,30 +62,53 @@
   `;
   document.body.appendChild(modal);
 
-  // 3. Logique Client
-  window.openRetourModal = function() {
-    if (typeof me === 'undefined' || !me || !me.phone) { alert("Connectez-vous pour faire un retour."); return; }
-    var select = document.getElementById('rtOrderSelect');
-    select.innerHTML = '';
-    var allOrders = (window.S && window.S.orders) ? window.S.orders : {};
-    var myPhone = (me.phone || '').replace(/\D/g, '');
-    
-    var userOrders = Object.values(allOrders).filter(function(o) {
-      return o && o.phone && o.phone.replace(/\D/g, '') === myPhone && o.status !== 'annulée';
-    }).sort(function(a, b) { return b.date - a.date; });
+  // 3. Modale Admin (Cachée par défaut)
+  var adminModal = document.createElement('div');
+  adminModal.id = 'retourAdminModal';
+  adminModal.innerHTML = `
+    <div class="rm-box" style="max-width: 600px;">
+      <h3>🔄 Gestion des Retours (Admin)</h3>
+      <div id="adminRetoursList" style="margin-bottom: 15px;"></div>
+      <button class="rm-btn-close" onclick="document.getElementById('retourAdminModal').classList.remove('show')">Fermer</button>
+    </div>
+  `;
+  document.body.appendChild(adminModal);
 
-    if (userOrders.length === 0) { 
-      select.innerHTML = '<option value="">Aucune commande éligible.</option>'; 
+  // 4. LE BOUTON INTELLIGENT
+  window.openRetourModal = function() {
+    // On vérifie si c'est l'admin qui clique
+    var isAdminUser = (typeof isAdmin !== 'undefined' && isAdmin) || (window.isAdmin === true);
+    
+    if (isAdminUser) {
+      // C'est l'admin -> On affiche la liste des retours
+      renderAdminRetoursUI();
+      document.getElementById('retourAdminModal').classList.add('show');
     } else {
-      select.innerHTML = '<option value="">-- Choisir l\\'article --</option>';
-      userOrders.forEach(function(o) {
-        var item = (o.items && o.items[0]) ? o.items[0].name : 'Article';
-        var opt = document.createElement('option'); opt.value = o.id; opt.text = 'Cmd #' + o.id.slice(-4) + ' - ' + item; select.appendChild(opt);
-      });
+      // C'est un client -> On affiche le formulaire
+      if (typeof me === 'undefined' || !me || !me.phone) { alert("Connectez-vous pour faire un retour."); return; }
+      var select = document.getElementById('rtOrderSelect');
+      select.innerHTML = '';
+      var allOrders = (window.S && window.S.orders) ? window.S.orders : {};
+      var myPhone = (me.phone || '').replace(/\D/g, '');
+      
+      var userOrders = Object.values(allOrders).filter(function(o) {
+        return o && o.phone && o.phone.replace(/\D/g, '') === myPhone && o.status !== 'annulée';
+      }).sort(function(a, b) { return b.date - a.date; });
+
+      if (userOrders.length === 0) { 
+        select.innerHTML = '<option value="">Aucune commande éligible.</option>'; 
+      } else {
+        select.innerHTML = '<option value="">-- Choisir l\'article --</option>';
+        userOrders.forEach(function(o) {
+          var item = (o.items && o.items[0]) ? o.items[0].name : 'Article';
+          var opt = document.createElement('option'); opt.value = o.id; opt.text = 'Cmd #' + o.id.slice(-4) + ' - ' + item; select.appendChild(opt);
+        });
+      }
+      document.getElementById('retourModal').classList.add('show');
     }
-    modal.classList.add('show');
   };
 
+  // 5. Envoi Client
   window.submitRetour = async function() {
     var orderId = document.getElementById('rtOrderSelect').value;
     var reasonInput = document.querySelector('input[name="rtReason"]:checked');
@@ -107,53 +130,21 @@
     if (typeof window.write === 'function') {
       try {
         await window.write('returns/' + id, obj);
-        alert('✅ Demande envoyée ! L\\'admin va l\\'examiner.');
+        alert('✅ Demande envoyée ! L\'admin va l\'examiner.');
         document.getElementById('retourModal').classList.remove('show');
       } catch (e) { alert('Erreur : ' + e.message); }
     }
   };
 
-  // 4. Injection sécurisée dans le panneau Admin
-  var bound = false;
-  function bindAdmin() {
-    if (typeof window.renderAdmin !== 'function' || typeof window.TABS === 'undefined') {
-      return setTimeout(bindAdmin, 500);
-    }
-    if (bound) return;
-    bound = true;
-
-    var TAB_ID = 'retours';
-    if (!window.TABS.find(t => t[0] === TAB_ID)) {
-      window.TABS.push([TAB_ID, '🔄 Retours']);
-    }
-
-    var _origRender = window.renderAdmin;
-    window.renderAdmin = function() {
-      var curTab = 'stats';
-      try { curTab = tab; } catch(e) {}
-      
-      if (curTab === TAB_ID) {
-        var tabsEl = document.getElementById('tabs');
-        if (tabsEl) {
-          tabsEl.innerHTML = window.TABS.map(t => `<button class="${t[0] === curTab ? 'on' : ''}" onclick="setTab('${t[0]}')">${t[1]}</button>`).join('');
-        }
-        var body = document.getElementById('adminBody');
-        if (body) renderAdminRetoursUI(body);
-        return;
-      }
-      return _origRender.apply(this, arguments);
-    };
-  }
-  setTimeout(bindAdmin, 1500);
-
-  // 5. Affichage Admin
-  function renderAdminRetoursUI(body) {
+  // 6. Affichage Admin
+  function renderAdminRetoursUI() {
+    var body = document.getElementById('adminRetoursList');
     var allRetours = (window.S && window.S.returns) ? window.S.returns : {};
     var list = Object.values(allRetours).sort((a, b) => b.date - a.date);
-    var html = '<div style="padding:10px;">';
+    var html = '';
     
     if (list.length === 0) {
-      html += '<p style="text-align:center; color:#888; padding:20px;">Aucune demande de retour.</p>';
+      html += '<p style="text-align:center; color:#888; padding:20px;">Aucune demande de retour pour le moment.</p>';
     } else {
       list.forEach(r => {
         var sTxt = 'En attente', sCls = 'attente';
@@ -181,16 +172,16 @@
         html += `</div>`;
       });
     }
-    html += '</div>';
     body.innerHTML = html;
   }
 
+  // 7. Action Admin
   window.actionRetour = async function(id, action) {
     if (!confirm("Confirmer cette action ?")) return;
     if (typeof window.write === 'function') {
       await window.write('returns/' + id + '/status', action);
       alert('Action validée !');
-      renderAdminRetoursUI(document.getElementById('adminBody'));
+      renderAdminRetoursUI(); // Rafraîchit la liste
     }
   };
 
