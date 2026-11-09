@@ -1359,34 +1359,6 @@ window.confirmPayInApp = async function () {
  <script src="avis-dynamique.js" defer></script>
  <script src="profil-avance.js" defer></script>
  <script src="retours.js" defer></script>
- <script>
-/* Gestion stricte des boutons flottants (Uniquement sur l'accueil) */
-(function(){
- function syncBtns() {
-    // On vérifie si la page Panier, Contrôle, etc. est ouverte
-    var pageActive = document.querySelector('.page.active');
-    
-    // Si pageActive existe, on est PAS sur l'accueil
-    var isHome = (pageActive === null); 
-    
-    var btns = ['avisFab', 'conseilsFab', 'retourFab'];
-    
-    btns.forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) {
-        // Si on est sur l'accueil (isHome true) on affiche (flex), sinon on cache (none)
-        el.style.display = isHome ? 'flex' : 'none';
-      }
-    });
- }
-
- // On vérifie toutes les 200 millisecondes (ultra rapide)
- setInterval(syncBtns, 200);
-
- // On vérifie aussi dès le chargement
- document.addEventListener('DOMContentLoaded', syncBtns);
-})();
- </script>
 </body>
  </html>
 
