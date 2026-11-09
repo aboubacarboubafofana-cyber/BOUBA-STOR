@@ -1377,6 +1377,10 @@ window.confirmPayInApp = async function () {
     OneSignal.Slidedown.promptPush(); 
   });
  </script>
+ <div onclick="alert('body=' + document.body.className + ' | imgs=' + document.querySelectorAll('#grid img').length + ' | view=' + (document.getElementById('imgViewer')?.style.display || 'none'))"
+     style="position:fixed;bottom:0;left:0;right:0;z-index:999999;background:red;color:#fff;padding:10px;text-align:center;font-weight:900;font-size:14px">
+  TAP ICI POUR DIAGNOSTIC
+ </div>
 </body>
  </html>
 
