@@ -62,7 +62,7 @@
   `;
   document.body.appendChild(modal);
 
-  // 3. Modale Admin (Cachée par défaut)
+  // 3. Modale Admin
   var adminModal = document.createElement('div');
   adminModal.id = 'retourAdminModal';
   adminModal.innerHTML = `
@@ -76,15 +76,12 @@
 
   // 4. LE BOUTON INTELLIGENT
   window.openRetourModal = function() {
-    // On vérifie si c'est l'admin qui clique
     var isAdminUser = (typeof isAdmin !== 'undefined' && isAdmin) || (window.isAdmin === true);
     
     if (isAdminUser) {
-      // C'est l'admin -> On affiche la liste des retours
       renderAdminRetoursUI();
       document.getElementById('retourAdminModal').classList.add('show');
     } else {
-      // C'est un client -> On affiche le formulaire
       if (typeof me === 'undefined' || !me || !me.phone) { alert("Connectez-vous pour faire un retour."); return; }
       var select = document.getElementById('rtOrderSelect');
       select.innerHTML = '';
@@ -92,16 +89,24 @@
       var myPhone = (me.phone || '').replace(/\D/g, '');
       
       var userOrders = Object.values(allOrders).filter(function(o) {
+        // On compare les numéros de téléphone
         return o && o.phone && o.phone.replace(/\D/g, '') === myPhone && o.status !== 'annulée';
       }).sort(function(a, b) { return b.date - a.date; });
 
       if (userOrders.length === 0) { 
-        select.innerHTML = '<option value="">Aucune commande éligible.</option>'; 
+        select.innerHTML = '<option value="">Aucune commande trouvée pour ce numéro.</option>'; 
       } else {
-        select.innerHTML = '<option value="">-- Choisir l\'article --</option>';
+        select.innerHTML = '<option value="">-- Choisir l\'article à retourner --</option>';
         userOrders.forEach(function(o) {
-          var item = (o.items && o.items[0]) ? o.items[0].name : 'Article';
-          var opt = document.createElement('option'); opt.value = o.id; opt.text = 'Cmd #' + o.id.slice(-4) + ' - ' + item; select.appendChild(opt);
+          if (o.items && o.items.length > 0) {
+            o.items.forEach(function(item, index) {
+              var opt = document.createElement('option');
+              // On stocke l'ID de la commande et l'index de l'article séparés par ||
+              opt.value = o.id + '||' + index;
+              opt.text = 'Cmd #' + o.id.slice(-4) + ' - ' + item.name + ' (' + item.price + ' F)';
+              select.appendChild(opt);
+            });
+          }
         });
       }
       document.getElementById('retourModal').classList.add('show');
@@ -110,21 +115,33 @@
 
   // 5. Envoi Client
   window.submitRetour = async function() {
-    var orderId = document.getElementById('rtOrderSelect').value;
+    var selectedVal = document.getElementById('rtOrderSelect').value;
     var reasonInput = document.querySelector('input[name="rtReason"]:checked');
     var details = document.getElementById('rtDetails').value.trim();
 
-    if (!orderId) { alert("Sélectionnez l'article."); return; }
+    if (!selectedVal) { alert("Sélectionnez l'article à retourner."); return; }
     if (!reasonInput) { alert("Cochez un motif."); return; }
     
+    // On récupère l'ID de la commande et l'index de l'article
+    var parts = selectedVal.split('||');
+    var orderId = parts[0];
+    var itemIndex = parseInt(parts[1]);
+    
     var order = (window.S && window.S.orders) ? window.S.orders[orderId] : null;
-    var item = (order && order.items && order.items[0]) ? order.items[0] : {};
+    var item = (order && order.items && order.items[itemIndex]) ? order.items[itemIndex] : {};
 
     var id = 'ret_' + Date.now();
     var obj = {
-      id: id, orderId: orderId, clientName: me.name, clientPhone: me.phone,
-      productName: item.name || 'Article', amount: order ? order.total : 0,
-      reason: reasonInput.value, details: details, status: 'attente', date: Date.now()
+      id: id, 
+      orderId: orderId, 
+      clientName: me.name, 
+      clientPhone: me.phone,
+      productName: item.name || 'Article', 
+      amount: item.price * (item.qty || 1), // On prend le prix de l'article spécifique
+      reason: reasonInput.value, 
+      details: details, 
+      status: 'attente', 
+      date: Date.now()
     };
 
     if (typeof window.write === 'function') {
@@ -181,7 +198,7 @@
     if (typeof window.write === 'function') {
       await window.write('returns/' + id + '/status', action);
       alert('Action validée !');
-      renderAdminRetoursUI(); // Rafraîchit la liste
+      renderAdminRetoursUI();
     }
   };
 
