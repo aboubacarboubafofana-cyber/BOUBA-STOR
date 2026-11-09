@@ -1,5 +1,5 @@
 /* =============================================================
-   AVIS CLIENTS DYNAMIQUES (Version Affichage Instantané)
+   AVIS CLIENTS DYNAMIQUES (Version Connectée à Firebase)
    ============================================================= */
 (function() {
   'use strict';
@@ -78,10 +78,10 @@
     var avisObj = { id: id, name: name, city: city || 'Abidjan', text: text, stars: currentStars, date: Date.now() };
 
     if (typeof window.write === 'function') {
-      // On sauvegarde dans Firebase
-      window.write('reviews/' + id, avisObj);
+      // 🔥 ON UTILISE LE BON CHEMIN : avis/general
+      window.write('avis/general/' + id, avisObj);
       
-      // 🔥 C'EST ICI LA MAGIE : On l'ajoute directement à l'écran pour un affichage instantané !
+      // Affichage instantané local
       if (!window.S) window.S = {};
       if (!window.S.reviews) window.S.reviews = {};
       window.S.reviews[id] = avisObj;
@@ -130,16 +130,16 @@
     container.innerHTML = html;
   }
 
-  // 4. Écouter les changements Firebase pour les autres visiteurs
+  // 4. Écouter les changements Firebase en temps réel (Sur le bon chemin : avis/general)
   setTimeout(function() {
     if (window.fb && window.fb.D && window.fb.db) {
-      window.fb.D.onValue(window.fb.D.ref(window.fb.db, 'reviews'), function(snap) {
+      window.fb.D.onValue(window.fb.D.ref(window.fb.db, 'avis/general'), function(snap) {
         if (!window.S) window.S = {};
         window.S.reviews = snap.val() || {};
-        renderAvis(); // On met à jour quand quelqu'un d'autre poste un avis
+        renderAvis();
       });
     } else {
-      setTimeout(renderAvis, 2000); // Sécurité
+      setTimeout(renderAvis, 2000);
     }
   }, 1500);
 
