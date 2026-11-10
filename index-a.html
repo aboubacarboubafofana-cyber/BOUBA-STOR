@@ -879,24 +879,24 @@ async function envoyerNotif() {
   toast("📢 Envoi en cours...");
   
   try {
-  const res = await fetch('/api/push', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ act: 'manual', title: titre, body: msg })
-  });
-  const data = await res.json();
-  
-  if (data.sent === 0) {
-    toast("❌ Échec : 0 téléphone n'est enregistré pour recevoir les notifications.");
-  } else if (data.sent > 0) {
-    toast("✅ Notification envoyée à " + data.sent + " téléphone(s) !");
-  } else {
-    toast("⚠️ Réponse inconnue de Vercel.");
+    const res = await fetch('/api/push', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ act: 'manual', title: titre, body: msg })
+    });
+    const data = await res.json();
+    
+    if (data.sent === 0) {
+      toast("❌ Échec : 0 téléphone n'est enregistré.");
+    } else if (data.sent > 0) {
+      toast("✅ Notification envoyée à " + data.sent + " téléphone(s) !");
+    } else {
+      toast("⚠️ Erreur inconnue.");
+    }
+  } catch (e) {
+    toast("❌ Erreur réseau : " + e.message);
   }
-} catch (e) {
-  toast("❌ Erreur réseau : " + e.message);
-  }
-
+}
 
 </script>
  <script>
