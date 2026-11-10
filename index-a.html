@@ -548,8 +548,7 @@ function toggleIA(){
   iaSay('Salam ! 👋 Bienvenue chez '+esc(shopN())+'. Dis-moi ce que tu cherches (ex: "ensemble", "jogging") ou tape "nouveautés".');
 }
 function iaSay(h,u){const d=document.createElement('div');d.className='msg '+(u?'user':'bot');d.innerHTML=h;$('iaMsgs').appendChild(d);$('iaMsgs').scrollTop=1e6}
-function iaCards(l){return l.slice(0,5).map(p=>'<div class="iaCard" onclick="addCart(\''+p.id+'\')"><img src="'+safeImg(p.img)+'"><div><b>'+esc(p.name)+'</b><br><span style="color:gold">'+fmt(p.price)+' F</span><br><small>👆 Touche pour ajouter</small></div></div>').join('')}
-function sendIA(){
+function iaCards(l){return l.slice(0,5).map(p=>'<div class="iaCard" onclick="addCart(\''+p.id+'\')"><img src="'+safeImg(p.img)+'" onclick="event.stopPropagation();window.showImg(this.src)"><div><b>'+esc(p.name)+'</b><br><span style="color:gold">'+fmt(p.price)+' F</span><br><small>👆 Touche pour ajouter</small></div></div>').join('')}
  const raw=$('iaInput').value.trim();if(!raw)return;$('iaInput').value='';
  iaSay(esc(raw),true);
  const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
