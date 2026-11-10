@@ -1,9 +1,8 @@
 import {firebaseConfig} from './firebase-config.js';
-import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {getMessaging,getToken,onMessage} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+import {initializeApp} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import {getMessaging,getToken,onMessage} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-messaging.js";
 import { auth, db } from './firebase-config.js';
-import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 const VAPID="BNKwvLEvBi6bAvLgh3Hj508UQCFl71iEqHUU_SEleU63pJL1JVRBaJGIvYJBc1dOv5Xu2KTJHkjeXc7c9bU9si4";
 let dev='';try{dev=localStorage.getItem('b_dev')||'';if(!dev){dev=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2)).replace(/[^\w-]/g,'');localStorage.setItem('b_dev',dev)}}catch(e){}
 const say=(m,manual)=>{if(manual)alert(m)};
