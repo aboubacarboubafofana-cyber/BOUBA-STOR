@@ -869,19 +869,31 @@ function bar(){if(document.getElementById('updBar'))return;var d=document.create
     <a href="confidentialite.html" style="color:#ffd700; text-decoration:none; margin: 0 10px;">Confidentialité</a>
 </div>
 <script>
-function envoyerNotif() {
+async function envoyerNotif() {
   if (!isAdmin) { toast("Action réservée à l'administrateur"); return; }
-  const titre = prompt("Titre de la notification (ex: 🔥 Nouvel arrivage) :", "🔥 Nouveau sur BOuba STOR !");
+  const titre = prompt("Titre de la notification (ex: 🔥 Nouvel arrivage) :", "🔥 Nouveau sur BOUBA STOR !");
   if (!titre) return;
   const msg = prompt("Message (ex: Découvrez nos nouveaux pulls) :", "Venez vite découvrir nos nouveautés !");
   if (!msg) return;
   
   toast("📢 Envoi en cours...");
-  // Ici, on utilise Firebase Cloud Messaging (FCM) pour envoyer à tous
-  // Pour l'instant, on simule l'envoi en local
-  setTimeout(() => {
-    toast("✅ Notification envoyée à tous les clients !");
-  }, 1500);
+  
+  try {
+    const res = await fetch('/api/push', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ act: 'manual', title: titre, body: msg })
+    });
+    const data = await res.json();
+    
+    if (data.errors) {
+      toast("❌ Erreur OneSignal : " + JSON.stringify(data.errors));
+    } else {
+      toast("✅ Notification envoyée à tous les clients !");
+    }
+  } catch (e) {
+    toast("❌ Erreur réseau : " + e.message);
+  }
 }
 
 // Afficher le bouton admin quand on est connecté
