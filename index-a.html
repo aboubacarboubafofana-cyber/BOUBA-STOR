@@ -360,8 +360,8 @@ function cartItems(){return cart.map(c=>{let p=(S.products||{})[c.id];if(!p&&win
 function cartSum(){return cartItems().reduce((s,x)=>s+x.p.price*x.qty,0)}
 function renderCart(){
  const l=cartItems();
- $('cartN').textContent=cart.length?'('+cart.length+')':'';
- $('cartList').innerHTML=l.length?l.map(x=>'<div class="row"><img src="'+safeImg(x.p.img)+'"><div class="g"><b>'+esc(x.p.name)+'</b><br><span style="color:gold">'+fmt(x.p.price)+' F</span></div><button class="mini" onclick="qty(\''+x.p.id+'\',-1)">−</button><b>'+x.qty+'</b><button class="mini" onclick="qty(\''+x.p.id+'\',1)">+</button></div>').join(''):'<p style="color:#888">Panier vide</p>';
+  $('cartN').textContent=cart.length?'('+cart.length+')':'';
+ $('cartList').innerHTML=l.length?l.map(x=>'<div class="row"><img src="'+safeImg(x.p.img)+'" onclick="event.stopPropagation();window.showImg(this.src)"><div class="g"><b>'+esc(x.p.name)+'</b><br><span style="color:gold">'+fmt(x.p.price)+' F</span></div><button class="mini" onclick="qty(\''+x.p.id+'\',-1)">−</button><b>'+x.qty+'</b><button class="mini" onclick="qty(\''+x.p.id+'\',1)">+</button></div>').join(''):'<p style="color:#888">Panier vide</p>';
  $('cartTotal').textContent=l.length?'Total : '+fmt(cartSum())+' F':'';
 }
 function commander(){
