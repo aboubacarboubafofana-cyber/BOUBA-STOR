@@ -400,7 +400,8 @@ function register(){
  SV('b_cc',dial);
  const key=full,ph='+'+full;
  me={key,name:n,phone:ph,city,date:Date.now()};SV('b_me',me);
- write('users/'+key,me);checkGate();
+ checkGate();
+ write('users/'+key,me);
 }
 function loadProfile(){$('eName').value=me.name;$('ePhone').value=me.phone;$('eCity').value=me.city}
 function saveProfile(){
