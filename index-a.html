@@ -1302,8 +1302,8 @@ window.confirmPayInApp = async function () {
   const items = cartItems();
   if (!items.length) { toast('Panier vide'); return; }
   const total = items.reduce((a, b) => a + b.p.price * b.qty, 0);
-  const myUid = (fb && fb.auth && fb.auth.auth && fb.auth.auth.currentUser) ? fb.auth.auth.currentUser.uid : (fb && fb.auth && fb.auth.currentUser ? fb.auth.currentUser.uid : null);
-  try {
+  const myUid = (fb && fb.auth && fb.auth.currentUser) ? fb.auth.currentUser.uid : null;
+try {
     const id = 'CMD' + Date.now().toString(36).toUpperCase();
     write('orders/' + id, {
       id, name: nom, phone: tel, city: '', transaction: trans, methode: payMethod, total,
