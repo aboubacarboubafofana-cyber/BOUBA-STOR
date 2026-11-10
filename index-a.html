@@ -751,8 +751,7 @@ function renderAll(){
 checkGate();renderAll();setNet();initFB();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=2').catch(()=>{});
 <script>
- <script>
-setInterval(function(){
+ setInterval(function(){
   var n=document.getElementById('navAdmin');
   if(n)n.style.display=(typeof isAdmin!=='undefined'&&isAdmin)?'':'none';
 },1000);
