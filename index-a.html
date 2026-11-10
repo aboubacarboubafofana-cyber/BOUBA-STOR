@@ -1180,7 +1180,7 @@ window.supRender=function(b){
 var posWatch=null;
 function myUid(){return fb&&fb.auth&&fb.auth.currentUser?fb.auth.currentUser.uid:null}
 function posShareStart(){
- var uid=myUid();
+ var uid=me&&me.key?me.key:null;
  if(!uid){alert('Connecte-toi d\'abord dans Mon compte.');return}
  if(!navigator.geolocation){alert('La localisation n\'est pas disponible sur cet appareil.');return}
  navigator.geolocation.getCurrentPosition(function(){
@@ -1191,7 +1191,7 @@ function posShareStart(){
   {enableHighAccuracy:true,maximumAge:15000,timeout:20000});
   posUI(true);
  },function(e){alert('Autorise la localisation pour activer le partage.')},{enableHighAccuracy:true,timeout:15000});
-}
+  }
 function posShareStop(){
  var uid=myUid(); if(posWatch!==null){navigator.geolocation.clearWatch(posWatch);posWatch=null}
  if(uid){var p=(S.users&&S.users[uid]&&S.users[uid].pos)||{}; write('users/'+uid+'/pos',{lat:p.lat||0,lng:p.lng||0,t:p.t||Date.now(),on:false})}
