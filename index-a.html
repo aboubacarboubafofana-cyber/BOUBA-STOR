@@ -1400,7 +1400,36 @@ document.addEventListener('click', function(e) {
     }
 }, true); // Le "true" intercepte le clic AVANT tous les autres scripts
  </script>
+  <script>
+window.envoyerNotif = async function() {
+  if (!isAdmin) { toast("Action réservée à l'administrateur"); return; }
+  const titre = prompt("Titre de la notification (ex: 🔥 Nouvel arrivage) :", "🔥 Nouveau sur BOUBA STOR !");
+  if (!titre) return;
+  const msg = prompt("Message (ex: Découvrez nos nouveaux pulls) :", "Venez vite découvrir nos nouveautés !");
+  if (!msg) return;
   
+  toast("📢 Envoi en cours...");
+  
+  try {
+    const res = await fetch('/api/push', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ act: 'manual', title: titre, body: msg })
+    });
+    const data = await res.json();
+    
+    if (data.sent === 0) {
+      toast("❌ Échec : 0 téléphone n'est enregistré.");
+    } else if (data.sent > 0) {
+      toast("✅ Notification envoyée à " + data.sent + " téléphone(s) !");
+    } else {
+      toast("⚠️ Erreur inconnue.");
+    }
+  } catch (e) {
+    toast("❌ Erreur réseau : " + e.message);
+  }
+};
+  </script>
 </body>
  </html>
 
