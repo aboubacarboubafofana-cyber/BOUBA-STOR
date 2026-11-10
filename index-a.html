@@ -901,9 +901,14 @@ async function envoyerNotif() {
 setInterval(() => {
   const btn = document.getElementById('adminNotifBtn');
   if (btn) {
-    btn.style.display = isAdmin ? 'block' : 'none';
+    // On vérifie si isAdmin existe et s'il est vrai
+    if (typeof isAdmin !== 'undefined' && isAdmin === true) {
+      btn.style.display = 'block';
+    } else {
+      btn.style.display = 'none';
+    }
   }
-}, 2000);
+}, 1000);
 </script>
  <script>
 async function partagerAvecPhoto(nomProduit, base64Image) {
