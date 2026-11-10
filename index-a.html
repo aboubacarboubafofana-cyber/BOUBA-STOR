@@ -879,17 +879,16 @@ async function envoyerNotif() {
   toast("📢 Envoi en cours...");
   
   try {
-    const res = await fetch('/api/onesignal', {
+    const res = await fetch('/api/push', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: titre, body: msg })
+      body: JSON.stringify({ act: 'manual', title: titre, body: msg })
     });
-    const data = await res.json();
     
-    if (data.errors) {
-      toast("❌ Erreur OneSignal : " + JSON.stringify(data.errors));
+    if(res.ok) {
+      toast("✅ Notification envoyée !");
     } else {
-      toast("✅ Notification envoyée à tous les clients !");
+      toast("❌ Erreur lors de l'envoi");
     }
   } catch (e) {
     toast("❌ Erreur réseau : " + e.message);
