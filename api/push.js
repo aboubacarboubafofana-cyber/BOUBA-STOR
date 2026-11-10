@@ -26,12 +26,11 @@ async function db(method,path,o={}){
  return{status:r.status,etag:r.headers.get('etag'),data:r.status===412?null:await r.json().catch(()=>null)};
 }
 
-// Une seule forme de message (data-only) + même "tag" : le téléphone remplace au lieu d'empiler
-const msg=(tk,title,body)=>({message:{token:tk,data:{title,body,url:'./',tag:'bouba-new'},webpush:{headers:{Urgency:'high',TTL:'86400'}}}});
+// Une seule forme de message (data + notification) pour Android
+const msg=(tk,title,body)=>({message:{token:tk,notification:{title:title,body:body},data:{title,body,url:'./',tag:'bouba-new'},webpush:{headers:{Urgency:'high',TTL:'86400'}}}});
 // Un même jeton ne reçoit jamais deux fois le message
 const uniq=T=>{const s=new Set();return T.filter(([id,v])=>{const t=(v&&v.t)||v;if(!t||s.has(t))return false;s.add(t);return true})};
 const money=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ')+' F';
-
 async function subscribe(t,dev){
  t=String(t||'');
  if(t.length<100||t.length>400||!/^[\w:\-]+$/.test(t))return{ok:false};
