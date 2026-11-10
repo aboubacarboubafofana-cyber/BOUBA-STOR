@@ -1379,12 +1379,30 @@ window.confirmPayInApp = async function () {
  </script>
  <script>
 window.showImg = function(src) {
-    var v = document.getElementById('imgViewer');
-    var p = document.getElementById('imgViewerPic');
-    if(v && p) {
-        p.src = src;
-        v.style.display = 'flex';
-    }
+    var old = document.getElementById('myZoom');
+    if(old) old.remove();
+
+    var div = document.createElement('div');
+    div.id = 'myZoom';
+    div.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.95);z-index:9999999;display:flex;flex-direction:column;align-items:center;justify-content:center;';
+    
+    var img = document.createElement('img');
+    img.src = src;
+    img.style.cssText = 'max-width:95%;max-height:85%;object-fit:contain;border-radius:8px;';
+    
+    var btn = document.createElement('button');
+    btn.innerText = '✕ Fermer';
+    btn.style.cssText = 'margin-top:20px;background:gold;color:black;border:0;padding:12px 24px;border-radius:8px;font-weight:900;font-size:16px;cursor:pointer;';
+    
+    div.onclick = function(e) {
+        if(e.target === div || e.target === btn) {
+            div.remove();
+        }
+    };
+    
+    div.appendChild(img);
+    div.appendChild(btn);
+    document.body.appendChild(div);
 };
  </script>
   <div onclick="alert('body=' + document.body.className + ' | imgs=' + document.querySelectorAll('#grid img').length + ' | view=' + (document.getElementById('imgViewer')?.style.display || 'none'))"
