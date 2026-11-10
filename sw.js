@@ -1,6 +1,6 @@
 /* BOUBA STORE – « enveloppe » ultra rapide (App Shell) : l'appli s'ouvre instantanément depuis la mémoire du téléphone,
    puis se met à jour en arrière-plan. Un bandeau « Nouvelle version prête » propose d'actualiser. */
-const C='bouba-shell-v8',RT='bouba-ext-v1';
+const C='bouba-shell-v10',RT='bouba-ext-v1';
 const SHELL=['index.html','manifest.json','icon-192.png','icon-512.png','icon-maskable-512.png','bouton.html','amis.html','amis-chat.html','call.html','compte.html','firebase-config.js','bouba-data.js','alertes.js','amis5.js','bouba-chat.js','maj.js','articles-accueil.js',
  'promos.js','features.js','aide.js','fun.js','suite.js','bonus.js','more.js','pro.js','vibes.js','accueil.js','menu.js','monde.js','browser.js','star.js','onboarding.js','stats.js','commandes.js','vitesse.js','republier.js','partage.js'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(C).then(c=>Promise.all(SHELL.map(u=>c.add(new Request(u,{cache:'reload'})).catch(()=>{})))))});
