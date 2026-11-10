@@ -1447,78 +1447,7 @@ window.envoyerNotif = async function() {
     }, 4000);
 })();
 </script>
-<script>
-/* ----- ADMIN ----- */
-let tmpImg='',editId='';
-async function adminLogin(){
- if(!fb){alert('Hors ligne : connexion impossible');return}
- try{await fb.AU.signInWithEmailAndPassword(fb.auth,$('aMail').value.trim(),$('aPass').value)}
- catch(e){alert('Email ou mot de passe incorrect')}
-}
-function adminLogout(){fb.AU.signOut(fb.auth);closeAll()}
-function setTab(t){tab=t;renderAdmin()}
-const TABS=[['stats','📊 Stats'],['orders','🧾 Commandes'],['prods','🛍️ Produits'],['clients','👥 Clients'],['sup','🌍 Fournisseurs'],['radar','📡 Radar'],['set','⚙️ Réglages']];
-const STAT=['en attente','confirmée','livrée','annulée'];
-const orders=()=>Object.values(S.orders||{}).filter(o=>o&&o.id).sort((a,b)=>b.date-a.date);
 
-function renderAdmin(){
- if(!isAdmin)return;
- $('tabs').innerHTML=TABS.map(t=>'<button class="'+(t[0]===tab?'on':'')+'" onclick="setTab(\''+t[0]+'\')">'+t[1]+'</button>').join('');
- const b=$('adminBody');
- if(tab==='stats'){
-  const os=orders(),ok=os.filter(o=>o.status!=='annulée'),ca=ok.reduce((s,o)=>s+o.total,0);
-  const liv=os.filter(o=>o.status==='livrée').reduce((s,o)=>s+o.total,0);
-  b.innerHTML='<div class="stat"><div><b>'+fmt(ca)+' F</b>Chiffre d\'affaires</div><div><b>'+fmt(liv)+' F</b>Encaissé (livré)</div><div><b>'+os.length+'</b>Commandes</div><div><b>'+os.filter(o=>o.status==='en attente').length+'</b>À traiter</div><div><b>'+Object.keys(S.users||{}).length+'</b>Clients</div><div><b>'+prods().length+'</b>Produits</div></div>';
- }
- else if(tab==='orders'){
-  b.innerHTML=orders().map(o=>'<div class="ctrl"><b style="color:gold">#'+esc(o.id)+'</b> • '+new Date(o.date).toLocaleString('fr-FR')+'<br>'+esc(o.name)+' • '+esc(o.phone)+' • '+esc(o.city)+'<br>'+(o.items||[]).map(i=>'• '+esc(i.name)+' x'+i.qty).join('<br>')+'<br><b>'+fmt(o.total)+' F</b><br><select class="input" style="margin:6px 0" onchange="setStatus(\''+o.id+'\',this.value)">'+STAT.map(s=>'<option '+(s===o.status?'selected':'')+'>'+s+'</option>').join('')+'</select><a class="mini" style="text-decoration:none" href="https://wa.me/'+String(o.phone).replace(/\D/g,'')+'" target="_blank">💬 WhatsApp</a> <button class="mini" style="color:#f44;border-color:#f44" onclick="delOrder(\''+o.id+'\')">🗑️</button></div>').join('')||'<p style="color:#888">Aucune commande</p>';
- }
- else if(tab==='prods'){
-  const e=(S.products||{})[editId]||{};
-  b.innerHTML='<div class="ctrl"><h4 style="color:gold;margin-bottom:8px">'+(editId?'✏️ Modifier':'➕ Nouveau produit')+'</h4><input id="pName" class="input" placeholder="Nom" value="'+esc(e.name)+'"><input id="pPrice" class="input" type="number" placeholder="Prix (F)" value="'+esc(e.price)+'"><input id="pCat" class="input" placeholder="Catégorie (ex: Homme)" value="'+esc(e.cat)+'"><input type="file" accept="image/*" class="input" onchange="window._imgBusy=true;compress(this.files[0],600,d=>{tmpImg=d;window._imgBusy=false;$(\'pPrev\').src=d})"><img id="pPrev" src="'+safeImg(tmpImg||e.img)+'" style="width:80px;border-radius:8px;margin-bottom:8px"><button class="gold" onclick="saveProd()">✅ Enregistrer</button>'+(editId?'<button class="ghost" onclick="editId=\'\';tmpImg=\'\';renderAdmin()">Annuler</button>':'')+'</div>'+
-  prods().map(p=>'<div class="row"><img src="'+safeImg(p.img)+'"><div class="g"><b>'+esc(p.name)+'</b><br>'+fmt(p.price)+' F • '+esc(p.cat)+'</div><button class="mini" onclick="toggleStock(\''+p.id+'\')">'+(p.stock===false?'❌':'✅')+'</button><button class="mini" onclick="editId=\''+p.id+'\';tmpImg=\'\';renderAdmin()">✏️</button><button class="mini" style="color:#f44;border-color:#f44" onclick="delProd(\''+p.id+'\')">🗑️</button></div>').join('');
-  if(window._pf){ $('pName').value=window._pf.name||''; $('pPrice').value=window._pf.price||''; $('pCat').value=window._pf.cat||''; window._pf=null; }
- }
- else if(tab==='sup'){ supRender(b); }
- else if(tab==='radar'){ radarRender(b); }
- else if(tab==='clients'){
-  const t=(window._cq||'').toLowerCase();
-  const l=Object.entries(S.users||{}).map(function(e){return Object.assign({key:e[0]},e[1])}).filter(u=>u&&((u.name||'')+(u.phone||'')+(u.city||'')).toLowerCase().includes(t));
-  b.innerHTML='<div style="color:gold;font-weight:900;margin-bottom:6px">'+l.length+' client(s)</div><input class="input" placeholder="🔍 Chercher..." value="'+esc(window._cq||'')+'" oninput="window._cq=this.value;renderAdmin();this.focus()">'+l.map(u=>'<div class="row"><div class="g"><b>'+esc(u.name)+'</b><br>'+esc(u.phone)+' • '+esc(u.city)+'</div><a class="mini" style="text-decoration:none" href="https://wa.me/'+String(u.phone).replace(/\D/g,'')+'" target="_blank">💬</a><a class="mini" style="text-decoration:none" href="amis.html#tel='+String(u.phone).replace(/\D/g,'')+'">🗨️</a><button class="mini" style="color:#f44;border-color:#f44" onclick="delClient(\''+u.key+'\')">🗑️</button></div>').join('');
- }
- else if(tab==='set'){
-  const i=S.info||{};
-  b.innerHTML='<div class="ctrl"><input id="sName" class="input" placeholder="Nom boutique" value="'+esc(i.name)+'"><input id="sWa" class="input" placeholder="WhatsApp (225...)" value="'+esc(i.whatsapp||DEFAULT_WA)+'"><input id="sBan" class="input" placeholder="Texte bannière" value="'+esc(i.banner)+'"><p style="font-size:12px;color:#aaa;margin-bottom:6px">🏆 Logo</p><input type="file" accept="image/*" class="input" onchange="compress(this.files[0],200,d=>{tmpImg=d;$(\'lPrev\').src=d})"><img id="lPrev" src="'+safeImg(i.logo)+'" style="width:60px;border-radius:50%"><button class="gold" onclick="saveInfo()">✅ Sauver</button></div>';
- }
-}
-function setStatus(id,s){write('orders/'+id+'/status',s);toast('Statut : '+s)}
-function delOrder(id){if(confirm('Supprimer la commande ?'))write('orders/'+id,null)}
-function delClient(k){if(confirm('Supprimer ce client ?'))write('users/'+k,null)}
-function delProd(id){
- if(!id)return;
- if(!confirm('🗑️ Supprimer définitivement cet article ?'))return;
- write('products/'+id,null);
- document.querySelectorAll('[data-pid="'+id+'"]').forEach(function(el){el.style.transition='all .25s';el.style.opacity='0';el.style.transform='scale(.9)';setTimeout(function(){el.remove()},250)});
- toast('🗑️ Article supprimé');
-}
-function toggleStock(id){const p=(S.products||{})[id];if(!p)return;write('products/'+id+'/stock',p.stock===false)}
-function saveProd(){
- const n=$('pName').value.trim(),pr=+$('pPrice').value,c=$('pCat').value.trim();
- const old=(S.products||{})[editId]||{};
- const img=tmpImg||old.img||'';
- if(window._imgBusy){toast('⏳ La photo se prépare encore, patientez 1 seconde puis réessayez.');return}
- if(!n||!pr||!img){toast('❌ Nom, prix et photo sont obligatoires');return}
- const id=editId||uid();
- write('products/'+id,{id,name:n,price:pr,cat:c,img,stock:old.stock!==false,date:old.date||Date.now()});
- if(!old.date)fetch('/api/push',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({act:'new',title:'🆕 Nouvel article',body:n+' - '+pr+' F'})}).catch(()=>{});
- editId='';tmpImg='';toast('✅ Produit enregistré');
-}
-function saveInfo(){
- const i=S.info||{};
- write('info',{name:$('sName').value.trim(),whatsapp:$('sWa').value.trim(),banner:$('sBan').value.trim(),logo:tmpImg||i.logo||''});
- tmpImg='';toast('✅ Réglages sauvés');
-}
-</script>
 </body>
  </html>
 
