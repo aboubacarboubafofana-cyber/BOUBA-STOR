@@ -1193,7 +1193,7 @@ function posShareStart(){
  },function(e){alert('Autorise la localisation pour activer le partage.')},{enableHighAccuracy:true,timeout:15000});
   }
 function posShareStop(){
- var uid=myUid(); if(posWatch!==null){navigator.geolocation.clearWatch(posWatch);posWatch=null}
+ var uid=me&&me.key?me.key:null; if(posWatch!==null){navigator.geolocation.clearWatch(posWatch);posWatch=null}
  if(uid){var p=(S.users&&S.users[uid]&&S.users[uid].pos)||{}; write('users/'+uid+'/pos',{lat:p.lat||0,lng:p.lng||0,t:p.t||Date.now(),on:false})}
  posUI(false);
 }
