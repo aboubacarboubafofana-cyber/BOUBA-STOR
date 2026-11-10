@@ -52,5 +52,5 @@ async function ext(r){
 }
 self.addEventListener('push',e=>{let d={};try{const j=e.data.json();d=Object.assign({},j,j.notification||{},j.data||{})}catch(_){}
 const isCall=d.tag==='bouba-call';
-e.waitUntil(self.registration.showNotification(d.title||'BOUBA STORE',{body:d.body||'',icon:'icon-192.png',badge:'icon-192.png',tag:d.tag||'bouba-new',renotify:true,requireInteraction:isCall,vibrate:isCall?[300,150,300,150,300,150,300]:[150],data:{url:d.url||'./'}}))});
+e.waitUntil(self.registration.showNotification(String(d.title||'BOUBA STORE'),{body:String(d.body||''),icon:'icon-192.png',badge:'icon-192.png',tag:d.tag||'bouba-new',renotify:true,requireInteraction:isCall,vibrate:isCall?[300,150,300,150,300,150,300]:[150],data:{url:d.url||'./'}}))});
 self.addEventListener('notificationclick',e=>{e.notification.close();const u=(e.notification.data&&e.notification.data.url)||'./';e.waitUntil(self.clients.matchAll({type:'window'}).then(l=>{for(const c of l)if('focus' in c)return c.focus();return self.clients.openWindow(u)}))});
