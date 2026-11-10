@@ -749,9 +749,9 @@ function renderAll(){
  if($('adminPage').classList.contains('active')&&!/INPUT|SELECT/.test((document.activeElement||{}).tagName))renderAdmin();
 }
 checkGate();renderAll();setNet();initFB();
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
-</script>
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=2').catch(()=>{});
 <script>
+ <script>
 setInterval(function(){
   var n=document.getElementById('navAdmin');
   if(n)n.style.display=(typeof isAdmin!=='undefined'&&isAdmin)?'':'none';
