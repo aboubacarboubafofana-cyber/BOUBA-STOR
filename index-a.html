@@ -639,7 +639,7 @@ function iaBot(h){
  setTimeout(()=>{t.innerHTML=h;box.scrollTop=1e6},Math.min(900,350+h.length*2));
 }
 function iaCards(l){
- return l.slice(0,5).map((p,i)=>'<div class="iaCard"><img src="'+safeImg(p.img)+'"><div style="flex:1"><b>'+(i+1)+'. '+esc(p.name)+'</b><br><span style="color:gold">'+fmt(p.price)+' F</span>'+(p.stock===false?' <span style="color:#f66">• épuisé</span>':' <span style="color:#25D366">• disponible</span>')+'<br>'+(p.stock===false?'':'<span class="chip" onclick="iaAdd(\''+esc(p.id)+'\')">🛒 Ajouter</span>')+'<span class="chip" onclick="iaAsk(\''+esc(p.id)+'\')">📲 WhatsApp</span></div></div>').join('');
+ return l.slice(0,5).map((p,i)=>'<div class="iaCard"><img src="'+safeImg(p.img)+'" onclick="event.stopPropagation();window.showImg(this.src)"><div style="flex:1"><b>'+(i+1)+'. '+esc(p.name)+'</b><br><span style="color:gold">'+fmt(p.price)+' F</span>'+(p.stock===false?' <span style="color:#f66">• épuisé</span>':' <span style="color:#25D366">• disponible</span>')+'<br>'+(p.stock===false?'':'<span class="chip" onclick="iaAdd(\''+esc(p.id)+'\')">🛒 Ajouter</span>')+'<span class="chip" onclick="iaAsk(\''+esc(p.id)+'\')">📲 WhatsApp</span></div></div>').join('');
 }
 function iaShow(list,intro,outro){
  iaMem.last=list.slice(0,5);iaMem.offer=list.length===1&&list[0].stock!==false?list[0].id:null;iaMem.miss=0;
