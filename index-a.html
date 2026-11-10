@@ -898,18 +898,7 @@ async function envoyerNotif() {
   toast("❌ Erreur réseau : " + e.message);
   }
 
-// Afficher le bouton admin quand on est connecté
-setInterval(() => {
-  const btn = document.getElementById('adminNotifBtn');
-  if (btn) {
-    // On vérifie si isAdmin existe et s'il est vrai
-    if (typeof isAdmin !== 'undefined' && isAdmin === true) {
-      btn.style.display = 'block';
-    } else {
-      btn.style.display = 'none';
-    }
-  }
-}, 1000);
+
 </script>
  <script>
 async function partagerAvecPhoto(nomProduit, base64Image) {
