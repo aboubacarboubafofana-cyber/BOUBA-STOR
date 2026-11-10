@@ -444,6 +444,13 @@ function renderAdmin(){
  }
  else if(tab==='sup'){ supRender(b); }
  else if(tab==='radar'){ radarRender(b); }
+  else if(tab==='bugs'){
+ const errs = window.__siteErrors || [];
+ b.innerHTML = '<div class="ctrl"><h4 style="color:gold;margin-bottom:8px">🛠️ Erreurs sur cet appareil</h4>' +
+  '<p style="font-size:12px;color:#aaa;margin-bottom:10px">Ces erreurs ont été détectées sur ton téléphone. Recharge la page pour vider la liste.</p>' +
+  (errs.length ? errs.map(e => '<div class="row"><div class="g" style="color:#f44;font-size:12px">' + esc(e) + '</div></div>').join('') : '<div style="color:#25D366;font-weight:bold">✅ Aucune erreur détectée !</div>') +
+  '</div>';
+  }
  else if(tab==='clients'){
   const t=(window._cq||'').toLowerCase();
   const l=Object.entries(S.users||{}).map(function(e){return Object.assign({key:e[0]},e[1])}).filter(u=>u&&((u.name||'')+(u.phone||'')+(u.city||'')).toLowerCase().includes(t));
