@@ -27,7 +27,7 @@ async function db(method,path,o={}){
 }
 
 // Une seule forme de message (data-only) + même "tag" : le téléphone remplace au lieu d'empiler
-const msg=(tk,title,body)=>({message:{token:tk,data:{title,body,url:'./',tag:'bouba-new'},webpush:{headers:{Urgency:'high',TTL:'86400'}}}});
+const msg=(tk,title,body)=>({message:{token:tk,notification:{title:String(title),body:String(body)},data:{title:String(title),body:String(body),url:'./',tag:'bouba-new'},webpush:{headers:{Urgency:'high',TTL:'86400'}}}});
 // Un même jeton ne reçoit jamais deux fois le message
 const uniq=T=>{const s=new Set();return T.filter(([id,v])=>{const t=(v&&v.t)||v;if(!t||s.has(t))return false;s.add(t);return true})};
 const money=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ')+' F';
