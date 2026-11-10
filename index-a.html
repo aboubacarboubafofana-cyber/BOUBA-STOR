@@ -542,7 +542,7 @@ function addShare(){
 }
 const _rs=renderStore;
 renderStore=function(){_rs();addShare()};
-
+ function iaSay(h,u){const d=document.createElement('div');d.className='msg '+(u?'user':'bot');d.innerHTML=h;$('iaMsgs').appendChild(d);$('iaMsgs').scrollTop=1e6}
 /* ===== ASSISTANTE V2 ===== */
 const IA_INFO={
  livraison:'🚚 Livraison en 24H à Abidjan. Indique ton quartier en commandant, on te confirme le tarif sur WhatsApp.',
