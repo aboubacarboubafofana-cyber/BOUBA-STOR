@@ -1395,8 +1395,8 @@ window.showImg = function(src) {
  <script>
 document.addEventListener('click', function(e) {
     var t = e.target;
-    // Si on clique sur une image dans la grille et que ce n'est pas un bouton
-    if (t && t.tagName === 'IMG' && t.closest('#grid') && !t.closest('button')) {
+    // On autorise TOUTES les images, sauf le logo et celles déjà ouvertes
+    if (t && t.tagName === 'IMG' && t.id !== 'logo' && !t.closest('#myZoom') && !t.closest('button')) {
         e.preventDefault();
         e.stopPropagation();
         window.showImg(t.src);
