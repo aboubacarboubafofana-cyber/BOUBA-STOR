@@ -879,10 +879,10 @@ async function envoyerNotif() {
   toast("📢 Envoi en cours...");
   
   try {
-    const res = await fetch('/api/push', {
+    const res = await fetch('/api/onesignal', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ act: 'manual', title: titre, body: msg })
+      body: JSON.stringify({ title: titre, body: msg })
     });
     const data = await res.json();
     
