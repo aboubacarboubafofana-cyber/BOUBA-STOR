@@ -43,7 +43,7 @@ module.exports = async (req, res) => {
     const at = await tok();
     const r = await fetch('https://fcm.googleapis.com/v1/projects/' + PID + '/messages:send', {
       method: 'POST', headers: { authorization: 'Bearer ' + at, 'content-type': 'application/json' },
-      body: JSON.stringify({ message: { token: tkn, data: { title, body, url, tag }, webpush: { headers: { Urgency: 'high', TTL: '86400' } } } })
+      body: JSON.stringify({ message: { token: tkn, notification: { title, body }, data: { title, body, url, tag }, webpush: { headers: { Urgency: 'high', TTL: '86400' } } } })
     });
     const ok = r.ok;
     if (!ok) {
