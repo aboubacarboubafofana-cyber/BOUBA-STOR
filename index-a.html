@@ -844,8 +844,6 @@ navigator.serviceWorker.addEventListener('message',function(e){if(e.data&&e.data
 function bar(){if(document.getElementById('updBar'))return;var d=document.createElement('div');d.id='updBar';d.style.cssText='position:fixed;left:10px;right:10px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:1600;background:#ffd700;color:#000;border-radius:14px;padding:12px 14px;font-weight:800;display:flex;gap:10px;align-items:center;box-shadow:0 2px 14px #000';d.innerHTML='<span style="flex:1">🔄 Nouvelle version prête</span><button style="background:#000;color:#ffd700;border:0;border-radius:10px;padding:9px 14px;font-weight:800" onclick="location.reload()">Actualiser</button>';document.body.appendChild(d)}
 })();
 </script>
-
-
 <script src="maj.js" defer></script>
 <script type="module" src="articles-accueil.js" defer></script>
 <script src="images.js" defer></script>
