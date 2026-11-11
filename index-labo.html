@@ -245,7 +245,42 @@ body.gated>*:not(#gate):not(script):not(style):not(link):not(meta){visibility:hi
 </div>
 
 </div>
-</div><script>
+ </div><script><!-- NOUVELLE PAGE : SATELLITE MONDIAL -->
+<div id="satellitePage" class="page" style="display:none;">
+    <button class="mini" onclick="closeAll()">← Retour</button>
+    <h2 style="color:gold; margin:10px 0">🛰️ SATELLITE MONDIAL</h2>
+    
+    <div style="text-align: center; color: #00FF00; font-weight: bold; margin-bottom: 20px; padding: 10px; border: 1px dashed #00FF00; border-radius: 8px; background: #111;">
+        🟢 Connexion Hypersonique Active (100%)
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+        <div style="background: #111; border: 2px solid #FFD700; border-radius: 12px; padding: 15px; text-align: center;">
+            <h3 id="sVues" style="color: #FFD700; font-size: 24px; margin: 0 0 5px 0;">...</h3>
+            <p style="color: #ccc; font-size: 14px; margin: 0;">👁️ Vues Mondiales</p>
+        </div>
+        <div style="background: #111; border: 2px solid #FFD700; border-radius: 12px; padding: 15px; text-align: center;">
+            <h3 id="sLive" style="color: #00FF00; font-size: 24px; margin: 0 0 5px 0;">...</h3>
+            <p style="color: #ccc; font-size: 14px; margin: 0;">🟢 Visiteurs en direct</p>
+        </div>
+    </div>
+
+    <div style="background: #111; border: 2px solid #FFD700; border-radius: 12px; padding: 15px;">
+        <h3 style="color: #FFD700; margin-top: 0; font-size: 16px;">📱 Plateformes des visiteurs</h3>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px;">
+            <span style="color:#fff;">🤖 Android</span>
+            <span id="sAndroid" style="color:#FFD700; font-weight:bold;">...</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px;">
+            <span style="color:#fff;">🍏 iOS (iPhone)</span>
+            <span id="sIos" style="color:#FFD700; font-weight:bold;">...</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span style="color:#fff;">💻 Ordinateur</span>
+            <span id="sPc" style="color:#FFD700; font-weight:bold;">...</span>
+        </div>
+    </div>
+ </div>
 const ADMIN_UID="7W5OEzTeTNbFLzULLO9VsuDKZFN2";
 const DEFAULT_WA="2250787619717";
 const FB_CFG={
