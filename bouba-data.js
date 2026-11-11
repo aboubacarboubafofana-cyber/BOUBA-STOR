@@ -3,6 +3,25 @@
 const K = 'bouba_local_';
 let B = null;
 
+// === NOTIF PUSH : URL de ton push.js sur Vercel ===
+// Si ton push.js est sur /api/push, laisse comme ça. Sinon mets l'URL complète, ex: 'https://ton-site.vercel.app/api/push'
+const PUSH_URL = '/api/push';
+
+// Envoie la notif aux clients, sans jamais bloquer l'enregistrement si ça échoue
+async function notifyPush(title, body) {
+  try {
+    // Anti-doublon : même article/boutique = même clé, on n'envoie qu'une fois par session
+    const key = 'push_sent_' + title + '|' + body;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, '1');
+    await fetch(PUSH_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ act: 'send', title, body })
+    });
+  } catch (e) { console.warn('push non envoyé (pas grave) :', e); }
+}
+
 async function init() {
   if (B) return B;
   try {
@@ -34,6 +53,21 @@ export async function put(c, o) {
   await init();
   if (B.local) { const a = lread(c).filter(x => x.id !== o.id); a.push(o); lwrite(c, a); return; }
   await B.fs.setDoc(B.fs.doc(B.db, c, o.id), o);
+
+  // 🔥 NOTIF AUTO : juste après l'enregistrement réussi dans Firestore
+  // On n'envoie QUE si c'est une création récente (date < 2 min), pas une simple modification d'un vieil article
+  const age = Date.now() - Number(o.date || 0);
+  const isRecent = o.date && age >= 0 && age < 120000;
+  if (isRecent && !B.local) {
+    if (c === 'articles') {
+      const nomBoutique = o.shopName || 'BOUBA STOR';
+      notifyPush('🆕 Nouvel article', (o.name || 'Nouvel article') + ' — ' + money(o.price || 0) + ' chez ' + nomBoutique);
+    }
+    if (c === 'boutiques') {
+      const nom = o.name || o.nom || o.shopName || o.title || 'Nouvelle boutique';
+      notifyPush('🏪 Nouvelle boutique : ' + String(nom).slice(0, 40), 'Découvre la nouvelle boutique sur BOUBA STOR !');
+    }
+  }
 }
 export async function patch(c, id, p) {
   await init();
@@ -82,3 +116,4 @@ export function shareLinks(text, url) {
   };
 }
 export const homeUrl = () => new URL('index.html', location.href).href;
+        
