@@ -116,4 +116,3 @@ export function shareLinks(text, url) {
   };
 }
 export const homeUrl = () => new URL('index.html', location.href).href;
-        
