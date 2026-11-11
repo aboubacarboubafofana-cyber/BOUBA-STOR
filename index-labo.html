@@ -1452,6 +1452,33 @@ document.addEventListener('click', function(e) {
     }
 }, true); // Le "true" intercepte le clic AVANT tous les autres scripts
  </script>
+ <script>
+// === LOGIQUE DU SATELLITE MONDIAL ===
+function animerSatellite() {
+    // On génère des chiffres pour simuler l'activité en direct
+    let vues = Math.floor(Math.random() * 5000000) + 1200000;
+    let enDirect = Math.floor(Math.random() * 350) + 150;
+    
+    let android = Math.floor(enDirect * 0.55); // 55% Android
+    let ios = Math.floor(enDirect * 0.30);     // 30% iOS
+    let pc = enDirect - android - ios;         // Le reste sur PC
+
+    // On vérifie que les éléments existent avant d'afficher
+    if(typeof $ === 'function') {
+        if($('sVues')) $('sVues').innerText = typeof fmt === 'function' ? fmt(vues) : vues;
+        if($('sLive')) $('sLive').innerText = enDirect;
+        if($('sAndroid')) $('sAndroid').innerText = android + " vues";
+        if($('sIos')) $('sIos').innerText = ios + " vues";
+        if($('sPc')) $('sPc').innerText = pc + " vues";
+    }
+}
+
+// On lance l'animation pour la première fois
+animerSatellite();
+
+// On met à jour les chiffres toutes les 5 secondes (5000 ms)
+setInterval(animerSatellite, 5000);
+ </script>
   
 </body>
  </html>
