@@ -225,7 +225,7 @@ body.gated>*:not(#gate):not(script):not(style):not(link):not(meta){visibility:hi
 <h4 style="color:gold;margin-bottom:8px">🔐 Connexion admin</h4>
 <input id="aMail" class="input" type="email" placeholder="Email admin">
 <input id="aPass" class="input" type="password" placeholder="Mot de passe">
-<button class="gold" onclick="alert('Clic détecté !');adminLogin()">Se connecter</button>
+<button class="gold" style="background:#ff4444; color:#fff;" onclick="var errs = window.__siteErrors || []; if(errs.length) { alert('🛠️ ERREURS TROUVÉES :\n\n' + errs.join('\n\n')); } else { alert('✅ Aucune erreur enregistrée par le Radar. Le problème vient peut-être de tes identifiants Firebase (mot de passe incorrect, compte inexistant).'); }">🛠️ Voir les erreurs du Radar</button>
 </div>
 <div id="adminPanel" style="display:none">
  <button class="gold" style="width:100%; margin-bottom:15px; background:#25D366; color:#000; border-radius:10px; padding:15px; font-size:16px; font-weight:900;" onclick="envoyerNotif()">📢 Envoyer une notification aux clients</button>
