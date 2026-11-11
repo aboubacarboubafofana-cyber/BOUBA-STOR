@@ -231,6 +231,21 @@ body.gated>*:not(#gate):not(script):not(style):not(link):not(meta){visibility:hi
 <div id="adminBody"></div>
 <button class="ghost" onclick="adminLogout()" style="color:#f44;border-color:#f44">🚪 Déconnexion admin</button>
  <button class="gold" style="width:100%; margin-bottom:10px; background:#333; color:#ffd700; border:1px solid #ffd700;" onclick="SPEED.open()">⚡ Vitesse & connexion</button>
+ <!-- Ton bouton existant -->
+<div class="bouton-vitesse" style="margin-bottom: 10px;">
+    <button style="width: 100%; padding: 15px; background: #222; color: #FFD700; border: 2px solid #FFD700; border-radius: 10px; font-weight: bold; font-size: 16px;">
+        ⚡ Vitesse & connexion
+    </button>
+</div>
+
+<!-- LE NOUVEAU BOUTON SATELLITE (à ajouter juste en dessous) -->
+<div class="bouton-satellite">
+    <a href="satellite.html" style="text-decoration: none;">
+        <button style="width: 100%; padding: 15px; background: #FFD700; color: #000; border: 2px solid #FFD700; border-radius: 10px; font-weight: bold; font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 10px; cursor: pointer;">
+            🛰️ Centre Satellite Mondial
+        </button>
+    </a>
+</div>
 </div>
 </div><script>
 const ADMIN_UID="7W5OEzTeTNbFLzULLO9VsuDKZFN2";
