@@ -1,4 +1,4 @@
-// BOUBA STORE : notifs auto articles + boutiques (Vercel) - V2 CORRIGEE
+// BOUBA STORE : notifs auto articles + boutiques (Vercel) - V3 : collections = articles + boutiques
 const crypto=require('crypto');
 const DB='https://project-f4477c80-7c55-4db7-b2e-default-rtdb.europe-west1.firebasedatabase.app';
 const PID='project-f4477c80-7c55-4db7-b2e';
@@ -84,7 +84,7 @@ async function checkCollection(coll,metaKey){
 async function notify(){
  const out={sent:0,products:0,shops:0};
  // 1) NOUVEAUX ARTICLES
- const P=await checkCollection('products','lastProduct');
+ const P=await checkCollection('articles','lastArticle');
  const L=P.items.filter(p=>p.name&&p.stock!==false);
  if(L.length){
   const title=L.length>1?'🆕 '+L.length+' nouveaux articles':'🆕 Nouvel article';
@@ -94,13 +94,13 @@ async function notify(){
  }
  // 2) NOUVELLES BOUTIQUES - on essaie les 3 noms possibles de collection
  let shops=[];
- for(const coll of ['shops','boutiques','stores']){
-  const S=await checkCollection(coll,'lastShop_'+coll);
+ for(const coll of ['boutiques']){
+  const S=await checkCollection(coll,'lastBoutique');
   shops.push(...S.items);
  }
- shops=shops.filter(s=>s&&(s.name||s.nom||s.title));
+ shops=shops.filter(s=>s&&(s.name||s.nom||s.title||s.shopName));
  if(shops.length){
-  const nom=shops[0].name||shops[0].nom||shops[0].title;
+  const nom=shops[0].name||shops[0].nom||shops[0].title||shops[0].shopName;
   const r=await sendAll('🏪 Nouvelle boutique : '+String(nom).slice(0,40),'Découvre la nouvelle boutique sur BOUBA STOR !');
   out.sent+=r.sent; out.shops=shops.length;
  }
@@ -130,4 +130,4 @@ module.exports=async(req,res)=>{
   return res.status(200).json(await notify());
  }catch(e){console.error(e);res.status(500).json({ok:false,error:String(e.message||e)})}
 };
- 
+     
