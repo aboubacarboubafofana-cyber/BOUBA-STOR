@@ -871,54 +871,7 @@ async function partagerAvecPhoto(nomProduit, base64Image) {
   }
 }
  </script>
- <script>
-// INTERCEPTEUR ULTIME POUR LE BOUTON "PARTAGER AVEC LA PHOTO"
-document.addEventListener('click', async function(e) {
-  // On cherche si le clic vient du bouton ou d'un élément à l'intérieur
-  const btn = e.target.closest('button');
-  if (!btn || !btn.innerText.includes('Partager avec la photo')) return;
 
-  // ON BLOQUE LE CODE ORIGINAL QUI BUGUE
-  e.preventDefault();
-  e.stopImmediatePropagation();
-
-  // On cherche les infos dans la fenêtre (le modal)
-  const modal = btn.closest('div[style*="background"]') || btn.parentElement.parentElement;
-  const imgEl = modal.querySelector('img');
-  const nameEl = modal.querySelector('b');
-  
-  const nom = nameEl ? nameEl.innerText : 'Article BOuba';
-  const imgSrc = imgEl ? imgEl.src : '';
-
-  const textePartage = `Découvrez cet article sur BOuba STOR :\n\n👉 ${nom}\n\n🛒 Commandez ici : https://bouba-stor.vercel.app/`;
-
-  // Photo : lien internet (http...), image en Base64 (data:) ou blob
-  if (imgSrc && /^(https?:|data:image|blob:)/.test(imgSrc)) {
-    try {
-      const res = await fetch(imgSrc);
-      const blob = await res.blob();
-      const file = new File([blob], "produit.jpg", { type: blob.type && blob.type.indexOf('image/') === 0 ? blob.type : "image/jpeg" });
-
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'BOuba STOR', text: textePartage });
-        return;
-      }
-    } catch (err) {
-      // L'utilisateur a fermé la fenêtre de partage : on n'ouvre pas un 2e partage
-      if (err && err.name === 'AbortError') return;
-      // Sinon (image illisible) : on passe au partage de texte ci-dessous
-    }
-  }
-
-  // Si l'image est cassée ou en Base64, on partage juste le texte et le lien
-  if (navigator.share) {
-    await navigator.share({ title: 'BOuba STOR', text: textePartage });
-  } else {
-    navigator.clipboard.writeText(textePartage);
-    alert('Lien copié ! Vous pouvez le coller sur WhatsApp.');
-  }
-}, true); // Le "true" est très important : il intercepte le clic AVANT les autres scripts
- </script>
 <style>
 /* Images : jamais d'icône cassée, fond doux tant que la photo n'est pas chargée */
 img[data-ok="0"]{opacity:0}
