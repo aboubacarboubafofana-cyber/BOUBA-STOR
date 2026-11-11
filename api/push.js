@@ -1,4 +1,4 @@
-// BOUBA STORE : envoi des alertes (Vercel, gratuit) - VERSION CORRIGEE
+// BOUBA STORE : notifs auto articles + boutiques (Vercel) - V2 CORRIGEE
 const crypto=require('crypto');
 const DB='https://project-f4477c80-7c55-4db7-b2e-default-rtdb.europe-west1.firebasedatabase.app';
 const PID='project-f4477c80-7c55-4db7-b2e';
@@ -25,10 +25,12 @@ async function db(method,path,o={}){
  const r=await fetch(DB+'/'+path+'.json?'+(o.q?o.q+'&':'')+'access_token='+t,{method,headers:h,body:o.body===undefined?undefined:JSON.stringify(o.body)});
  return{status:r.status,etag:r.headers.get('etag'),data:r.status===412?null:await r.json().catch(()=>null)};
 }
-const msg=(tk,title,body)=>({message:{token:tk,data:{title,body,url:'./',tag:'bouba-new'},webpush:{headers:{Urgency:'high',TTL:'86400'}}}});
+const msg=(tk,title,body)=>({message:{token:tk,data:{title,[STRIPPED]
 const getTk=v=>(v&&v.t)||v;
 const uniq=T=>{const s=new Set();return T.filter(([id,v])=>{const t=getTk(v);if(!t||s.has(t))return false;s.add(t);return true})};
 const money=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ')+' F';
+// date peut etre en secondes ou millisecondes -> on normalise en ms
+const normDate=v=>{let n=+(v||0); if(n>0&&n<10000000000)n*=1000; return n;};
 
 async function subscribe(t,dev){
  t=String(t||'');
@@ -38,12 +40,11 @@ async function subscribe(t,dev){
  await db('PUT','pushTokens/'+key,{body:{t,ts:Date.now()}});
  return{ok:true};
 }
-
 async function sendAll(title,body){
  const T=uniq(Object.entries((await db('GET','pushTokens')).data||{}));
- if(!T.length)return{sent:0,total:0,reason:'Aucun client abonne - personne n a clique sur Activer les notifications'};
+ if(!T.length)return{sent:0,total:0,reason:'Aucun client abonne'};
  const at=await tok();
- let ok=0; const errors=[];
+ let ok=0;
  for(let i=0;i<T.length;i+=20){
   await Promise.all(T.slice(i,i+20).map(async([id,v])=>{
    const tk=getTk(v);
@@ -52,35 +53,59 @@ async function sendAll(title,body){
    else if(r.status===404||r.status===400){
     const e=JSON.stringify(await r.json().catch(()=>({})));
     if(/UNREGISTERED|NOT_FOUND/.test(e))await db('DELETE','pushTokens/'+id);
-    else errors.push(e.slice(0,120));
-   } else errors.push('HTTP '+r.status);
+   }
   }));
  }
- return{sent:ok,total:T.length,errors:errors.slice(0,3)};
+ return{sent:ok,total:T.length};
 }
-
-async function notify(){
- const m=await db('GET','pushMeta/last',{etag:1});
- const last=m.data;
+// Verifie les nouveautes dans UNE collection (products OU shops/boutiques)
+async function checkCollection(coll,metaKey){
+ const m=await db('GET','pushMeta/'+metaKey,{etag:1});
+ let last=m.data;
  if(typeof last!=='number'){
-  const q=await db('GET','products',{q:'orderBy="date"&limitToLast=1'});
-  const mx=Math.max(0,...Object.values(q.data||{}).map(p=>+(p&&p.date)||0));
-  await db('PUT','pushMeta/last',{body:mx,match:m.etag});
-  return{init:true,sent:0};
+  const q=await db('GET',coll,{q:'orderBy="date"&limitToLast=1'});
+  const mx=Math.max(0,...Object.values(q.data||{}).map(p=>normDate(p&&(p.date||p.createdAt||p.ts))));
+  await db('PUT','pushMeta/'+metaKey,{body:mx,match:m.etag});
+  return{items:[],init:true};
  }
- const q=await db('GET','products',{q:'orderBy="date"&startAt='+(last+1)});
- const all=Object.values(q.data||{}).filter(p=>p&&(+p.date)>last);
- if(!all.length)return{sent:0,reason:'Aucun nouvel article depuis le dernier envoi'};
- const mx=Math.max(...all.map(p=>+p.date));
- const w=await db('PUT','pushMeta/last',{body:mx,match:m.etag});
- if(w.status===412)return{skip:true};
- const L=all.filter(p=>p.name&&p.stock!==false);
- if(!L.length)return{sent:0};
- const title=L.length>1?'🆕 '+L.length+' nouveaux articles':'🆕 Nouvel article';
- const body=L.slice(0,3).map(p=>p.name+(p.price?' — '+money(p.price):'')).join('\n')+(L.length>3?'\n…':'');
- return await sendAll(title,body);
+ const q=await db('GET',coll,{q:'orderBy="date"&startAt='+(last+1)});
+ // Fallback : si date en secondes dans la base, startAt en ms ne trouve rien -> on relit tout et on filtre en JS
+ let all=Object.values(q.data||{}).filter(p=>p&&normDate(p.date||p.createdAt||p.ts)>last);
+ if(!all.length){
+  const q2=await db('GET',coll);
+  all=Object.values(q2.data||{}).filter(p=>p&&normDate(p.date||p.createdAt||p.ts)>last);
+ }
+ if(!all.length)return{items:[]};
+ const mx=Math.max(...all.map(p=>normDate(p.date||p.createdAt||p.ts)));
+ const w=await db('PUT','pushMeta/'+metaKey,{body:mx,match:m.etag});
+ if(w.status===412)return{items:[],skip:true};
+ return{items:all};
 }
-
+async function notify(){
+ const out={sent:0,products:0,shops:0};
+ // 1) NOUVEAUX ARTICLES
+ const P=await checkCollection('products','lastProduct');
+ const L=P.items.filter(p=>p.name&&p.stock!==false);
+ if(L.length){
+  const title=L.length>1?'🆕 '+L.length+' nouveaux articles':'🆕 Nouvel article';
+  const body=L.slice(0,3).map(p=>p.name+(p.price?' — '+money(p.price):'')).join('\n');
+  const r=await sendAll(title,body);
+  out.sent+=r.sent; out.products=L.length;
+ }
+ // 2) NOUVELLES BOUTIQUES - on essaie les 3 noms possibles de collection
+ let shops=[];
+ for(const coll of ['shops','boutiques','stores']){
+  const S=await checkCollection(coll,'lastShop_'+coll);
+  shops.push(...S.items);
+ }
+ shops=shops.filter(s=>s&&(s.name||s.nom||s.title));
+ if(shops.length){
+  const nom=shops[0].name||shops[0].nom||shops[0].title;
+  const r=await sendAll('🏪 Nouvelle boutique : '+String(nom).slice(0,40),'Découvre la nouvelle boutique sur BOUBA STOR !');
+  out.sent+=r.sent; out.shops=shops.length;
+ }
+ return out;
+}
 module.exports=async(req,res)=>{
  res.setHeader('Access-Control-Allow-Origin','*');
  res.setHeader('Access-Control-Allow-Headers','content-type');
@@ -88,23 +113,21 @@ module.exports=async(req,res)=>{
  if(req.method==='OPTIONS')return res.status(204).end();
  try{
   const b=typeof req.body==='string'?JSON.parse(req.body||'{}'):(req.body||{});
-  // CORRECTION 1 : le bouton peut envoyer n'importe quel nom d'action
   const act=String(b.act||b.action||b.type||'').toLowerCase();
-  const isSend=['new','send','sendall','send-all','broadcast','notify','notifyclients','notify-clients','clients','push','manual'].includes(act);
+  // ENVOI MANUEL (bouton vert) : ne touche PLUS aux reperes auto
+  const isSend=['new','send','sendall','broadcast','notify','push','manual'].includes(act);
   if(isSend){
    const g=await db('GET','pushMeta/lastNew',{etag:1});
-   if(typeof g.data==='number'&&Date.now()-g.data<60000)return res.status(200).json({skip:true,reason:'Double-clic bloque 60s, reessaie dans 1 min'});
+   if(typeof g.data==='number'&&Date.now()-g.data<60000)return res.status(200).json({skip:true});
    const w=await db('PUT','pushMeta/lastNew',{body:Date.now(),match:g.etag});
    if(w.status===412)return res.status(200).json({skip:true});
-   // CORRECTION 2 : accepte title/body/message/text, avec defaut si bouton sans texte
    const t=String(b.title||b.titre||'🆕 Nouvel article chez BOUBA STOR').slice(0,60);
-   const x=String(b.body||b.message||b.text||b.texte||'Découvre les nouveautés — livraison 24H à Abidjan !').slice(0,120);
-   const out=await sendAll(t,x);
-   return res.status(200).json(out);
+   const x=String(b.body||b.message||b.text||'Découvre les nouveautés — livraison 24H à Abidjan !').slice(0,120);
+   return res.status(200).json(await sendAll(t,x));
   }
   if(act==='sub'||act==='subscribe')return res.status(200).json(await subscribe(b.token,b.dev));
-  // Sans act : c'est l'envoi auto apres ajout d'article, pas le bouton manuel
+  // AUTO : appele apres ajout article OU boutique (voir code a coller ci-dessous)
   return res.status(200).json(await notify());
  }catch(e){console.error(e);res.status(500).json({ok:false,error:String(e.message||e)})}
 };
-  
+ 
