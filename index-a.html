@@ -244,8 +244,7 @@ const FB_CFG={
  projectId:"project-f4477c80-7c55-4db7-b2e",
  storageBucket:"project-f4477c80-7c55-4db7-b2e.firebasestorage.app",
  messagingSenderId:"697604298457",
- appId:"1:697604298457:web:4f9a6d66ec6fde9c1990c8"
-};
+
 const $=id=>document.getElementById(id);
 const LS=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}};
 const SV=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){if(k==='b_out'||k==='b_me')alert('Mémoire pleine : libérez de la place sur le téléphone');return false}};
