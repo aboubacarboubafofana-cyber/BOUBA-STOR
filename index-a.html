@@ -276,36 +276,35 @@ function setLocal(path,val){
  const k=p[p.length-1];
  if(val===null)delete o[k];else o[k]=val;
 }
-function write(path,val){setLocal(path,val);outbox.push({path,val});save();renderAll();flush()}
-async function flush(){
- if(!fb||!online||flushing)return;flushing=true;
- try{
-  while(outbox.length){
-   const o=outbox[0];
-   try{const r=fb.D.ref(fb.db,o.path);
-    if(o.val===null)await fb.D.remove(r);else await fb.D.set(r,o.val);
-   }catch(e){if(!/permission/i.test(String(e.code)+String(e.message)))throw e}
-   outbox.shift();save();setNet();
-  }
- }catch(e){console.log('flush',e)}
- flushing=false;setNet();
-}
-async function initFB(){
- try{
-  const B="https://www.gstatic.com/firebasejs/12.19.0/";
-  const A=await import(B+"firebase-app.js"),D=await import(B+"firebase-database.js"),AU=await import(B+"firebase-auth.js");
-  const app=A.initializeApp(FB_CFG);
-  fb={db:D.getDatabase(app),D,AU,auth:AU.getAuth(app)};
-  D.onValue(D.ref(fb.db,'.info/connected'),s=>{online=!!s.val();setNet();if(online)flush()});
-  sub('info');sub('products');
-  AU.onAuthStateChanged(fb.auth,u=>{
-   isAdmin=!!u&&u.uid===ADMIN_UID;
-   $('adminLogin').style.display=isAdmin?'none':'block';
-   $('adminPanel').style.display=isAdmin?'block':'none';
-   if(isAdmin)subAdmin();
-   renderAll();
-  });
- }catch(e){console.log('Mode local',e);setNet()}
+const $=id=>document.getElementById(id);
+const LS=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}};
+const SV=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){if(k==='b_out'||k==='b_me')alert('Mémoire pleine : libérez de la place sur le téléphone');return false}};
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeImg=u=>/^(https?:|data:image\/)/.test(u||'')?esc(u):'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+const fmt=n=>Number(n||0).toLocaleString('fr-FR');
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+
+let S=LS('b_state',null)||{};
+S.info=S.info||{};S.products=S.products||{};S.users=S.users||{};S.orders=S.orders||{};
+let outbox=LS('b_out',[]),cart=LS('b_cart',[]),me=LS('b_me',null);
+let isAdmin=false,cat='all',q='',online=false,fb=null,flushing=false,adminSub=false,tab='stats';
+window.LITE=!!(navigator.connection&&(navigator.connection.saveData||/(^|-)2g$/.test(navigator.connection.effectiveType||'')));
+let SHOWN=LITE?12:24,_rt=0;
+function renderSoon(){if(_rt)return;_rt=setTimeout(()=>{_rt=0;renderAll()},150)}
+/* défilement sans limite : la suite des articles se charge toute seule en descendant */
+const _io=('IntersectionObserver' in window)?new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){_io.disconnect();SHOWN+=30;renderStore()}},{rootMargin:'900px'}):null;
+function watchMore(){if(!_io)return;const s=document.getElementById('moreS');if(s)_io.observe(s)}
+if(_io&&document.getElementById('grid'))new MutationObserver(watchMore).observe(document.getElementById('grid'),{childList:true});
+
+let _svt=0;
+function saveState(){clearTimeout(_svt);_svt=0;try{localStorage.setItem('b_state',JSON.stringify(S))}catch(e){try{localStorage.setItem('b_state',JSON.stringify(S,(k,v)=>((k==='img'||k==='cover'||k==='av')&&typeof v==='string'&&v.length>2000)?undefined:v))}catch(e2){}}}
+function save(){SV('b_out',outbox);if(!_svt)_svt=setTimeout(saveState,900)}
+window.addEventListener('pagehide',saveState);document.addEventListener('visibilitychange',()=>{if(document.hidden)saveState()});
+function setLocal(path,val){
+ const p=path.split('/');let o=S;
+ for(let i=0;i<p.length-1;i++)o=o[p[i]]=o[p[i]]||{};
+ const k=p[p.length-1];
+ if(val===null)delete o[k];else o[k]=val;
 }
 function sub(root){
  fb.D.onValue(fb.D.ref(fb.db,root),s=>{
