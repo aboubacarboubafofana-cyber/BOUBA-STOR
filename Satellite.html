@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Satellite Mondial - BOUBA STOR</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 15px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .btn-retour {
+            background: transparent;
+            color: #FFD700;
+            border: 1px solid #FFD700;
+            padding: 8px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        h1 {
+            color: #FFD700;
+            font-size: 22px;
+            margin: 0;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .card {
+            background: #111;
+            border: 1px solid #FFD700;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+        .card h2 {
+            color: #FFD700;
+            font-size: 24px;
+            margin: 0 0 5px 0;
+        }
+        .card p {
+            color: #ccc;
+            font-size: 14px;
+            margin: 0;
+        }
+        .status {
+            text-align: center;
+            color: #00FF00;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px dashed #00FF00;
+            border-radius: 8px;
+        }
+        .platforms {
+            background: #111;
+            border: 1px solid #FFD700;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .platforms h3 {
+            color: #FFD700;
+            margin-top: 0;
+        }
+        .platform-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- En-tête avec bouton retour -->
+    <div class="header">
+        <a href="controle.html" class="btn-retour">← Retour</a> <!-- Assure-toi que le lien pointe vers ton fichier de contrôle -->
+        <h1>🛰️ SATELLITE MONDIAL</h1>
+    </div>
+
+    <!-- Statut du serveur -->
+    <div class="status">
+        🟢 Connexion Hypersonique Active (100%)
+    </div>
+
+    <!-- Les Statistiques Mondiales -->
+    <div class="grid">
+        <div class="card">
+            <h2 id="vues-totales">Chargement...</h2>
+            <p>👁️ Vues Mondiales</p>
+        </div>
+        <div class="card">
+            <h2 id="en-direct" style="color: #00FF00;">Chargement...</h2>
+            <p>🟢 Visiteurs en direct</p>
+        </div>
+    </div>
+
+    <!-- Détails des plateformes -->
+    <div class="platforms">
+        <h3>📱 Plateformes des visiteurs</h3>
+        <div class="platform-row">
+            <span>🤖 Android</span>
+            <span id="android-count">...</span>
+        </div>
+        <div class="platform-row">
+            <span>🍏 iOS (iPhone)</span>
+            <span id="ios-count">...</span>
+        </div>
+        <div class="platform-row">
+            <span>💻 Ordinateur (PC/Mac)</span>
+            <span id="pc-count">...</span>
+        </div>
+    </div>
+
+    <!-- Script de simulation en temps réel -->
+    <script>
+        // Cette fonction simule les données de ton "Satellite"
+        // Plus tard, tu pourras la connecter à Google Analytics ou ton serveur PHP/Node.js
+        
+        function chargerDonneesSatellite() {
+            // Simulation des vues mondiales (ex: 1 245 890)
+            let vues = Math.floor(Math.random() * 5000000) + 1000000;
+            document.getElementById('vues-totales').innerText = vues.toLocaleString('fr-FR');
+
+            // Simulation des visiteurs en direct (entre 150 et 500)
+            let enDirect = Math.floor(Math.random() * 350) + 150;
+            document.getElementById('en-direct').innerText = enDirect;
+
+            // Simulation des plateformes
+            let android = Math.floor(enDirect * 0.55); // 55% Android
+            let ios = Math.floor(enDirect * 0.30);     // 30% iOS
+            let pc = enDirect - android - ios;         // Le reste sur PC
+
+            document.getElementById('android-count').innerText = android + " visiteurs";
+            document.getElementById('ios-count').innerText = ios + " visiteurs";
+            document.getElementById('pc-count').innerText = pc + " visiteurs";
+        }
+
+        // Lancer au démarrage
+        chargerDonneesSatellite();
+
+        // Mettre à jour automatiquement toutes les 5 secondes
+        setInterval(chargerDonneesSatellite, 5000);
+    </script>
+
+</body>
+</html>
