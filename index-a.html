@@ -382,9 +382,25 @@ function logout(){me=null;localStorage.removeItem('b_me');closeAll();checkGate()
 /* ----- ADMIN ----- */
 let tmpImg='',editId='';
 async function adminLogin(){
- if(!fb){alert('Hors ligne : connexion impossible');return}
- try{await fb.AU.signInWithEmailAndPassword(fb.auth,$('aMail').value.trim(),$('aPass').value)}
- catch(e){alert('Email ou mot de passe incorrect')}
+ try {
+   if(typeof fb === 'undefined' || !fb || !fb.AU) {
+     alert("❌ Firebase n'est pas encore prêt. Attends 3 secondes et réessaie.");
+     return;
+   }
+   const email = $('aMail').value.trim();
+   const pass = $('aPass').value;
+   
+   if(!email || !pass) { 
+     alert("❌ Remplis l'email et le mot de passe."); 
+     return; 
+   }
+   
+   await fb.AU.signInWithEmailAndPassword(fb.auth, email, pass);
+   alert("✅ Connexion réussie !");
+   
+ } catch(e) {
+   alert("❌ Erreur Firebase : " + e.message);
+ }
 }
 function adminLogout(){fb.AU.signOut(fb.auth);closeAll()}
 function setTab(t){tab=t;renderAdmin()}
