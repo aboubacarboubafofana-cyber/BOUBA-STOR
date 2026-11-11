@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr"><head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Satellite Mondial - BOUBA STOR</title>
+<style>
+body{background:#000;color:#fff;font-family:Arial,sans-serif;margin:0;padding:15px}
+.header{display:flex;align-items:center;margin-bottom:20px}
+.btn-retour{background:transparent;color:#FFD700;border:2px solid #FFD700;padding:8px 15px;border-radius:8px;text-decoration:none;font-weight:bold;margin-right:15px}
+h2{color:#FFD700;margin:0;font-size:22px}
+.status{text-align:center;font-weight:bold;margin-bottom:20px;padding:10px;border:1px dashed #00FF00;border-radius:8px;background:#111}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px}
+.card{background:#111;border:2px solid #FFD700;border-radius:12px;padding:15px;text-align:center}
+.card h3{color:#FFD700;font-size:24px;margin:0 0 5px 0}
+.card p{color:#ccc;font-size:14px;margin:0}
+.platforms{background:#111;border:2px solid #FFD700;border-radius:12px;padding:15px}
+.platforms h3{color:#FFD700;margin-top:0;font-size:16px}
+.platform-row{display:flex;justify-content:space-between;margin-bottom:10px;border-bottom:1px solid #333;padding-bottom:5px}
+.row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #222;font-size:13px}
+small{color:#aaa}
+</style></head><body>
+<div class="header"><a href="index.html" class="btn-retour">← Retour</a><h2>🛰️ SATELLITE MONDIAL</h2></div>
+<div class="status" id="sStatus">🟡 Connexion…</div>
+<div class="grid">
+<div class="card"><h3 id="sVues">—</h3><p>👁️ Vues totales (réelles)</p></div>
+<div class="card"><h3 id="sLive" style="color:#00FF00">—</h3><p>🟢 Visiteurs en direct</p></div>
+</div>
+<div class="platforms"><h3>📱 Plateformes des visiteurs en direct</h3>
+<div class="platform-row"><span>🤖 Android</span><span id="sAndroid" style="color:#FFD700;font-weight:bold">—</span></div>
+<div class="platform-row"><span>🍏 iOS (iPhone)</span><span id="sIos" style="color:#FFD700;font-weight:bold">—</span></div>
+<div class="platform-row"><span>💻 Ordinateur</span><span id="sPc" style="color:#FFD700;font-weight:bold">—</span></div>
+</div>
+<div class="platforms" style="margin-top:15px"><h3>👁️ Visiteurs en direct</h3><div id="sList"><small>Aucun visiteur pour le moment.</small></div>
+<small id="sNote" style="display:block;margin-top:10px"></small></div>
+<script type="module">
+/* VRAIES données : même Firebase que BOUBA STOR, même système de heartbeat que l'onglet Satellite.
+   Hors-ligne : affiche le dernier snapshot sauvé en localStorage, et renvoie le heartbeat dès le retour réseau. */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, onDisconnect } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+const CFG={apiKey:"AIzaSyAnLLXpUC35OleB0hCLUXnLU0lMiesY7j4",authDomain:"project-f4477c80-7c55-4db7-b2e.firebaseapp.com",databaseURL:"https://project-f4477c80-7c55-4db7-b2e-default-rtdb.europe-west1.firebasedatabase.app",projectId:"project-f4477c80-7c55-4db7-b2e",storageBucket:"project-f4477c80-7c55-4db7-b2e.firebasestorage.app",messagingSenderId:"697604298457",appId:"1:697604298457:web:4f9a6d66ec6fde9c1990c8"};
+const $=id=>document.getElementById(id);
+let presence={}, views=0, online=false;
+let vid=localStorage.getItem('b_sat_id')||('V'+Date.now().toString(36)+Math.random().toString(36).slice(2,7));
+localStorage.setItem('b_sat_id',vid);
+function platform(){const u=navigator.userAgent; if(/Android/i.test(u))return 'Android'; if(/iPhone|iPad|iPod/i.test(u))return 'iOS'; return 'Ordinateur';}
+function render(){
+  const now=Date.now();
+  const live=Object.values(presence).filter(p=>p&&now-p.lastSeen<45000);
+  $('sVues').textContent=views.toLocaleString('fr-FR');
+  $('sLive').textContent=live.length;
+  $('sAndroid').textContent=live.filter(p=>p.platform==='Android').length+' en direct';
+  $('sIos').textContent=live.filter(p=>p.platform==='iOS').length+' en direct';
+  $('sPc').textContent=live.filter(p=>p.platform==='Ordinateur').length+' en direct';
+  $('sList').innerHTML=live.length?live.sort((a,b)=>b.lastSeen-a.lastSeen).map(p=>'<div class="row"><span>'+(p.platform==='Android'?'🤖':p.platform==='iOS'?'🍏':'💻')+' '+p.platform+'</span><span style="color:#00FF00">● '+Math.round((now-p.lastSeen)/1000)+'s</span></div>').join(''):'<small>Aucun visiteur en direct pour le moment.</small>';
+  $('sStatus').textContent=online?'🟢 Connexion en direct active — données réelles Firebase':'🟠 Hors ligne — dernières données sauvées affichées';
+  $('sNote').textContent='En direct = vu il y a moins de 45 secondes. Vues = 1 par visiteur / 24h.';
+  try{localStorage.setItem('b_sat_snapshot',JSON.stringify({presence,views,at:now}))}catch(e){}
+}
+function renderCached(){ try{const s=JSON.parse(localStorage.getItem('b_sat_snapshot')||'null'); if(s){presence=s.presence||{};views=s.views||0;render();}}catch(e){} }
+renderCached(); setInterval(render,5000);
+try{
+  const app=initializeApp(CFG); const db=getDatabase(app);
+  onValue(ref(db,'.info/connected'),s=>{online=!!s.val(); render();});
+  onValue(ref(db,'presence'),s=>{presence=s.val()||{}; render();});
+  onValue(ref(db,'satstats/views'),s=>{views=s.val()||0; render();});
+  async function beat(){
+    const e={id:vid,lastSeen:Date.now(),platform:platform(),lang:navigator.language||'fr',tz:Intl.DateTimeFormat().resolvedOptions().timeZone||'',page:location.pathname||'/'};
+    try{ await set(ref(db,'presence/'+vid),e); try{await onDisconnect(ref(db,'presence/'+vid)).remove()}catch(_){} }catch(err){ /* hors-ligne : le snapshot local garde l'affichage, on réessaie */ }
+    // 1 vue / 24h
+    try{ const last=+localStorage.getItem('b_sat_view_day')||0; if(Date.now()-last>24*3600*1000){ localStorage.setItem('b_sat_view_day',String(Date.now())); const cur=views||0; await set(ref(db,'satstats/views'),cur+1); } }catch(_){}
+  }
+  beat(); setInterval(beat,20000);
+}catch(e){ $('sStatus').textContent='🟠 Hors ligne — dernières données sauvées affichées'; }
+</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
