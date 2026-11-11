@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NAwa</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--bg:#F6F7FB;--sf:#fff;--tx:#0E1B3D;--mu:#66708C;--ac:#0E1B3D;--ac2:#F5B301;--ok:#15955B;--bd:#E2E5EF;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0A1226;--sf:#131D38;--tx:#EEF1FA;--mu:#98A2C0;--ac:#F5B301;--ac2:#F5B301;--bd:#24304F}}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--tx);font-family:Sora,system-ui,sans-serif}
+#app{max-width:480px;margin:0 auto;padding:16px 16px 96px}
+h1,h2,h3{margin:0}
+.logo{font-weight:800;font-size:28px;letter-spacing:-1px}.logo i{color:var(--ac2);font-style:normal}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:18px;padding:16px;margin:12px 0}
+.hero{background:var(--ac);color:#fff;border-radius:22px;padding:22px;margin:14px 0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hero{background:#1B2A55}}
+.hero small{opacity:.75}.bal{font-size:36px;font-weight:800;margin:6px 0}
+label{display:block;font-size:13px;color:var(--mu);margin:12px 0 4px}
+input,select,textarea{width:100%;padding:13px;border-radius:12px;border:1px solid var(--bd);background:var(--sf);color:var(--tx);font:inherit;font-size:16px}
+button{font:inherit;cursor:pointer}
+.btn{width:100%;padding:14px;border:0;border-radius:14px;background:var(--ac);color:#fff;font-weight:600;font-size:16px;margin-top:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn{color:#0A1226}}
+.btn.alt{background:var(--ac2);color:#0E1B3D}.btn.ghost{background:transparent;color:var(--tx);border:1px solid var(--bd)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bd)}.row:last-child{border:0}
+.row b{font-weight:600}.mu{color:var(--mu);font-size:13px}.in{color:var(--ok)}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--sf);border-top:1px solid var(--bd);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px)}
+nav div{display:flex;max-width:480px;width:100%}
+nav button{flex:1;background:none;border:0;padding:12px 2px;color:var(--mu);font-size:12px}
+nav button.on{color:var(--tx);font-weight:800;box-shadow:inset 0 3px 0 var(--ac2)}
+.bio{width:110px;height:110px;border-radius:50%;margin:20px auto;border:3px solid var(--ac2);display:flex;align-items:center;justify-content:center;font-size:44px;background:var(--sf);user-select:none;touch-action:none;transition:box-shadow .3s}
+.bio.go{box-shadow:0 0 0 14px rgba(245,179,1,.25)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{padding:8px 12px;border-radius:99px;border:1px solid var(--bd);background:var(--sf);color:var(--tx);font-size:13px}
+.chip.on{background:var(--ac2);border-color:var(--ac2);color:#0E1B3D}
+.toast{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:9;max-width:90%}
+.av{border-radius:50%;object-fit:cover;background:var(--ac2);color:#0E1B3D;display:inline-flex;align-items:center;justify-content:center;font-weight:800;border:2px solid var(--ac2)}
+.demo{font-size:12px;color:var(--mu);text-align:center;margin-top:8px}
+#qr,#sqr{display:flex;justify-content:center;background:#fff;padding:14px;border-radius:14px;margin:10px auto;width:fit-content}
+video{width:100%;border-radius:14px;margin-top:10px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<nav id="nav" hidden><div id="tabs"></div></nav>
+<script>
+var RATES={XOF:1,EUR:0.00152,USD:0.0017,NGN:2.6,GHS:0.021,MAD:0.0165,XAF:1};
+var COUNTRIES=[["Sénégal","+221","XOF"],["Côte d’Ivoire","+225","XOF"],["Mali","+223","XOF"],["Burkina Faso","+226","XOF"],["Guinée","+224","XOF"],["Bénin","+229","XOF"],["Togo","+228","XOF"],["Niger","+227","XOF"],["Nigeria","+234","NGN"],["Ghana","+233","GHS"],["Cameroun","+237","XAF"],["France","+33","EUR"],["États-Unis","+1","USD"],["Autre pays","+","USD"]];
+var PARTNERS=[["Orange Money","📱"],["Wave","🌊"],["Ecobank","🏦"],["MTN MoMo","📶"],["Moov Money","📲"],["Visa / Mastercard","💳"]];
+var unl=false,admOK=false,S=null,tab="home",step=1,draft={},toast="",stream=null;
+try{S=JSON.parse(localStorage.getItem("zelle")||"null")}catch(e){}
+function save(){try{localStorage.setItem("zelle",JSON.stringify(S))}catch(e){}}
+function $(id){return document.getElementById(id)}
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function fmt(n){return new Intl.NumberFormat("fr-FR",{maximumFractionDigits:2}).format(n)+" "+S.cur}
+function say(m){toast=m;render();setTimeout(function(){toast="";render()},2400)}
+function tx(type,label,amt){if(type==="in")setTimeout(capCheck,0);S.tx.unshift({type:type,label:label,amt:amt,t:Date.now(),ref:"NW"+Math.random().toString(36).slice(2,8).toUpperCase(),d:new Date().toLocaleString("fr-FR",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})})}
+
+function render(){
+  var a=$("app"),h="";
+  if(!S){h=onboard()}else if(S.pin&&!unl){h=lock()}else{h=({home:home,send:send,scan:scan,net:net,pay:pay,shop:shop,rcpt:rcpt,adm:adm,agt:agt,cash:cash})[tab]()}
+  a.innerHTML=h+(toast?'<div class="toast">'+esc(toast)+'</div>':"");
+  $("nav").hidden=!S||(S.pin&&!unl);
+  if(S){$("tabs").innerHTML=[["home","Accueil"],["send","Envoyer"],["scan","Scanner"],["shop","Commerce"],["net","Réseaux"]].map(function(t){return '<button class="'+(tab===t[0]?"on":"")+'" onclick="go(\''+t[0]+'\')">'+t[1]+'</button>'}).join("")}
+  if(S&&tab==="scan")drawQR();if(S&&tab==="shop"&&draft.sc)drawQR2();
+}
+function av(p,n,s){var st='width:'+s+'px;height:'+s+'px;font-size:'+(s*0.4)+'px';return p?'<img class="av" style="'+st+'" src="'+p+'" alt="">':'<span class="av" style="'+st+'">'+esc((n||"?").charAt(0))+'</span>'}
+function keep(){["fn","ln","bd","ci"].forEach(function(k){var e=$(k);if(e){draft[k==="ci"?"city":k]=e.value}})}
+function pickPhoto(inp){var f=inp.files&&inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement("canvas");c.width=c.height=192;var x=c.getContext("2d"),m=Math.min(im.width,im.height);x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,192,192);var d=c.toDataURL("image/jpeg",0.8);if(S){S.photo=d;save();say("Photo mise à jour")}else{keep();draft.photo=d;render()}};im.src=r.result};r.readAsDataURL(f)}
+function pay(){var p=draft.pay;if(!p)return scan();var cv=(p.c!==S.cur&&p.a>0)?'<p class="mu">Soit ≈ '+fmt(convert(p.a,p.c,S.cur))+'</p>':'';return '<h2>Payer un achat</h2><div class="card"><div style="text-align:center">'+av("",p.n,72)+'<h3 style="margin-top:8px">'+esc(p.n)+'</h3><p class="mu">Commerçant</p></div><label>Montant ('+esc(p.c)+')</label><input id="pa" type="number" inputmode="decimal" value="'+(p.a||"")+'" '+(p.a?"readonly":"")+'>'+cv+'<button class="btn alt" onclick="doPay()">Payer</button><button class="btn ghost" onclick="draft.pay=null;go(\'scan\')">Annuler</button></div>'}
+function doPay(){var p=draft.pay,a=parseFloat($("pa").value);if(!(a>0)){say("Montant invalide");return}var own=Math.round(convert(a,p.c,S.cur)*100)/100;var ov=over(own,true);if(ov){say(ov);return}if(own>S.bal){say("Solde insuffisant");return}if(S.pin&&prompt("Entrez votre code PIN")!==S.pin){say("Code PIN incorrect");return}S.bal-=own;tx("out","Achat · "+p.n,own);save();draft.pay=null;tab="rcpt";draft.rc=S.tx[0];say("Paiement effectué : "+fmt(own))}
+function now(){return new Date().toLocaleString("fr-FR",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}
+function showRc(i){draft.rc=S.tx[i];tab="rcpt";render();window.scrollTo(0,0)}
+function rcpt(){var t=draft.rc;if(!t)return home();return '<h2>Reçu</h2><div class="card" style="text-align:center">'+av(S.photo,S.name,64)+'<p class="mu">'+esc(S.name)+'</p><div class="bal">'+(t.type==="in"?"+":"−")+fmt(t.amt)+'</div><p><b>'+esc(t.label)+'</b></p><p class="mu">'+t.d+'</p><p class="mu">Référence '+esc(t.ref||"—")+'</p><p class="in"><b>✔ Confirmé</b></p></div><button class="btn alt" onclick="shareRc()">Partager le reçu</button><button class="btn ghost" onclick="go(\'home\')">Terminé</button>'}
+function shareRc(){var t=draft.rc,txt="Reçu NAwa\n"+(t.type==="in"?"Reçu":"Payé")+" : "+fmt(t.amt)+"\n"+t.label+"\n"+t.d+"\nRéf. "+t.ref+"\nCompte "+S.id;if(navigator.share){navigator.share({title:"Reçu NAwa",text:txt}).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(txt).then(function(){say("Reçu copié")},function(){say("Copie impossible")})}else{say("Partage indisponible")}}
+function shop(){
+ if(!S.shop)return '<h2>Espace commerçant</h2><p class="mu">Encaissez vos clients avec un code NAwa.</p><div class="card"><label>Nom du commerce</label><input id="sn" placeholder="Ex. Boutique Awa"><button class="btn alt" onclick="mkShop()">Ouvrir mon commerce</button></div>';
+ var t=0;S.shop.sales.forEach(function(s){t+=s.amt});
+ var h='<h2>'+esc(S.shop.name)+'</h2><div class="hero"><small>Ventes totales</small><div class="bal">'+fmt(t)+'</div><small>'+S.shop.sales.length+' vente(s)</small></div>';
+ h+='<div class="card"><h3>Code de paiement</h3><label>Montant ('+S.cur+'). Laissez vide pour que le client le saisisse.</label><input id="sa" type="number" inputmode="decimal" placeholder="0"><button class="btn" onclick="mkCode()">Créer le code</button>';
+ if(draft.sc)h+='<div id="sqr"></div><p class="mu" style="text-align:center">'+(draft.sc.a?fmt(draft.sc.a):"Montant libre")+'</p><button class="btn alt" onclick="fakeSale()">Simuler un paiement client</button>';
+ h+='</div><div class="card"><h3>Ventes</h3>';
+ if(!S.shop.sales.length)h+='<p class="mu">Aucune vente. Créez un code et faites-le scanner.</p>';
+ S.shop.sales.slice(0,15).forEach(function(s){h+='<div class="row"><div><b>'+esc(s.by)+'</b><div class="mu">'+s.d+'</div></div><b class="in">+'+fmt(s.amt)+'</b></div>'});
+ return h+'</div>';
+}
+function mkShop(){var n=$("sn").value.trim();if(!n){say("Entrez le nom du commerce");return}S.shop={name:n,sales:[]};save();render()}
+function mkCode(){var a=parseFloat($("sa").value)||0;draft.sc={a:a,code:"NAWAPAY|"+S.shop.name.replace(/\|/g,"")+"|"+(a||"")+"|"+S.cur};render()}
+function drawQR2(){var q=$("sqr");if(!q)return;q.innerHTML="";try{new QRCode(q,{text:draft.sc.code,width:170,height:170})}catch(e){q.textContent=draft.sc.code}}
+function fakeSale(){var a=draft.sc.a||5000;S.bal+=a;S.shop.sales.unshift({amt:a,by:"Client démo",d:now()});tx("in","Vente · client démo",a);save();say("Vente encaissée : "+fmt(a))}
+function lock(){return '<div class="logo" style="margin:30px 0 10px;text-align:center">NA<i>w</i>a</div><div style="text-align:center">'+av(S.photo,S.name,84)+'<h3 style="margin:10px 0">'+esc(S.name)+'</h3></div><div class="card"><label>Code PIN</label><input id="lp" type="password" inputmode="numeric" maxlength="4" placeholder="••••"><button class="btn alt" onclick="unlock()">Ouvrir</button></div>'}
+function unlock(){if($("lp").value===S.pin){unl=true;render()}else{say("Code PIN incorrect")}}
+var EM=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function openAdm(){var c=prompt("Code administrateur");if(c!==S.adm){say("Code administrateur incorrect");return}admOK=true;tab="adm";render();window.scrollTo(0,0)}
+function letter(){var fr=draft.lg!=="en",nm=S.name;var s=draft.ls!=null?draft.ls:(fr?"Demande de partenariat : NAwa, paiement mobile ouvert à tous":"Partnership request: NAwa, mobile payments open to everyone");var b=draft.lb!=null?draft.lb:(fr?"Bonjour,\n\nJe suis "+nm+", administrateur de NAwa, un projet d’application de paiement mobile ouverte à tous, partout dans le monde. Nous souhaitons associer votre institution à NAwa afin que nos utilisateurs puissent recharger leur compte et envoyer de l’argent vers vos services.\n\nSeriez-vous disponibles pour un échange afin d’étudier ce partenariat ?\n\nCordialement,\n"+nm+"\nNAwa · "+S.phone:"Hello,\n\nI am "+nm+", administrator of NAwa, a mobile payment app project open to everyone, everywhere. We would like to connect your institution to NAwa so our users can top up their accounts and send money to your services.\n\nWould you be available for a call to explore this partnership?\n\nBest regards,\n"+nm+"\nNAwa · "+S.phone);return{s:s,b:b}}
+function gm(to,bcc){var m=letterT();return "https://mail.google.com/mail/?view=cm&fs=1&to="+encodeURIComponent(to)+"&bcc="+encodeURIComponent(bcc)+"&su="+encodeURIComponent(m.s)+"&body="+encodeURIComponent(m.b)}
+function openGm(u){var w=window.open(u,"_blank");if(!w)say("Fenêtre bloquée : autorisez les pop-ups")}
+function setMail(i){var e=prompt("E-mail de contact de "+S.inst[i].n);if(!e)return;e=e.trim();if(!EM.test(e)){say("Adresse e-mail invalide");return}S.inst[i].e=e;save();render()}
+function cyc(i){var o=["À contacter","Contacté","Partenaire"],x=S.inst[i];x.s=o[(o.indexOf(x.s)+1)%3];save();render()}
+function sendOne(i){var x=S.inst[i];openGm(gm(x.e,""));if(x.s==="À contacter")x.s="Contacté";save();render()}
+function sendAll(){var L=S.inst.filter(function(i){return i.e&&i.s!=="Partenaire"}).map(function(i){return i.e});if(!L.length){say("Ajoutez d’abord des adresses e-mail");return}draft.batches=[];for(var k=0;k<L.length;k+=25)draft.batches.push(L.slice(k,k+25));draft.bi=0;nextBatch()}
+function nextBatch(){var b=draft.batches[draft.bi];if(!b)return;openGm(gm("",b.join(",")));S.inst.forEach(function(x){if(b.indexOf(x.e)>-1&&x.s==="À contacter")x.s="Contacté"});draft.bi++;save();render()}
+function addInst(){var n=$("in").value.trim(),c=$("ic").value.trim(),e=$("ie").value.trim();if(!n){say("Entrez le nom");return}if(e&&!EM.test(e)){say("Adresse e-mail invalide");return}S.inst.push({n:n,c:c||"—",e:e,s:"À contacter"});save();render()}
+function impInst(){var k=0;$("bulk").value.split("\n").forEach(function(l){var p=l.split(/[,;]/).map(function(x){return x.trim()});if(p[0]){var e=p[2]||"";if(e&&!EM.test(e))e="";S.inst.push({n:p[0],c:p[1]||"—",e:e,s:"À contacter"});k++}});save();say(k+" institution(s) importée(s)")}
+function adm(){
+ if(!admOK)return home();
+ S.inst=S.inst||[];
+ if(!S.inst.length)S.inst=[["Orange Money","Afrique de l’Ouest"],["Wave","Sénégal, Côte d’Ivoire"],["Ecobank","Afrique"],["MTN MoMo","Afrique"],["Moov Money","Afrique de l’Ouest"],["UBA","Afrique"],["Visa","Mondial"],["Mastercard","Mondial"],["PayPal","Mondial"],["Western Union","Mondial"]].map(function(x){return{n:x[0],c:x[1],e:"",s:"À contacter"}});
+ var m=S.inst.filter(function(i){return i.e}).length,p=S.inst.filter(function(i){return i.s==="Partenaire"}).length,L=letterT();
+ var h='<div class="row"><h2>Administration</h2><button class="chip" onclick="go(\'home\')">Fermer</button></div><div class="hero"><small>Institutions suivies</small><div class="bal">'+S.inst.length+'</div><small>'+m+' avec e-mail · '+p+' partenaire(s)</small></div>';
+ h+=alertsCard()+'<div class="card"><h3>Messages</h3><label>Type de message</label><select onchange="draft.lt=this.value;draft.ls=null;draft.lb=null;render()"><option value="p">Partenariat institution</option><option value="a"'+(draft.lt==="a"?" selected":"")+'>Recrutement d’agents</option><option value="d"'+(draft.lt==="d"?" selected":"")+'>Dossier de présentation</option><option value="c"'+(draft.lt==="c"?" selected":"")+'>Contrat d’agent</option></select><label>Langue</label><select onchange="draft.lg=this.value;draft.ls=null;draft.lb=null;render()"><option value="fr"'+(draft.lg==="en"?"":" selected")+'>Français</option><option value="en"'+(draft.lg==="en"?" selected":"")+'>English</option></select><label>Objet</label><input value="'+esc(L.s)+'" oninput="draft.ls=this.value"><label>Message</label><textarea rows="9" oninput="draft.lb=this.value">'+esc(L.b)+'</textarea><button class="btn alt" onclick="sendAll()">Envoyer à toutes via Gmail</button><button class="btn ghost" onclick="waShare()">Partager par WhatsApp</button>';
+ if(draft.batches&&draft.bi<draft.batches.length)h+='<button class="btn" onclick="nextBatch()">Lot suivant ('+(draft.bi+1)+'/'+draft.batches.length+')</button>';
+ h+='<p class="demo">Gmail s’ouvre avec le message prêt et les destinataires en copie cachée. Vous appuyez sur Envoyer depuis votre compte.</p></div><div class="card"><h3>Institutions</h3>';
+ S.inst.forEach(function(x,i){h+='<div class="row"><div><b>'+esc(x.n)+'</b><div class="mu">'+esc(x.c)+' · '+(x.e?esc(x.e):"e-mail à renseigner")+'</div><div class="mu">'+x.s+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="chip'+(x.e?" on":"")+'" onclick="'+(x.e?"sendOne("+i+")":"setMail("+i+")")+'">'+(x.e?"Gmail":"E-mail")+'</button><button class="chip" onclick="cyc('+i+')">Statut</button></div></div>'});
+ h+='</div>'+plafCard()+caisseCard()+treasCard()+agentsCard()+'<div class="card"><h3>Ajouter une institution</h3><label>Nom</label><input id="in"><label>Pays</label><input id="ic"><label>E-mail de contact</label><input id="ie" type="email"><button class="btn" onclick="addInst()">Ajouter</button><label>Ou collez une liste (nom, pays, e-mail par ligne)</label><textarea id="bulk" rows="4"></textarea><button class="btn ghost" onclick="impInst()">Importer la liste</button></div>';
+ return h}
+function letterT(){var t=draft.lt||"p";if(t==="p")return letter();var nm=S.name,d;
+ if(t==="a")d=["Devenez agent NAwa","Bonjour,\n\nNAwa recrute des agents dans votre quartier. Un agent NAwa reçoit les dépôts des clients (espèces, Orange Money, Wave) et paie leurs retraits. Il gagne une commission sur chaque opération.\n\nConditions : une pièce d’identité ou une attestation locale, un téléphone, un point fixe (boutique ou kiosque) et une réserve de départ.\n\nSi vous êtes intéressé, répondez avec votre nom, votre quartier et votre numéro.\n\nMerci,\n"+nm+"\nNAwa · "+S.phone];
+ else if(t==="c")d=["Contrat d’agent NAwa (modèle)","CONTRAT D’AGENT NAwa\n\nEntre NAwa, représentée par "+nm+", et l’agent : ____________ (nom, téléphone, quartier).\n\n1. Rôle. L’agent reçoit les dépôts des clients de NAwa (espèces, Orange Money, Wave) et paie leurs retraits.\n2. Identité. L’agent note le numéro ou l’ID NAwa du client et vérifie le nom avant chaque opération.\n3. Réserve. NAwa donne à l’agent une réserve électronique de départ. L’agent en est responsable et l’utilise seulement pour des opérations de clients.\n4. Commission. 0,5 % du montant de chaque dépôt et de chaque retrait (à confirmer).\n5. Interdictions. Aucune opération pour un client anonyme, aucun frais caché, aucun partage du code PIN.\n6. Fraude. En cas de fraude ou de faute, NAwa peut suspendre l’agent, bloquer sa réserve et signaler les faits aux autorités.\n7. Registre. L’agent garde la liste de ses opérations et la présente sur demande.\n8. Durée. Un an renouvelable, résiliable avec 15 jours de préavis.\n9. Droit applicable. Lois du pays de l’agent.\n\nFait à ________, le ________\nSignature de NAwa : ________   Signature de l’agent : ________\n\nModèle à faire valider par un avocat avant signature."];
+ else d=["Présentation de NAwa","NAwa est un projet d’application de paiement mobile ouverte à tous.\n\n• Compte avec téléphone, photo, code PIN et biométrie\n• Envoi et réception par numéro ou code QR, avec conversion de devises\n• Paiement chez les commerçants par code QR\n• Dépôt et retrait par un réseau d’agents, en espèces, Orange Money ou Wave\n• Réseaux et banques partenaires (Orange Money, Wave, Ecobank…)\n\nÉtat : prototype fonctionnel. Licence et partenaire agréé en cours de cadrage.\n\nContact : "+nm+" · "+S.phone];
+ return{s:draft.ls!=null?draft.ls:d[0],b:draft.lb!=null?draft.lb:d[1]}}
+function waShare(){var m=letterT();window.open("https://wa.me/?text="+encodeURIComponent(m.s+"\n\n"+m.b),"_blank")}
+function invite(){var u="https://claude.ai/artifact/GvcNux6M3yUBwXxzV2upn9",t="Rejoins-moi sur NAwa : dépôt, retrait, envoi et paiement pour tous.";if(navigator.share){navigator.share({title:"NAwa",text:t,url:u}).catch(function(){})}else{window.open("https://wa.me/?text="+encodeURIComponent(t+" "+u),"_blank")}}
+function agentsCard(){S.agents=S.agents||[];var h='<div class="card"><h3>Agence et agents</h3><p class="mu">'+S.agents.length+' agent(s) recruté(s). Chaque agent reçoit les dépôts et paie les retraits, avec 0,5 % de commission (démo).</p>';S.agents.forEach(function(a){h+='<div class="row"><div><b>'+esc(a.n)+'</b><div class="mu">'+esc(a.z)+' · '+esc(a.p)+'</div></div><span class="chip on">Actif</span></div>'});return h+'<label>Nom de l’agent</label><input id="an"><label>Téléphone</label><input id="ap" type="tel"><label>Quartier ou ville</label><input id="az"><button class="btn" onclick="addAgent()">Ajouter l’agent</button><button class="btn alt" onclick="demoAgent()">'+(S.agent?"Ouvrir mon espace agent":"Activer mon espace agent (démo)")+'</button><p class="demo">Pour recruter, choisissez « Recrutement d’agents » dans les messages ci-dessus.</p></div>'}
+function addAgent(){var n=$("an").value.trim(),p=$("ap").value.trim(),z=$("az").value.trim();if(!n||!p){say("Nom et téléphone requis");return}S.agents.push({n:n,p:p,z:z||"—"});save();render()}
+function demoAgent(){if(!S.agent)S.agent={float:500000,cash:300000,comm:0,ops:[]};save();tab="agt";render();window.scrollTo(0,0)}
+function agt(){var A=S.agent;if(!A)return home();
+ var h='<div class="row"><h2>Espace agent</h2><button class="chip" onclick="go(\'home\')">Fermer</button></div><div class="hero"><small>Réserve électronique</small><div class="bal">'+fmt(A.float)+'</div><small>Espèces en caisse '+fmt(A.cash)+' · commissions '+fmt(A.comm)+'</small></div>';
+ var vol=0;A.ops.forEach(function(o){vol+=o.a});var g=A.goal||2000000,pc=Math.min(100,Math.round(vol/g*100));h+='<div class="card"><h3>Objectif du mois</h3><div class="mu">'+fmt(vol)+' sur '+fmt(g)+' ('+pc+' %)</div><div style="height:10px;border-radius:6px;background:var(--bd);margin:8px 0"><div style="height:10px;border-radius:6px;background:var(--ac2);width:'+pc+'%"></div></div><button class="chip" onclick="setGoal()">Changer l’objectif</button></div>';h+='<div class="card"><h3>Dépôt client</h3><label>Compte du client (numéro ou ID NAwa)</label><input id="dc"><label>Montant reçu ('+S.cur+')</label><input id="da" type="number" inputmode="decimal"><label>Moyen reçu du client</label><select id="dm"><option>Espèces</option><option>Orange Money</option><option>Wave</option><option>Autre réseau</option></select><label>Compte de destination</label><select id="dd"><option>Compte NAwa</option>'+S.links.map(function(n){return '<option>'+esc(n)+'</option>'}).join("")+'</select><button class="btn alt" onclick="agDep()">Valider le dépôt</button></div>';
+ h+='<div class="card"><h3>Retrait client</h3><label>Code de retrait du client</label><input id="wc" inputmode="numeric" maxlength="6"><button class="btn alt" onclick="agWd()">Payer le retrait</button></div><div class="card"><h3>Opérations</h3>';
+ if(!A.ops.length)h+='<p class="mu">Aucune opération.</p>';
+ A.ops.slice(0,10).forEach(function(o){h+='<div class="row"><div><b>'+esc(o.l)+'</b><div class="mu">'+o.d+'</div></div><b>'+fmt(o.a)+'</b></div>'});
+ return h+'<button class="btn ghost" onclick="agTop()">Recharger ma réserve (démo)</button></div>'}
+function agTop(){S.agent.float+=100000;save();say("Réserve rechargée");}
+function agDep(){var A=S.agent,c=$("dc").value.trim(),a=parseFloat($("da").value),m=$("dm").value,d=$("dd").value;if(!c){say("Indiquez le compte du client");return}if(!(a>0)){say("Montant invalide");return}var ov=over(a,false);if(ov){say(ov);return}if(a>A.float){say("Réserve insuffisante");return}if(S.pin&&prompt("PIN de l’agent")!==S.pin){say("Code PIN incorrect");return}
+ var cm=Math.round(a*0.005*100)/100;A.float-=a;if(m==="Espèces")A.cash+=a;A.comm+=cm;
+ var own=d==="Compte NAwa"&&(c.toUpperCase()===S.id||c.replace(/\D/g,"")===S.phone.replace(/\D/g,""));
+ if(own){S.bal+=a;tx("in","Dépôt agent ("+m+")",a)}
+ A.ops.unshift({l:"Dépôt "+m+" · "+c+" → "+d,a:a,d:now()});save();say("Dépôt validé : "+fmt(a)+" · commission "+fmt(cm))}
+function agWd(){var A=S.agent,c=$("wc").value.trim(),w=S.wd;if(!w||c!==w.code||Date.now()>w.exp){say("Code invalide ou expiré");return}if(w.amt>A.cash){say("Espèces en caisse insuffisantes");return}if(S.pin&&prompt("PIN de l’agent")!==S.pin){say("Code PIN incorrect");return}
+ var amt=w.amt,cm=Math.round(amt*0.005*100)/100;A.float+=amt;A.cash-=amt;A.comm+=cm;A.ops.unshift({l:"Retrait payé · "+S.id,a:amt,d:now()});S.wd=null;save();say("Retrait payé : "+fmt(amt))}
+function cash(){if(S.wd&&Date.now()>S.wd.exp){S.bal+=S.wd.amt;tx("in","Retrait expiré, remboursé",S.wd.amt);S.wd=null;save()}
+ var h='<div class="row"><h2>Dépôt et retrait</h2><button class="chip" onclick="go(\'home\')">Fermer</button></div>';
+ h+='<div class="card"><h3>Déposer de l’argent</h3><p class="mu">Donnez ce numéro à un agent NAwa avec vos espèces, votre Orange Money ou votre Wave. Il crédite votre compte tout de suite.</p><div class="bal" style="font-size:22px">'+esc(S.phone)+'</div><p class="mu">ou ID '+esc(S.id)+'</p></div>';
+ h+='<div class="card"><h3>Retirer de l’argent</h3>'+(S.wd?'<p class="mu">Montrez ce code à l’agent (valable 10 minutes) :</p><div class="bal" style="letter-spacing:6px">'+S.wd.code+'</div><p class="mu">Montant : '+fmt(S.wd.amt)+'</p><button class="btn ghost" onclick="cancelWd()">Annuler le retrait</button>':'<label>Montant ('+S.cur+')</label><input id="wa" type="number" inputmode="decimal"><button class="btn alt" onclick="mkWd()">Générer mon code de retrait</button>')+'</div>';
+ h+=bankCard()+rcards();h+='<div class="card"><h3>Agents NAwa</h3>';
+ S.agents=S.agents||[];if(!S.agents.length)h+='<p class="mu">Aucun agent dans votre zone pour le moment.</p>';
+ S.agents.forEach(function(a){h+='<div class="row"><div><b>'+esc(a.n)+'</b><div class="mu">'+esc(a.z)+'</div></div><span class="mu">'+esc(a.p)+'</span></div>'});
+ return h+'</div>'}
+function mkWd(){var a=parseFloat($("wa").value);if(!(a>0)){say("Montant invalide");return}var ov=over(a,true);if(ov){say(ov);return}if(a>S.bal){say("Solde insuffisant");return}if(S.pin&&prompt("Entrez votre code PIN")!==S.pin){say("Code PIN incorrect");return}
+ S.bal-=a;S.wd={code:String(Math.floor(100000+Math.random()*900000)),amt:a,exp:Date.now()+600000};tx("out","Retrait chez un agent",a);save();say("Code de retrait créé")}
+function cancelWd(){S.bal+=S.wd.amt;tx("in","Retrait annulé",S.wd.amt);S.wd=null;save();say("Retrait annulé")}
+function tr(){if(!S.treas)S.treas=[{n:"Orange Money",num:"+2250787619717"},{n:"Wave",num:"+2250787619717"}];S.req=S.req||[];return S.treas}
+function rcards(){var T=tr(),o=T.map(function(x,i){return '<option value="'+i+'">'+esc(x.n)+'</option>'}).join("");
+ var h='<div class="card"><h3>Dépôt par réseau ou banque</h3><p class="mu">Choisissez où vous envoyez l’argent. Votre compte NAwa est crédité après confirmation.</p><label>Envoyer via</label><select id="rn">'+o+'</select><label>Montant ('+S.cur+')</label><input id="ra" type="number" inputmode="decimal"><button class="btn alt" onclick="reqDep()">Demander le dépôt</button></div>';
+ h+='<div class="card"><h3>Retrait vers Orange Money, Wave ou banque</h3><label>Recevoir via</label><select id="wn">'+o+'</select><label>Numéro ou compte qui reçoit</label><input id="wt" value="'+esc(S.phone)+'"><label>Montant ('+S.cur+')</label><input id="wm" type="number" inputmode="decimal"><button class="btn alt" onclick="reqWd()">Demander le retrait</button></div>';
+ h+='<div class="card"><h3>Mes demandes</h3>';if(!S.req.length)h+='<p class="mu">Aucune demande.</p>';
+ S.req.slice(0,8).forEach(function(r){h+='<div class="row"><div><b>'+(r.auto?"Transfert auto":r.t==="dep"?"Dépôt":"Retrait")+' · '+fmt(r.a)+'</b><div class="mu">'+esc(r.n)+' · '+r.s+(r.t==="dep"&&r.s==="En attente"?'. Envoyez au '+esc(r.to)+', réf. '+r.ref:'')+'</div></div></div>'});
+ return h+'</div>'}
+function reqDep(){var x=tr()[$("rn").value],a=parseFloat($("ra").value);if(!(a>0)){say("Montant invalide");return}var ov=over(a,false);if(ov){say(ov);return}var r={t:"dep",n:x.n,to:x.num,a:a,ref:"NW"+Math.floor(1000+Math.random()*9000),s:"En attente",d:now()};S.req.unshift(r);save();say("Envoyez "+fmt(a)+" au "+x.num+", réf. "+r.ref)}
+function reqWd(){var x=tr()[$("wn").value],a=parseFloat($("wm").value),t=$("wt").value.trim();var ov0=over(a,true);if(a>0&&ov0){say(ov0);return}if(!t){say("Indiquez le numéro qui reçoit");return}if(!(a>0)){say("Montant invalide");return}if(a>S.bal){say("Solde insuffisant");return}if(S.pin&&prompt("Entrez votre code PIN")!==S.pin){say("Code PIN incorrect");return}S.bal-=a;tx("out","Retrait vers "+x.n,a);S.req.unshift({t:"wd",n:x.n,to:t,a:a,ref:"NW"+Math.floor(1000+Math.random()*9000),s:"En attente",d:now()});save();say("Retrait demandé : "+fmt(a))}
+function treasCard(){var T=tr(),h='<div class="card"><h3>Caisse NAwa</h3><p class="mu">Comptes qui reçoivent les dépôts et paient les retraits. Ajoutez une banque ou un réseau à tout moment.</p>';
+ T.forEach(function(x,i){h+='<div class="row"><div><b>'+esc(x.n)+'</b><div class="mu">'+esc(x.num)+'</div></div><button class="chip" onclick="delT('+i+')">Retirer</button></div>'});
+ h+='<label>Nom (réseau ou banque)</label><input id="tn"><label>Numéro ou compte</label><input id="tc"><button class="btn" onclick="addT()">Ajouter à la caisse</button></div>';
+ var P=S.req.filter(function(r){return r.s==="En attente"});h+='<div class="card"><h3>Demandes en attente ('+P.length+')</h3>';if(!P.length)h+='<p class="mu">Aucune demande.</p>';
+ S.req.forEach(function(r,i){if(r.s!=="En attente")return;h+='<div class="row"><div><b>'+(r.auto?"Transfert auto":r.t==="dep"?"Dépôt":"Retrait")+' · '+fmt(r.a)+'</b><div class="mu">'+esc(r.n)+' · '+(r.t==="dep"?"vers "+esc(r.to)+", réf. "+r.ref:"payer "+esc(r.to))+'</div></div><div style="display:flex;gap:6px"><button class="chip on" onclick="okReq('+i+')">Confirmer</button><button class="chip" onclick="noReq('+i+')">Refuser</button></div></div>'});
+ return h+'<p class="demo">Confirmez un dépôt seulement après avoir vu l’argent dans votre application Orange Money, Wave ou bancaire. Pour un retrait, envoyez l’argent puis confirmez.</p></div>'}
+function addT(){var n=$("tn").value.trim(),c=$("tc").value.trim();if(!n||!c){say("Nom et numéro requis");return}S.treas.push({n:n,num:c});save();render()}
+function delT(i){S.treas.splice(i,1);save();render()}
+function okReq(i){var r=S.req[i];if(r.t==="dep"){S.bal+=r.a;tx("in","Dépôt "+r.n,r.a);r.s="Confirmé"}else{r.s="Payé"}save();say(r.t==="dep"?"Dépôt confirmé":"Retrait marqué payé")}
+function noReq(i){var r=S.req[i];if(r.t==="wd"){S.bal+=r.a;tx("in","Retrait refusé, remboursé",r.a)}r.s="Refusé";save();say("Demande refusée")}
+function caisseStats(){var T=tr(),tot=0,rows=T.map(function(x){var i=0,o=0;S.req.forEach(function(r){if(r.n!==x.n)return;if(r.t==="dep"&&r.s==="Confirmé")i+=r.a;if(r.t==="wd"&&r.s==="Payé")o+=r.a});var b=x.b||0;tot+=b+i-o;return{x:x,b:b,i:i,o:o,e:b+i-o}});return{rows:rows,tot:tot}}
+function caisseCard(){var C=caisseStats(),eng=S.bal+(S.agent?S.agent.float:0),gap=C.tot-eng;
+ var h='<div class="card"><h3>Suivi de la caisse</h3><p class="mu">Solde de départ saisi à la main, puis entrées (dépôts confirmés) et sorties (retraits payés).</p>';
+ C.rows.forEach(function(r,i){h+='<div class="row"><div><b>'+esc(r.x.n)+'</b><div class="mu">Départ '+fmt(r.b)+' · entrées '+fmt(r.i)+' · sorties '+fmt(r.o)+'</div></div><div style="text-align:right"><b>'+fmt(r.e)+'</b><br><button class="chip" onclick="setB('+i+')">Solde de départ</button></div></div>'});
+ h+='<div class="row"><b>Caisse totale attendue</b><b>'+fmt(C.tot)+'</b></div><div class="row"><div><b>Dû aux clients et aux agents</b><div class="mu">Soldes NAwa et réserve des agents</div></div><b>'+fmt(eng)+'</b></div><div class="row"><b>Écart</b><b'+(gap<0?' style="color:#C0392B"':' class="in"')+'>'+fmt(gap)+'</b></div>';
+ h+=(gap<0?'<p class="mu">La caisse ne couvre pas ce que vous devez. Ajoutez des fonds avant de confirmer d’autres retraits.</p>':'')+'<button class="btn ghost" onclick="exportOps()">Exporter le journal (copier ou partager)</button></div>';return h}
+function setB(i){var a=parseFloat(prompt("Solde de départ de "+S.treas[i].n+" ("+S.cur+")"));if(isNaN(a))return;S.treas[i].b=a;save();render()}
+function exportOps(){var L=["date;type;réseau;montant;statut;référence;compte"];S.req.forEach(function(r){L.push([r.d,r.t==="dep"?"Dépôt":"Retrait",r.n,r.a,r.s,r.ref,r.to].join(";"))});S.tx.forEach(function(t){L.push([t.d,t.type==="in"?"Entrée":"Sortie",t.label,t.amt,"",t.ref||"",""].join(";"))});var txt=L.join("\n");if(navigator.share){navigator.share({title:"Journal NAwa",text:txt}).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(txt).then(function(){say("Journal copié")},function(){say("Copie impossible")})}else{say("Partage indisponible")}}
+function plaf(){return convert(S.lim||500000,"XOF",S.cur)}
+function usedToday(){var d=new Date().toDateString(),u=0;S.tx.forEach(function(x){if(!x.t||new Date(x.t).toDateString()!==d)return;if(x.type==="out")u+=x.amt;else if(/^Retrait /.test(x.label))u-=x.amt});return Math.max(u,0)}
+function over(a,out){var m=over0(a,out);if(m){S.blk=S.blk||[];S.blk.unshift({m:m,a:a,d:now()});S.blk=S.blk.slice(0,30);save()}return m}
+function over0(a,out){var L=plaf();if(a>L)return "Plafond par opération : "+fmt(L);if(out&&usedToday()+a>L)return "Plafond du jour atteint : "+fmt(L);return ""}
+function plafCard(){return '<div class="card"><h3>Plafonds</h3><p class="mu">Par opération et par jour : '+fmtn(S.lim||500000)+' XOF. Valable pour les envois, achats, dépôts et retraits.</p><button class="btn ghost" onclick="setPlaf()">Modifier le plafond (XOF)</button><button class="btn ghost" onclick="setCap()">Plafond de solde : '+fmtn(S.cap||1500000)+' XOF</button>'+blkList()+'</div>'}
+function blkList(){var B=S.blk||[];if(!B.length)return '<p class="demo">Aucune opération bloquée.</p>';var h='<h3 style="margin-top:14px">Opérations bloquées</h3>';B.slice(0,5).forEach(function(b){h+='<div class="row"><div><b>'+fmt(b.a)+'</b><div class="mu">'+esc(b.m)+' · '+b.d+'</div></div></div>'});return h}
+function setPlaf(){var v=parseFloat(prompt("Nouveau plafond en XOF",S.lim||500000));if(!(v>0))return;S.lim=v;save();render()}
+function capCheck(){if(!S)return;var cap=convert(S.cap||1500000,"XOF",S.cur);if(S.bal<=cap)return;var ex=Math.round((S.bal-cap)*100)/100;S.req=S.req||[];S.al=S.al||[];
+ if(!S.bank){if(!S.al.length||S.al[0].m.indexOf("aucune banque")<0)S.al.unshift({m:"Plafond de solde dépassé de "+fmt(ex)+" : aucune banque choisie par le client",d:now()});save();render();return}
+ S.bal-=ex;tx("out","Transfert automatique vers "+S.bank.n,ex);S.req.unshift({t:"wd",n:S.bank.n,to:S.bank.acc,a:ex,ref:"NW"+Math.floor(1000+Math.random()*9000),s:"En attente",d:now(),auto:true});save();render()}
+function bankCard(){var b=S.bank;return '<div class="card"><h3>Ma banque de transfert</h3><p class="mu">Quand votre solde dépasse '+fmt(convert(S.cap||1500000,"XOF",S.cur))+', l’excédent part vers cette banque.</p><label>Banque</label><input id="bn" placeholder="Ex. Ecobank, UBA, NSIA" value="'+(b?esc(b.n):"")+'"><label>Numéro de compte</label><input id="ba" value="'+(b?esc(b.acc):"")+'"><button class="btn alt" onclick="saveBank()">Enregistrer ma banque</button></div>'}
+function saveBank(){var n=$("bn").value.trim(),c=$("ba").value.trim();if(!n||!c){say("Banque et numéro requis");return}S.bank={n:n,acc:c};save();say("Banque enregistrée")}
+function alertsCard(){var P=(S.req||[]).filter(function(r){return r.auto&&r.s==="En attente"}),A=S.al||[];if(!P.length&&!A.length)return "";var h='<div class="card" style="border-color:#F5B301"><h3>🔔 Plafond de solde atteint</h3>';P.forEach(function(r){h+='<div class="row"><div><b>Transférer '+fmt(r.a)+'</b><div class="mu">vers '+esc(r.n)+', compte '+esc(r.to)+'</div></div></div>'});A.slice(0,3).forEach(function(a){h+='<div class="row"><div class="mu">'+esc(a.m)+' · '+a.d+'</div></div>'});return h+'<p class="demo">Envoyez l’argent à la banque, puis confirmez dans « Demandes en attente ».</p><button class="btn ghost" onclick="S.al=[];save();render()">Effacer les alertes</button></div>'}
+function setCap(){var v=parseFloat(prompt("Plafond de solde en XOF",S.cap||1500000));if(!(v>0))return;S.cap=v;save();render()}
+function setGoal(){var v=parseFloat(prompt("Objectif du mois",S.agent.goal||2000000));if(!(v>0))return;S.agent.goal=v;save();render()}
+function go(t){stopCam();tab=t;render();window.scrollTo(0,0)}
+
+/* ---------- Inscription ---------- */
+function onboard(){
+  var h='<div class="logo" style="margin:10px 0">NA<i>w</i>a</div>';
+  if(step===1){
+    h+='<h2>Ouvrez votre compte en 1 minute</h2><p class="mu">Un compte pour tout le monde, partout. Pas de pièce d’identité exigée pour commencer.</p><div class="card"><label>Pays</label><select id="ct">'+COUNTRIES.map(function(c,i){return '<option value="'+i+'"'+(draft.ci==i?" selected":"")+'>'+c[0]+' ('+c[1]+')</option>'}).join("")+'</select><label>Numéro de téléphone</label><input id="ph" type="tel" inputmode="tel" placeholder="77 000 00 00" value="'+esc(draft.ph||"")+'"><button class="btn" onclick="s1()">Continuer</button></div>';
+  }else if(step===2){
+    h+='<h2>Vos informations</h2><div class="card"><div style="text-align:center">'+av(draft.photo,draft.fn||"?",96)+'<br><label class="chip" style="display:inline-block;margin:10px 0 0;color:var(--tx)">📷 '+(draft.photo?"Changer la photo":"Prendre ma photo")+'<input type="file" accept="image/*" capture="user" hidden onchange="pickPhoto(this)"></label></div><label>Prénom</label><input id="fn" value="'+esc(draft.fn||"")+'"><label>Nom</label><input id="ln" value="'+esc(draft.ln||"")+'"><label>Date de naissance</label><input id="bd" type="date" value="'+esc(draft.bd||"")+'"><label>Ville</label><input id="ci" value="'+esc(draft.city||"")+'"><button class="btn" onclick="s2()">Continuer</button></div>';
+  }else if(step===4){
+    h+='<h2>Choisissez votre code PIN</h2><p class="mu">4 chiffres. Il sera demandé avant chaque envoi.</p><div class="card"><label>Code PIN</label><input id="pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••"><label>Code administrateur (6 chiffres, facultatif)</label><input id="adm" type="password" inputmode="numeric" maxlength="6" placeholder="Réservé au propriétaire de NAwa"><button class="btn alt" onclick="s4()">Créer mon compte</button></div>';
+  }else{
+    h+='<h2>Votre empreinte digitale</h2><p class="mu">Maintenez le doigt sur le capteur pour sécuriser votre compte.</p><div class="bio" id="bio" onpointerdown="bioStart()" onpointerup="bioStop()" onpointerleave="bioStop()">🖐️</div><p class="demo" id="bt">Maintenez pendant 2 secondes</p>';
+  }
+  return h+'<p class="demo">Prototype de démonstration : argent fictif</p>';
+}
+function s1(){var c=COUNTRIES[$("ct").value],p=$("ph").value.replace(/\D/g,"");if(p.length<6){say("Entrez un numéro valide");return}draft.ci=$("ct").value;draft.ph=p;draft.country=c[0];draft.code=c[1];draft.cur=c[2];step=2;render()}
+function s2(){var f=$("fn").value.trim(),l=$("ln").value.trim();if(!f||!l){say("Prénom et nom requis");return}if(!draft.photo){say("Ajoutez votre photo");return}draft.fn=f;draft.ln=l;draft.bd=$("bd").value;draft.city=$("ci").value;step=3;render()}
+var bioT=null;
+function bioStart(){var b=$("bio");b.classList.add("go");$("bt").textContent="Lecture en cours…";bioT=setTimeout(function(){step=4;render()},2000)}
+function s4(){
+  var p=$("pin").value,a6=$("adm").value.trim();if(a6&&!/^\d{6}$/.test(a6)){say("Le code administrateur a 6 chiffres");return}if(!/^\d{4}$/.test(p)){say("Le code PIN doit avoir 4 chiffres");return}
+  var id="NAW-"+Math.random().toString(36).slice(2,8).toUpperCase();
+  S={id:id,name:draft.fn+" "+draft.ln,phone:draft.code+draft.ph,country:draft.country,cur:draft.cur,bal:0,tier:"Niveau 1",links:[],tx:[],pin:p,photo:draft.photo,adm:a6,inst:[]};
+  save();unl=true;step=1;tab="home";say("Compte créé : "+id)}
+function bioStop(){clearTimeout(bioT);var b=$("bio");if(b){b.classList.remove("go");$("bt").textContent="Maintenez pendant 2 secondes"}}
+
+/* ---------- Accueil ---------- */
+function home(){
+  var h='<div class="row"><div class="logo">NA<i>w</i>a</div><label style="display:flex;align-items:center;gap:8px;margin:0"><span class="mu">'+esc(S.id)+'</span>'+av(S.photo,S.name,44)+'<input type="file" accept="image/*" hidden onchange="pickPhoto(this)"></label></div>';
+  h+='<div class="hero"><small>Bonjour '+esc(S.name.split(" ")[0])+', solde disponible</small><div class="bal">'+fmt(S.bal)+'</div><small>'+esc(S.phone)+' · '+S.tier+' · plafond '+fmt(plaf())+'</small></div>';
+  h+='<div class="chips"><button class="chip on" onclick="go(\'net\')">Recharger</button><button class="chip" onclick="go(\'send\')">Envoyer</button><button class="chip" onclick="go(\'scan\')">Mon code</button><button class="chip" onclick="go(\'scan\')">Payer un achat</button><button class="chip" onclick="go(\'cash\')">Dépôt / Retrait</button>'+(S.agent?'<button class="chip" onclick="go(\'agt\')">Espace agent</button>':"")+(S.adm?'<button class="chip" onclick="openAdm()">Administration'+((S.req||[]).filter(function(r){return r.auto&&r.s==="En attente"}).length?" 🔔":"")+'</button>':"")+'</div>';
+  h+='<div class="card"><h3>Activité</h3><p class="mu">Touchez une opération pour voir son reçu.</p>';
+  if(!S.tx.length)h+='<p class="mu">Aucune opération. Liez un réseau partenaire pour recharger votre compte.</p>';
+  S.tx.slice(0,12).forEach(function(t,i){h+='<div class="row" style="cursor:pointer" onclick="showRc('+i+')"><div><b>'+esc(t.label)+'</b><div class="mu">'+t.d+'</div></div><b class="'+(t.type==="in"?"in":"")+'">'+(t.type==="in"?"+":"−")+fmt(t.amt)+'</b></div>'});
+  h+='</div><div class="card"><details><summary><b>Installer NAwa sur le téléphone</b></summary><p class="mu">Android (Chrome) : touchez ⋮ puis « Ajouter à l’écran d’accueil ».<br>iPhone (Safari) : touchez Partager puis « Sur l’écran d’accueil ».</p></details><button class="btn ghost" onclick="invite()">Inviter par WhatsApp ou message</button></div><p class="demo">Prototype de démonstration : argent fictif</p><button class="btn ghost" onclick="unl=false;render()">Verrouiller l’application</button><button class="btn ghost" onclick="reset()">Supprimer mon compte démo</button>';
+  return h;
+}
+function reset(){if(confirm("Supprimer le compte démo ?")){S=null;try{localStorage.removeItem("zelle")}catch(e){}step=1;render()}}
+
+/* ---------- Envoyer ---------- */
+function send(){
+  var d=S.links.map(function(n){return '<option>'+esc(n)+'</option>'}).join("");
+  return '<h2>Envoyer de l’argent</h2><div class="card"><label>Destinataire : numéro, ID NAwa ou code scanné</label><input id="to" placeholder="+221 77 000 00 00 ou NAW-XXXXXX" value="'+esc(draft.to||"")+'"><label>Montant ('+S.cur+')</label><input id="am" type="number" inputmode="decimal" placeholder="0" oninput="conv()"><label>Le destinataire reçoit en</label><select id="rc" onchange="conv()">'+Object.keys(RATES).map(function(c){return '<option'+(c===S.cur?" selected":"")+'>'+c+'</option>'}).join("")+'</select><p class="mu" id="cv"></p><label>Envoyer vers</label><select id="dest"><option>Compte NAwa</option>'+d+'</select><p class="mu">Frais : 0 '+S.cur+' (démo)</p><button class="btn alt" onclick="doSend()">Envoyer maintenant</button></div>';
+}
+function convert(a,f,t){return a/RATES[f]*RATES[t]}
+function fmtn(n){return new Intl.NumberFormat("fr-FR",{maximumFractionDigits:2}).format(n)}
+function conv(){var a=parseFloat($("am").value),rc=$("rc").value;$("cv").textContent=(a>0&&rc!==S.cur)?"Le destinataire reçoit ≈ "+fmtn(convert(a,S.cur,rc))+" "+rc+" (taux de démonstration)":""}
+function doSend(){
+  var to=$("to").value.trim(),am=parseFloat($("am").value),dest=$("dest").value;
+  if(!to){say("Indiquez un destinataire");return}
+  if(!(am>0)){say("Montant invalide");return}
+  var lim=plaf(),ov=over(am,true);if(ov){say(ov);return}
+  if(am>lim){say("Limite du niveau atteinte : "+fmt(lim));return}
+  if(am>S.bal){say("Solde insuffisant");return}
+  if(S.pin&&prompt("Entrez votre code PIN")!==S.pin){say("Code PIN incorrect");return}
+  var rc=$("rc").value,got=convert(am,S.cur,rc);S.bal-=am;tx("out",to+" · "+dest+(rc!==S.cur?" → "+fmtn(got)+" "+rc:""),am);save();draft.to="";tab="rcpt";draft.rc=S.tx[0];say("Envoyé : "+fmt(am));
+}
+
+/* ---------- Scanner / Mon code ---------- */
+function myCode(){return "NAWA|"+S.id+"|"+S.phone+"|"+S.name}
+function scan(){
+  return '<h2>Mon code NAwa</h2><p class="mu">Montrez ce code pour recevoir de l’argent.</p><div class="card"><div style="display:flex;justify-content:center">'+av(S.photo,S.name,72)+'</div><div id="qr"></div><p class="mu" style="text-align:center">'+esc(S.id)+' · '+esc(S.phone)+'</p></div><h2 style="margin-top:20px">Scanner un code ou payer un achat</h2><div class="card"><button class="btn" style="margin-top:0" onclick="startCam()">Ouvrir la caméra</button><video id="vd" playsinline muted hidden></video><label>Ou collez le code reçu</label><input id="cd" placeholder="NAWA|NAW-…"><button class="btn ghost" onclick="useCode($(\'cd\').value)">Utiliser ce code</button><button class="btn ghost" onclick="useCode(\'NAWAPAY|Boutique Awa Dakar|7500|XOF\')">Essayer un achat de démonstration</button></div>';
+}
+function drawQR(){var q=$("qr");if(!q)return;q.innerHTML="";try{new QRCode(q,{text:myCode(),width:170,height:170})}catch(e){q.textContent=myCode()}}
+function useCode(c){var p=String(c).split("|");if(p[0]==="NAWAPAY"&&p[1]){stopCam();draft.pay={n:p[1],a:parseFloat(p[2])||0,c:RATES[p[3]]?p[3]:S.cur};tab="pay";render();return}if(p[0]!=="NAWA"||p.length<3){say("Code non reconnu");return}draft.to=p[1]+" ("+p[3]+")";stopCam();say("Destinataire : "+(p[3]||p[1]));tab="send";render()}
+function startCam(){
+  if(!("BarcodeDetector" in window)||!navigator.mediaDevices){say("Scan caméra indisponible ici. Collez le code.");return}
+  navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}}).then(function(s){
+    stream=s;var v=$("vd");v.hidden=false;v.srcObject=s;v.play();var bd=new BarcodeDetector({formats:["qr_code"]});
+    (function loop(){if(!stream)return;bd.detect(v).then(function(r){if(r.length){useCode(r[0].rawValue)}else setTimeout(loop,300)}).catch(function(){setTimeout(loop,500)})})();
+  }).catch(function(){say("Caméra refusée. Collez le code.")});
+}
+function stopCam(){if(stream){stream.getTracks().forEach(function(t){t.stop()});stream=null}}
+
+/* ---------- Réseaux partenaires ---------- */
+function net(){
+  var h='<h2>Réseaux et banques</h2><p class="mu">Liez vos comptes pour recharger NAwa ou envoyer vers eux.</p><div class="card">';
+  PARTNERS.concat(S.links.filter(function(n){return !PARTNERS.some(function(p){return p[0]===n})}).map(function(n){return [n,"🔗"]})).forEach(function(p){
+    var on=S.links.indexOf(p[0])>-1;
+    h+='<div class="row"><div><b>'+p[1]+' '+esc(p[0])+'</b><div class="mu">'+(on?"Lié":"Non lié")+'</div></div>'+(on?'<button class="chip on" onclick="topup(\''+esc(p[0]).replace(/'/g,"")+'\')">Recharger</button>':'<button class="chip" onclick="link(\''+esc(p[0]).replace(/'/g,"")+'\')">Lier</button>')+'</div>';
+  });
+  h+='</div><div class="card"><h3>Ajouter un réseau ou une banque</h3><label>Nom</label><input id="np" placeholder="Ex. Free Money, UBA, PayPal…"><button class="btn alt" onclick="addNet()">Demander l’association</button></div>';
+  return h;
+}
+function link(n){if(S.links.indexOf(n)<0)S.links.push(n);save();say(n+" lié");render()}
+function addNet(){var n=$("np").value.trim();if(!n){say("Entrez un nom");return}link(n)}
+function topup(n){var v=prompt("Montant à recharger depuis "+n+" ("+S.cur+")");var a=parseFloat(v);if(!(a>0))return;var ov=over(a,false);if(ov){say(ov);return}S.bal+=a;tx("in","Recharge "+n,a);save();say("Compte rechargé : "+fmt(a));render()}
+
+render();
+</script>
+</body>
+</html>
