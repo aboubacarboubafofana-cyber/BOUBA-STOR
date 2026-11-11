@@ -379,21 +379,13 @@ function saveProfile(){
 }
 function logout(){me=null;localStorage.removeItem('b_me');closeAll();checkGate()}
 </script><script>
+let tmpImg='',editId='';
 async function adminLogin(){
- alert("1. La fonction adminLogin a démarré !");
- 
- if(typeof fb === 'undefined' || !fb || !fb.AU){
-   alert("2. ERREUR : Firebase (fb) n'est pas chargé. Attends 3 secondes et réessaie.");
-   return;
- }
- 
- alert("3. Firebase est bien chargé. Tentative de connexion...");
- 
+ if(!fb){alert('Attends 2 secondes, le site se connecte...');return}
  try{
-   await fb.AU.signInWithEmailAndPassword(fb.auth,$('aMail').value.trim(),$('aPass').value);
-   alert("4. ✅ Connexion réussie !");
+  await fb.AU.signInWithEmailAndPassword(fb.auth,$('aMail').value.trim(),$('aPass').value);
  }catch(e){
-   alert("4. ❌ ERREUR FIREBASE : " + e.message);
+  alert('Erreur : ' + e.message);
  }
 }
 function adminLogout(){fb.AU.signOut(fb.auth);closeAll()}
