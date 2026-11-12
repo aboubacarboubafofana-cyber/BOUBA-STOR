@@ -236,56 +236,100 @@ body.gated>*:not(#gate):not(script):not(style):not(link):not(meta){visibility:hi
 <button id="btn-hydre" class="ta-classe-css">🐍 Robot</button>
 
 <!-- 🐍 Le moteur du robot (à laisser juste en dessous) -->
-
 <script>
 document.getElementById('btn-hydre').onclick = function() {
-    // 1. On récupère les données
+    // 0. NETTOYAGE : Si un overlay existe déjà, on l'enlève
+    let oldOverlay = document.getElementById('hydre9-overlay');
+    if (oldOverlay) oldOverlay.remove();
+    document.body.style.overflow = '';
+
+    // Fonction pour échapper le HTML (anti-bug XSS)
+    function escapeHtml(str) {
+        if (!str) return "";
+        return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    // Fonction de copie universelle qui marche PARTOUT
+    function copyTextFallback(text, btn, originalText) {
+        // Méthode 1 : API moderne
+        if (navigator.clipboard && window.isSecureContext) {
+            return navigator.clipboard.writeText(text).then(() => true).catch(() => copyOld(text));
+        } else {
+            return copyOld(text);
+        }
+        function copyOld(t) {
+            try {
+                let ta = document.createElement('textarea');
+                ta.value = t;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                let ok = document.execCommand('copy');
+                document.body.removeChild(ta);
+                return Promise.resolve(ok);
+            } catch(e) { return Promise.resolve(false); }
+        }
+    }
+
+    // 1. On récupère les données - VERSION CORRIGÉE
     let imagesData = [...document.querySelectorAll('img')].map(img => {
         let contextText = "";
         try {
-            let parent = img.closest('div, li, article, figure') || img.parentElement;
+            // On cherche le meilleur parent possible
+            let parent = img.closest('article, figure, li, .product, .card, div') || img.parentElement;
             if (parent) {
-                contextText = parent.innerText.replace(/\n/g, ' ').substring(0, 100).trim();
+                // On prend le texte mais on enlève les textes trop longs / inutiles
+                let txt = (parent.innerText || "").replace(/\s+/g, ' ').trim();
+                contextText = txt.substring(0, 150).trim();
             }
         } catch(e) {}
+        // On prend le meilleur src possible (lazy-load)
+        let src = img.currentSrc || img.src || img.getAttribute('data-src') || "";
         return {
-            src: img.src,
-            alt: img.alt || "Produit BOUBA STOR",
+            src: src,
+            alt: (img.alt || img.getAttribute('title') || "Produit BOUBA STOR").trim(),
             context: contextText || "Aucune description trouvée"
         };
-    }).filter(x => x.src);
+    }).filter(x => x.src && x.src.startsWith('http') && !x.src.includes('logo') && !x.src.includes('icon'));
 
-    let text = document.body.innerText;
-    window._hydre9_imagesData = imagesData; // On stocke les données pour les boutons
+    // Si aucune image
+    if (imagesData.length === 0) {
+        alert("Aucune image de produit trouvée sur cette page.");
+        return;
+    }
+
+    let text = document.body.innerText || "";
+    window._hydre9_imagesData = imagesData;
 
     // 2. Création de l'interface
     let overlay = document.createElement('div');
-    overlay.style = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:#0d1117; color:#fff; z-index:999999; overflow-y:auto; padding:15px; box-sizing:border-box; font-family:sans-serif;';
-    
-    let html = '<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #a371f7; padding-bottom:10px; margin-bottom:15px; position:sticky; top:0; background:#0d1117; z-index:10;">';
+    overlay.id = 'hydre9-overlay';
+    overlay.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:#0d1117; color:#fff; z-index:999999; overflow-y:auto; padding:15px; box-sizing:border-box; font-family:sans-serif;';
+    document.body.style.overflow = 'hidden'; // Bloque le scroll derrière
+
+    let html = '<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #a371f7; padding-bottom:10px; margin-bottom:15px; position:sticky; top:-15px; background:#0d1117; z-index:10; padding-top:15px;">';
     html += '<h2 style="margin:0; color:#a371f7; font-size:20px;">🐍 HYDRE-9</h2>';
-    html += '<button id="close-hydre" style="background:#ff4444; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; font-size:16px;">✕ Fermer</button>';
+    html += '<button id="close-hydre" style="background:#ff4444; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; font-size:16px; cursor:pointer;">✕ Fermer</button>';
     html += '</div>';
     
     html += '<p style="font-size:15px;"><b>Total :</b> ' + imagesData.length + ' images avec informations</p>';
     
-    // 3. Affichage de chaque image avec ses boutons (IDs uniques pour éviter les bugs)
+    // 3. Affichage
     html += imagesData.map((img, index) => {
         return `
         <div style="background:#161b22; border:1px solid #30363d; border-radius:10px; padding:12px; margin-bottom:20px;">
-            <img src="${img.src}" style="max-width:100%; height:auto; display:block; margin:0 auto 10px auto; border-radius:8px;">
+            <img src="${escapeHtml(img.src)}" loading="lazy" onerror="this.style.display=\'none\'" style="max-width:100%; height:auto; display:block; margin:0 auto 10px auto; border-radius:8px;">
             
-            <div style="font-size:12px; color:#c9d1d9; background:#0d1117; padding:10px; border-radius:5px; margin-bottom:10px; border-left: 3px solid #a371f7;">
-                <b>📝 Info :</b> ${img.alt}<br>
-                <b>📦 Contexte :</b> ${img.context}
+            <div style="font-size:12px; color:#c9d1d9; background:#0d1117; padding:10px; border-radius:5px; margin-bottom:10px; border-left: 3px solid #a371f7; word-break:break-word;">
+                <b>📝 Info :</b> ${escapeHtml(img.alt)}<br>
+                <b>📦 Contexte :</b> ${escapeHtml(img.context)}
             </div>
             
             <div style="display:flex; gap:8px;">
-                <button class="btn-h-share" data-index="${index}" style="flex:1; background:#238636; color:white; border:none; padding:10px; border-radius:5px; font-weight:bold; font-size:13px;">📤 Partager</button>
-                
-                <button class="btn-h-copy" data-index="${index}" style="flex:1; background:#1f6feb; color:white; border:none; padding:10px; border-radius:5px; font-weight:bold; font-size:13px;">📋 Lien</button>
-                
-                <button class="btn-h-open" data-index="${index}" style="flex:1; background:#e3b341; color:#000; text-align:center; padding:10px; border-radius:5px; font-weight:bold; font-size:13px; border:none;">📥 Ouvrir</button>
+                <button class="btn-h-share" data-index="${index}" style="flex:1; background:#238636; color:white; border:none; padding:10px; border-radius:5px; font-weight:bold; font-size:13px; cursor:pointer;">📤 Partager</button>
+                <button class="btn-h-copy" data-index="${index}" style="flex:1; background:#1f6feb; color:white; border:none; padding:10px; border-radius:5px; font-weight:bold; font-size:13px; cursor:pointer;">📋 Lien</button>
+                <button class="btn-h-open" data-index="${index}" style="flex:1; background:#e3b341; color:#000; padding:10px; border-radius:5px; font-weight:bold; font-size:13px; border:none; cursor:pointer;">📥 Ouvrir</button>
             </div>
         </div>
         `;
@@ -293,62 +337,84 @@ document.getElementById('btn-hydre').onclick = function() {
     
     html += '<div style="background:#161b22; padding:10px; border-radius:8px; margin-top:20px;">';
     html += '<b style="color:#58a6ff;">📝 Texte complet de la page :</b><br>';
-    html += '<div style="white-space:pre-wrap; word-break:break-word; font-size:12px; margin-top:10px; color:#c9d1d9; max-height:200px; overflow-y:auto;">' + text.substring(0, 5000) + '...</div>';
+    html += '<div style="white-space:pre-wrap; word-break:break-word; font-size:12px; margin-top:10px; color:#c9d1d9; max-height:200px; overflow-y:auto;">' + escapeHtml(text.substring(0, 5000)) + '...</div>';
     html += '</div>';
     
     overlay.innerHTML = html;
     document.body.appendChild(overlay);
     
-    // 4. Bouton Fermer
-    document.getElementById('close-hydre').onclick = function() {
-        document.body.removeChild(overlay);
-    };
+    // 4. Bouton Fermer - CORRIGÉ (restaure le scroll)
+    function closeHydre() {
+        overlay.remove();
+        document.body.style.overflow = '';
+    }
+    document.getElementById('close-hydre').onclick = closeHydre;
+    // Fermer avec touche Echap aussi
+    document.addEventListener('keydown', function escHandler(e) {
+        if (e.key === 'Escape') { closeHydre(); document.removeEventListener('keydown', escHandler); }
+    });
 
-    // 5. LA MAGIE : On active les boutons un par un (méthode anti-bug)
-    
-    // Bouton PARTAGER
+    // 5. LES BOUTONS - 100% FONCTIONNELS
+
+    // Bouton PARTAGER - Corrigé
     document.querySelectorAll('.btn-h-share').forEach(btn => {
-        btn.onclick = function() {
+        btn.onclick = async function() {
             let img = window._hydre9_imagesData[this.dataset.index];
+            let original = this.innerText;
             let shareText = img.alt + " - " + img.context + "\n\nLien : " + img.src;
             
+            // Si navigator.share existe ET peut partager
             if (navigator.share) {
-                navigator.share({
-                    title: 'Produit BOUBA STOR',
-                    text: shareText,
-                    url: img.src
-                }).catch(e => console.log('Partage annulé', e));
+                try {
+                    await navigator.share({
+                        title: 'Produit BOUBA STOR',
+                        text: shareText,
+                        url: img.src
+                    });
+                    this.innerText = '✅ Partagé !';
+                } catch(e) {
+                    // Utilisateur a annulé = normal, on ne fait rien
+                    if (e.name !== 'AbortError') {
+                        // Si share échoue, on copie à la place
+                        let ok = await copyTextFallback(shareText);
+                        this.innerText = ok ? '✅ Copié !' : '❌ Échec';
+                    }
+                }
             } else {
-                navigator.clipboard.writeText(shareText).then(() => {
-                    this.innerText = '✅ Copié !';
-                    setTimeout(() => this.innerText = '📤 Partager', 2000);
-                });
+                let ok = await copyTextFallback(shareText);
+                this.innerText = ok ? '✅ Copié !' : '❌ Échec';
             }
+            setTimeout(() => this.innerText = original, 2000);
         };
     });
 
-    // Bouton COPIER LIEN
+    // Bouton COPIER LIEN - Corrigé
     document.querySelectorAll('.btn-h-copy').forEach(btn => {
-        btn.onclick = function() {
+        btn.onclick = async function() {
             let img = window._hydre9_imagesData[this.dataset.index];
-            navigator.clipboard.writeText(img.src).then(() => {
-                this.innerText = '✅ Copié !';
-                setTimeout(() => this.innerText = '📋 Lien', 2000);
-            }).catch(e => {
-                alert("Erreur de copie. Ton navigateur bloque peut-être la copie.");
-            });
+            let original = this.innerText;
+            let ok = await copyTextFallback(img.src);
+            this.innerText = ok ? '✅ Copié !' : '❌ Échec - Copie manuelle : ' + img.src;
+            if (!ok) { prompt("Copie ce lien :", img.src); }
+            setTimeout(() => this.innerText = original, 2000);
         };
     });
 
-    // Bouton OUVRIR
+    // Bouton OUVRIR - Corrigé (anti-bloqueur de popup)
     document.querySelectorAll('.btn-h-open').forEach(btn => {
         btn.onclick = function() {
             let img = window._hydre9_imagesData[this.dataset.index];
-            window.open(img.src, '_blank');
+            let win = window.open(img.src, '_blank', 'noopener,noreferrer');
+            if (!win) {
+                // Si popup bloqué, on propose de copier
+                alert("Popup bloqué par le navigateur. Lien : " + img.src);
+            }
         };
     });
 };
-</script>
+                           </script>
+
+    
 </div>
 </div><script>
 const ADMIN_UID="7W5OEzTeTNbFLzULLO9VsuDKZFN2";
