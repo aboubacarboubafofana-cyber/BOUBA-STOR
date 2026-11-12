@@ -238,9 +238,27 @@ body.gated>*:not(#gate):not(script):not(style):not(link):not(meta){visibility:hi
 <!-- 🐍 Le moteur du robot (à laisser juste en dessous) -->
 <script>
 document.getElementById('btn-hydre').onclick = function() {
-    let images = [...document.querySelectorAll('img')].map(x => x.src).filter(x => x);
+    // 1. On récupère les images ET leurs informations
+    let imagesData = [...document.querySelectorAll('img')].map(img => {
+        let contextText = "";
+        try {
+            // On cherche le texte autour de l'image (le nom du produit, le prix, etc.)
+            let parent = img.closest('div, li, article, figure') || img.parentElement;
+            if (parent) {
+                contextText = parent.innerText.replace(/\n/g, ' ').substring(0, 100).trim();
+            }
+        } catch(e) {}
+        
+        return {
+            src: img.src,
+            alt: img.alt || "Produit BOUBA STOR",
+            context: contextText || "Aucune description trouvée"
+        };
+    }).filter(x => x.src);
+
     let text = document.body.innerText;
     
+    // 2. Création de l'interface
     let overlay = document.createElement('div');
     overlay.style = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:#0d1117; color:#fff; z-index:999999; overflow-y:auto; padding:15px; box-sizing:border-box; font-family:sans-serif;';
     
@@ -249,46 +267,59 @@ document.getElementById('btn-hydre').onclick = function() {
     html += '<button id="close-hydre" style="background:#ff4444; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; font-size:16px;">✕ Fermer</button>';
     html += '</div>';
     
-    // Boutons d'exportation
-    html += '<div style="display:flex; gap:10px; margin-bottom:15px;">';
-    html += '<button id="copy-txt" style="flex:1; background:#1f6feb; color:white; border:none; padding:10px; border-radius:5px; font-weight:bold; font-size:13px;">📋 Copier le Texte</button>';
-    html += '<button id="copy-img" style="flex:1; background:#238636; color:white; border:none; padding:10px; border-radius:5px; font-weight:bold; font-size:13px;">🔗 Copier les Liens</button>';
-    html += '</div>';
+    html += '<p style="font-size:15px;"><b>Total :</b> ' + imagesData.length + ' images avec informations</p>';
     
-    html += '<p style="font-size:15px;"><b>Total :</b> ' + images.length + ' images</p>';
+    // 3. Affichage de chaque image avec ses boutons
+    html += imagesData.map((img, index) => {
+        return `
+        <div style="background:#161b22; border:1px solid #30363d; border-radius:10px; padding:12px; margin-bottom:20px;">
+            <img src="${img.src}" style="max-width:100%; height:auto; display:block; margin:0 auto 10px auto; border-radius:8px;">
+            
+            <div style="font-size:12px; color:#c9d1d9; background:#0d1117; padding:10px; border-radius:5px; margin-bottom:10px; border-left: 3px solid #a371f7;">
+                <b>📝 Info :</b> ${img.alt}<br>
+                <b>📦 Contexte :</b> ${img.context}
+            </div>
+            
+            <div style="display:flex; gap:8px;">
+                <button onclick="shareImage('${img.src}', '${img.alt.replace(/'/g, "\\'")} - ${img.context.replace(/'/g, "\\'")}')" style="flex:1; background:#238636; color:white; border:none; padding:10px; border-radius:5px; font-weight:bold; font-size:13px;">📤 Partager</button>
+                
+                <button onclick="navigator.clipboard.writeText('${img.src}'); this.innerText='✅ Copié'; setTimeout(()=>this.innerText='📋 Lien', 2000)" style="flex:1; background:#1f6feb; color:white; border:none; padding:10px; border-radius:5px; font-weight:bold; font-size:13px;">📋 Lien</button>
+                
+                <a href="${img.src}" target="_blank" style="flex:1; background:#e3b341; color:#000; text-align:center; padding:10px; border-radius:5px; font-weight:bold; font-size:13px; text-decoration:none;">📥 Ouvrir</a>
+            </div>
+        </div>
+        `;
+    }).join('');
     
-    html += '<div style="background:#161b22; padding:10px; border-radius:8px; margin-bottom:15px;">';
-    html += '<b style="color:#58a6ff;">📷 Images :</b><br>';
-    html += images.map(x => '<img src="' + x + '" style="max-width:100%; height:auto; display:block; margin:10px auto; border:1px solid #30363d; border-radius:8px;">').join('');
-    html += '</div>';
-    
-    html += '<div style="background:#161b22; padding:10px; border-radius:8px;">';
-    html += '<b style="color:#58a6ff;">📝 Texte :</b><br>';
-    html += '<div style="white-space:pre-wrap; word-break:break-word; font-size:13px; margin-top:10px; color:#c9d1d9;">' + text.substring(0, 10000) + '...</div>';
+    // 4. Bloc du texte global (optionnel, gardé en bas)
+    html += '<div style="background:#161b22; padding:10px; border-radius:8px; margin-top:20px;">';
+    html += '<b style="color:#58a6ff;">📝 Texte complet de la page :</b><br>';
+    html += '<div style="white-space:pre-wrap; word-break:break-word; font-size:12px; margin-top:10px; color:#c9d1d9; max-height:200px; overflow-y:auto;">' + text.substring(0, 5000) + '...</div>';
     html += '</div>';
     
     overlay.innerHTML = html;
     document.body.appendChild(overlay);
     
-    // Actions des boutons
+    // 5. Bouton fermer
     document.getElementById('close-hydre').onclick = function() {
         document.body.removeChild(overlay);
     };
-    
-    document.getElementById('copy-txt').onclick = function() {
-        navigator.clipboard.writeText(text).then(() => {
-            this.innerText = "✅ Texte copié !";
-            setTimeout(() => this.innerText = "📋 Copier le Texte", 2000);
+};
+
+// FONCTION DE PARTAGE MAGIQUE (utilise le menu natif du téléphone)
+window.shareImage = function(imgUrl, imgInfo) {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Produit BOUBA STOR',
+            text: imgInfo + '\n\nLien de l\'image : ' + imgUrl,
+            url: imgUrl
+        }).catch((error) => {
+            console.log('Partage annulé ou erreur', error);
         });
-    };
-    
-    document.getElementById('copy-img').onclick = function() {
-        let allLinks = images.join('\n');
-        navigator.clipboard.writeText(allLinks).then(() => {
-            this.innerText = "✅ Liens copiés !";
-            setTimeout(() => this.innerText = "🔗 Copier les Liens", 2000);
-        });
-    };
+    } else {
+        alert("Le partage direct n'est pas supporté par ce navigateur. L'image va s'ouvrir pour que tu puisses l'enregistrer.");
+        window.open(imgUrl, '_blank');
+    }
 };
 </script>
 </div>
