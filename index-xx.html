@@ -237,183 +237,218 @@ body.gated>*:not(#gate):not(script):not(style):not(link):not(meta){visibility:hi
 
 <!-- 🐍 Le moteur du robot (à laisser juste en dessous) -->
 <script>
-document.getElementById('btn-hydre').onclick = function() {
-    // 0. NETTOYAGE : Si un overlay existe déjà, on l'enlève
-    let oldOverlay = document.getElementById('hydre9-overlay');
-    if (oldOverlay) oldOverlay.remove();
-    document.body.style.overflow = '';
+(function () {
+  'use strict';
 
-    // Fonction pour échapper le HTML (anti-bug XSS)
-    function escapeHtml(str) {
-        if (!str) return "";
-        return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  // --- Utilitaires ---
+  function escapeHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function copyToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text);
     }
+    return new Promise(function (resolve, reject) {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.top = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        ok ? resolve() : reject(new Error('execCommand copy failed'));
+      } catch (e) { reject(e); }
+    });
+  }
 
-    // Fonction de copie universelle qui marche PARTOUT
-    function copyTextFallback(text, btn, originalText) {
-        // Méthode 1 : API moderne
-        if (navigator.clipboard && window.isSecureContext) {
-            return navigator.clipboard.writeText(text).then(() => true).catch(() => copyOld(text));
-        } else {
-            return copyOld(text);
+  // --- Ouverture de l'interface ---
+  function openHydre() {
+    // Supprime un éventuel overlay existant
+    var old = document.getElementById('hydre9-overlay');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+
+    // 1. Récupération des images
+    var imagesData = [];
+    var imgs = document.querySelectorAll('img');
+    for (var i = 0; i < imgs.length; i++) {
+      var img = imgs[i];
+      var attrSrc = img.getAttribute('src');
+      if (!attrSrc) continue; // évite le src = URL de la page
+
+      var src = img.currentSrc || img.src || attrSrc;
+
+      var contextText = '';
+      try {
+        var parent = img.closest('div, li, article, figure') || img.parentElement;
+        if (parent && typeof parent.innerText === 'string') {
+          contextText = parent.innerText.replace(/\s+/g, ' ').trim().substring(0, 100);
         }
-        function copyOld(t) {
-            try {
-                let ta = document.createElement('textarea');
-                ta.value = t;
-                ta.style.position = 'fixed';
-                ta.style.opacity = '0';
-                document.body.appendChild(ta);
-                ta.select();
-                let ok = document.execCommand('copy');
-                document.body.removeChild(ta);
-                return Promise.resolve(ok);
-            } catch(e) { return Promise.resolve(false); }
-        }
+      } catch (e) { /* ignore */ }
+
+      imagesData.push({
+        src: src,
+        alt: img.alt || 'Produit BOUBA STOR',
+        context: contextText || 'Aucune description trouvée'
+      });
     }
 
-    // 1. On récupère les données - VERSION CORRIGÉE
-    let imagesData = [...document.querySelectorAll('img')].map(img => {
-        let contextText = "";
-        try {
-            // On cherche le meilleur parent possible
-            let parent = img.closest('article, figure, li, .product, .card, div') || img.parentElement;
-            if (parent) {
-                // On prend le texte mais on enlève les textes trop longs / inutiles
-                let txt = (parent.innerText || "").replace(/\s+/g, ' ').trim();
-                contextText = txt.substring(0, 150).trim();
-            }
-        } catch(e) {}
-        // On prend le meilleur src possible (lazy-load)
-        let src = img.currentSrc || img.src || img.getAttribute('data-src') || "";
-        return {
-            src: src,
-            alt: (img.alt || img.getAttribute('title') || "Produit BOUBA STOR").trim(),
-            context: contextText || "Aucune description trouvée"
-        };
-    }).filter(x => x.src && x.src.startsWith('http') && !x.src.includes('logo') && !x.src.includes('icon'));
-
-    // Si aucune image
-    if (imagesData.length === 0) {
-        alert("Aucune image de produit trouvée sur cette page.");
-        return;
-    }
-
-    let text = document.body.innerText || "";
     window._hydre9_imagesData = imagesData;
 
-    // 2. Création de l'interface
-    let overlay = document.createElement('div');
+    var pageText = (document.body && document.body.innerText) || '';
+
+    // 2. Construction de l'interface
+    var overlay = document.createElement('div');
     overlay.id = 'hydre9-overlay';
-    overlay.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:#0d1117; color:#fff; z-index:999999; overflow-y:auto; padding:15px; box-sizing:border-box; font-family:sans-serif;';
-    document.body.style.overflow = 'hidden'; // Bloque le scroll derrière
+    overlay.style.cssText =
+      'position:fixed; top:0; left:0; width:100vw; height:100vh; background:#0d1117;' +
+      ' color:#fff; z-index:999999; overflow-y:auto; padding:15px; box-sizing:border-box;' +
+      ' font-family:sans-serif;';
 
-    let html = '<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #a371f7; padding-bottom:10px; margin-bottom:15px; position:sticky; top:-15px; background:#0d1117; z-index:10; padding-top:15px;">';
-    html += '<h2 style="margin:0; color:#a371f7; font-size:20px;">🐍 HYDRE-9</h2>';
-    html += '<button id="close-hydre" style="background:#ff4444; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; font-size:16px; cursor:pointer;">✕ Fermer</button>';
-    html += '</div>';
-    
-    html += '<p style="font-size:15px;"><b>Total :</b> ' + imagesData.length + ' images avec informations</p>';
-    
-    // 3. Affichage
-    html += imagesData.map((img, index) => {
-        return `
-        <div style="background:#161b22; border:1px solid #30363d; border-radius:10px; padding:12px; margin-bottom:20px;">
-            <img src="${escapeHtml(img.src)}" loading="lazy" onerror="this.style.display=\'none\'" style="max-width:100%; height:auto; display:block; margin:0 auto 10px auto; border-radius:8px;">
-            
-            <div style="font-size:12px; color:#c9d1d9; background:#0d1117; padding:10px; border-radius:5px; margin-bottom:10px; border-left: 3px solid #a371f7; word-break:break-word;">
-                <b>📝 Info :</b> ${escapeHtml(img.alt)}<br>
-                <b>📦 Contexte :</b> ${escapeHtml(img.context)}
-            </div>
-            
-            <div style="display:flex; gap:8px;">
-                <button class="btn-h-share" data-index="${index}" style="flex:1; background:#238636; color:white; border:none; padding:10px; border-radius:5px; font-weight:bold; font-size:13px; cursor:pointer;">📤 Partager</button>
-                <button class="btn-h-copy" data-index="${index}" style="flex:1; background:#1f6feb; color:white; border:none; padding:10px; border-radius:5px; font-weight:bold; font-size:13px; cursor:pointer;">📋 Lien</button>
-                <button class="btn-h-open" data-index="${index}" style="flex:1; background:#e3b341; color:#000; padding:10px; border-radius:5px; font-weight:bold; font-size:13px; border:none; cursor:pointer;">📥 Ouvrir</button>
-            </div>
-        </div>
-        `;
-    }).join('');
-    
-    html += '<div style="background:#161b22; padding:10px; border-radius:8px; margin-top:20px;">';
-    html += '<b style="color:#58a6ff;">📝 Texte complet de la page :</b><br>';
-    html += '<div style="white-space:pre-wrap; word-break:break-word; font-size:12px; margin-top:10px; color:#c9d1d9; max-height:200px; overflow-y:auto;">' + escapeHtml(text.substring(0, 5000)) + '...</div>';
-    html += '</div>';
-    
-    overlay.innerHTML = html;
+    var parts = [];
+    parts.push(
+      '<div style="display:flex; justify-content:space-between; align-items:center;' +
+      ' border-bottom:2px solid #a371f7; padding-bottom:10px; margin-bottom:15px;' +
+      ' position:sticky; top:0; background:#0d1117; z-index:10;">' +
+        '<h2 style="margin:0; color:#a371f7; font-size:20px;">🐍 HYDRE-9</h2>' +
+        '<button id="hydre9-close" style="background:#ff4444; color:white; border:none;' +
+        ' padding:8px 15px; border-radius:5px; font-weight:bold; font-size:16px; cursor:pointer;">✕ Fermer</button>' +
+      '</div>'
+    );
+    parts.push('<p style="font-size:15px;"><b>Total :</b> ' + imagesData.length + ' images avec informations</p>');
+
+    imagesData.forEach(function (img, index) {
+      parts.push(
+        '<div style="background:#161b22; border:1px solid #30363d; border-radius:10px;' +
+        ' padding:12px; margin-bottom:20px;">' +
+          '<img src="' + escapeHtml(img.src) + '" alt="' + escapeHtml(img.alt) + '"' +
+          ' style="max-width:100%; height:auto; display:block; margin:0 auto 10px auto; border-radius:8px;">' +
+          '<div style="font-size:12px; color:#c9d1d9; background:#0d1117; padding:10px;' +
+          ' border-radius:5px; margin-bottom:10px; border-left:3px solid #a371f7;">' +
+            '<b>📝 Info :</b> ' + escapeHtml(img.alt) + '<br>' +
+            '<b>📦 Contexte :</b> ' + escapeHtml(img.context) +
+          '</div>' +
+          '<div style="display:flex; gap:8px;">' +
+            '<button class="btn-h-share" data-index="' + index + '" style="flex:1; background:#238636;' +
+            ' color:white; border:none; padding:10px; border-radius:5px; font-weight:bold;' +
+            ' font-size:13px; cursor:pointer;">📤 Partager</button>' +
+            '<button class="btn-h-copy" data-index="' + index + '" style="flex:1; background:#1f6feb;' +
+            ' color:white; border:none; padding:10px; border-radius:5px; font-weight:bold;' +
+            ' font-size:13px; cursor:pointer;">📋 Lien</button>' +
+            '<button class="btn-h-open" data-index="' + index + '" style="flex:1; background:#e3b341;' +
+            ' color:#000; text-align:center; padding:10px; border-radius:5px; font-weight:bold;' +
+            ' font-size:13px; border:none; cursor:pointer;">📥 Ouvrir</button>' +
+          '</div>' +
+        '</div>'
+      );
+    });
+
+    parts.push(
+      '<div style="background:#161b22; padding:10px; border-radius:8px; margin-top:20px;">' +
+        '<b style="color:#58a6ff;">📝 Texte complet de la page :</b><br>' +
+        '<div style="white-space:pre-wrap; word-break:break-word; font-size:12px;' +
+        ' margin-top:10px; color:#c9d1d9; max-height:200px; overflow-y:auto;">' +
+          escapeHtml(pageText.substring(0, 5000)) + '...</div>' +
+      '</div>'
+    );
+
+    overlay.innerHTML = parts.join('');
     document.body.appendChild(overlay);
-    
-    // 4. Bouton Fermer - CORRIGÉ (restaure le scroll)
-    function closeHydre() {
-        overlay.remove();
-        document.body.style.overflow = '';
+
+    // 3. Bouton Fermer
+    var closeBtn = document.getElementById('hydre9-close');
+    if (closeBtn) {
+      closeBtn.onclick = function () {
+        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      };
     }
-    document.getElementById('close-hydre').onclick = closeHydre;
-    // Fermer avec touche Echap aussi
-    document.addEventListener('keydown', function escHandler(e) {
-        if (e.key === 'Escape') { closeHydre(); document.removeEventListener('keydown', escHandler); }
-    });
 
-    // 5. LES BOUTONS - 100% FONCTIONNELS
+    // 4. Boutons d'action (ciblés dans l'overlay)
+    var shareBtns = overlay.querySelectorAll('.btn-h-share');
+    for (var s = 0; s < shareBtns.length; s++) {
+      (function (btn) {
+        btn.onclick = function () {
+          var img = window._hydre9_imagesData[parseInt(this.dataset.index, 10)];
+          if (!img) return;
+          var shareText = img.alt + ' - ' + img.context + '\n\nLien : ' + img.src;
 
-    // Bouton PARTAGER - Corrigé
-    document.querySelectorAll('.btn-h-share').forEach(btn => {
-        btn.onclick = async function() {
-            let img = window._hydre9_imagesData[this.dataset.index];
-            let original = this.innerText;
-            let shareText = img.alt + " - " + img.context + "\n\nLien : " + img.src;
-            
-            // Si navigator.share existe ET peut partager
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: 'Produit BOUBA STOR',
-                        text: shareText,
-                        url: img.src
-                    });
-                    this.innerText = '✅ Partagé !';
-                } catch(e) {
-                    // Utilisateur a annulé = normal, on ne fait rien
-                    if (e.name !== 'AbortError') {
-                        // Si share échoue, on copie à la place
-                        let ok = await copyTextFallback(shareText);
-                        this.innerText = ok ? '✅ Copié !' : '❌ Échec';
-                    }
-                }
-            } else {
-                let ok = await copyTextFallback(shareText);
-                this.innerText = ok ? '✅ Copié !' : '❌ Échec';
-            }
-            setTimeout(() => this.innerText = original, 2000);
+          if (navigator.share) {
+            navigator.share({ title: 'Produit BOUBA STOR', text: shareText, url: img.src })
+              .catch(function (e) { console.log('Partage annulé', e); });
+          } else {
+            copyToClipboard(shareText).then(function () {
+              var self = btn;
+              self.innerText = '✅ Copié !';
+              setTimeout(function () { self.innerText = '📤 Partager'; }, 2000);
+            }).catch(function () {
+              alert('Copie impossible sur ce navigateur.');
+            });
+          }
         };
-    });
+      })(shareBtns[s]);
+    }
 
-    // Bouton COPIER LIEN - Corrigé
-    document.querySelectorAll('.btn-h-copy').forEach(btn => {
-        btn.onclick = async function() {
-            let img = window._hydre9_imagesData[this.dataset.index];
-            let original = this.innerText;
-            let ok = await copyTextFallback(img.src);
-            this.innerText = ok ? '✅ Copié !' : '❌ Échec - Copie manuelle : ' + img.src;
-            if (!ok) { prompt("Copie ce lien :", img.src); }
-            setTimeout(() => this.innerText = original, 2000);
+    var copyBtns = overlay.querySelectorAll('.btn-h-copy');
+    for (var c = 0; c < copyBtns.length; c++) {
+      (function (btn) {
+        btn.onclick = function () {
+          var img = window._hydre9_imagesData[parseInt(this.dataset.index, 10)];
+          if (!img) return;
+          copyToClipboard(img.src).then(function () {
+            btn.innerText = '✅ Copié !';
+            setTimeout(function () { btn.innerText = '📋 Lien'; }, 2000);
+          }).catch(function () {
+            alert('Erreur de copie. Ton navigateur bloque peut-être la copie.');
+          });
         };
-    });
+      })(copyBtns[c]);
+    }
 
-    // Bouton OUVRIR - Corrigé (anti-bloqueur de popup)
-    document.querySelectorAll('.btn-h-open').forEach(btn => {
-        btn.onclick = function() {
-            let img = window._hydre9_imagesData[this.dataset.index];
-            let win = window.open(img.src, '_blank', 'noopener,noreferrer');
-            if (!win) {
-                // Si popup bloqué, on propose de copier
-                alert("Popup bloqué par le navigateur. Lien : " + img.src);
-            }
+    var openBtns = overlay.querySelectorAll('.btn-h-open');
+    for (var o = 0; o < openBtns.length; o++) {
+      (function (btn) {
+        btn.onclick = function () {
+          var img = window._hydre9_imagesData[parseInt(this.dataset.index, 10)];
+          if (!img) return;
+          window.open(img.src, '_blank', 'noopener');
         };
-    });
-};
-                           </script>
+      })(openBtns[o]);
+    }
+  }
 
+  // --- Initialisation ---
+  function init() {
+    var btnHydre = document.getElementById('btn-hydre');
+    if (!btnHydre) {
+      console.warn('HYDRE-9 : bouton #btn-hydre introuvable dans le DOM.');
+      return;
+    }
+    btnHydre.onclick = function () {
+      try {
+        openHydre();
+      } catch (e) {
+        console.error('HYDRE-9 erreur :', e);
+        alert('Erreur HYDRE-9 : ' + e.message);
+      }
+    };
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+   </script>
+        
     
 </div>
 </div><script>
