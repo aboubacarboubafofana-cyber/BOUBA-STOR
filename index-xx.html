@@ -232,6 +232,27 @@ body.gated>*:not(#gate):not(script):not(style):not(link):not(meta){visibility:hi
  <button class="gold" id="satMainBtn" style="width:100%; margin-bottom:10px; background:linear-gradient(135deg,#0a2a5e,#00c6ff); color:#fff; border:2px solid gold; font-size:16px;" onclick="setTab('sat')">🛰️ SATELLITE MONDIAL — Voir en direct</button>
  <a href="satellite.html" target="_blank" style="display:block;text-align:center;margin-bottom:10px;color:gold;font-size:13px">🛰️ Ouvrir la page Satellite plein écran →</a>
  <button class="gold" style="width:100%; margin-bottom:10px; background:#333; color:#ffd700; border:1px solid #ffd700;" onclick="SPEED.open()">⚡ Vitesse & connexion</button>
+ <!-- 🐍 Bouton Robot (Mets tes propres classes CSS ou ton propre style ici) -->
+<button id="btn-hydre" class="ta-classe-css">🐍 Robot</button>
+
+<!-- 🐍 Le moteur du robot (à laisser juste en dessous) -->
+<script>
+document.getElementById('btn-hydre').onclick = function() {
+    let images = [...document.querySelectorAll('img')].map(x => x.src).filter(x => x);
+    let text = document.body.innerText;
+    
+    let html = '<meta name="viewport" content="width=device-width,initial-scale=1">';
+    html += '<style>body{background:#000;color:#fff;padding:20px;font-family:sans-serif;} img{max-width:100%; margin:10px 0; border:1px solid #333; border-radius:8px;} .box{background:#111; padding:15px; border-radius:8px; margin-top:20px;}</style>';
+    html += '<h2 style="color:#a371f7">🐍 HYDRE-9 Mobile</h2>';
+    html += '<p><b>Images trouvées :</b> ' + images.length + '</p>';
+    html += '<div class="box">' + images.map(x => '<img src="' + x + '">').join('') + '</div>';
+    html += '<p><b>Texte extrait :</b></p>';
+    html += '<div class="box"><pre style="white-space:pre-wrap; font-size:12px;">' + text.substring(0, 5000) + '...</pre></div>';
+    
+    let w = window.open();
+    w.document.write(html);
+};
+</script>
 </div>
 </div><script>
 const ADMIN_UID="7W5OEzTeTNbFLzULLO9VsuDKZFN2";
