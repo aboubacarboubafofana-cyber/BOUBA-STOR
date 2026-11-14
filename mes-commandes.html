@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mes commandes — BOUBA STOR</title>
+<meta name="theme-color" content="#000000">
+<style>
+:root{--bg:#000;--card:#111;--line:#2a2a2a;--gold:#ffd700;--txt:#fff;--mut:#aaa}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Roboto,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--gold);padding:10px 12px;display:flex;gap:10px;align-items:center}
+header a,header button{background:none;border:0;color:var(--gold);font-size:24px;text-decoration:none;padding:4px}
+header input{flex:1;min-width:0;background:#1a1a1a;border:1px solid var(--gold);border-radius:24px;color:#fff;padding:11px 16px;font-size:15px}
+h1{font-size:24px;margin:18px 14px 6px;color:var(--gold)}
+.tabs{display:flex;border-bottom:1px solid var(--line);margin-top:8px}
+.tabs button{flex:1;background:none;border:0;border-bottom:3px solid transparent;color:var(--mut);font-weight:700;font-size:14px;padding:14px 4px;text-transform:uppercase}
+.tabs button.on{color:var(--gold);border-color:var(--gold)}
+.card{display:flex;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;margin:10px;padding:14px}
+.card img{width:92px;height:92px;object-fit:cover;border-radius:10px;background:#222;flex:none}
+.in{min-width:0;flex:1;font-size:14px;line-height:1.45}
+.t{font-weight:700;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.m{color:var(--mut)}
+.b{display:inline-block;padding:3px 10px;border-radius:5px;font-size:12px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;margin:5px 0;color:#fff}
+.b.w{background:#6b6b6b}.b.p{background:#0b6e8a}.b.l{background:#3fa535}.b.c{background:#8a2b2b}.b.s{background:#8a6d0b}
+.d{font-weight:700}
+.empty{text-align:center;color:var(--mut);padding:50px 20px}
+</style></head><body>
+<header><a href="/" aria-label="Retour">←</a><input id="q" placeholder="Rechercher une commande…" oninput="draw()"><a href="/" aria-label="Boutique">🛒</a></header>
+<h1>Mes commandes</h1>
+<div class="tabs"><button id="t0" class="on" onclick="tab(0)">En cours / livrées</button><button id="t1" onclick="tab(1)">Annulées / retournées</button></div>
+<div id="list"></div>
+<script>
+const DB='https://project-f4477c80-7c55-4db7-b2e-default-rtdb.europe-west1.firebasedatabase.app';
+let ALL=[],T=0;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const F=n=>String(Math.round(+n||0)).replace(/\B(?=(\d{3})+(?!\d))/g,' ')+' F';
+const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const LS=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}};
+const me=LS('b_me',null);
+const day=(t,o)=>new Date(t+(o||0)*864e5).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+const dd=t=>{const d=new Date(t);return d.toLocaleDateString('fr-FR',{weekday:'long'})+', '+String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')};
+/* statut -> [étiquette, couleur, onglet] */
+function st(o){const s=norm(o.status);
+ if(/rembours/.test(s))return['Article(s) remboursé(s)','c',1];
+ if(/echec.*paie|paie.*echec/.test(s))return['Annulée - échec du paiement','c',1];
+ if(/echec/.test(s))return['Échec de la livraison','w',1];
+ if(/annul|retour/.test(s))return['Annulée','c',1];
+ if(/livre|livr[ée]e/.test(s)&&!/en livraison|cours/.test(s))return['Colis livré','l',0];
+ if(/pret|recup/.test(s))return['Prêt à récupérer','p',0];
+ if(/exped|en livraison|cours|route/.test(s))return['En livraison','p',0];
+ if(/confirm|valid|prepar/.test(s))return['Confirmée','p',0];
+ return['En attente de confirmation','w',0]}
+async function load(){
+ let L=LS('b_orders',[]);
+ if(me){
+  const urls=['/orders.json?orderBy=%22phone%22&equalTo=%22'+encodeURIComponent(me.phone||'')+'%22','/orders.json'];
+  for(const u of urls){try{const r=await fetch(DB+u);if(!r.ok)continue;const j=await r.json();if(j){L=L.concat(Object.values(j));break}}catch(e){}}
+ }
+ const seen={};
+ ALL=L.filter(o=>o&&o.id&&!seen[o.id]&&(seen[o.id]=1)).filter(o=>!me||o.key===me.key||o.uid&&o.uid===me.uid||o.phone&&o.phone===me.phone||o.email&&o.email===me.email||o.userKey===me.key)
+  .sort((a,b)=>(b.date||0)-(a.date||0));
+ draw()}
+function tab(n){T=n;$('t0').className=n?'':'on';$('t1').className=n?'on':'';draw()}
+function draw(){
+ const q=norm($('q').value);let h='';
+ ALL.forEach(o=>{const[label,cls,tb]=st(o);if(tb!==T)return;
+  const done=/livre/.test(norm(label))&&cls==='l';
+  (o.items||[]).forEach((it,i)=>{
+   if(q&&!norm(it.name+' '+o.id).includes(q))return;
+   const img=it.img||('/api/img?id='+encodeURIComponent(it.id||''));
+   const when=(cls==='l'||tb===1)?dd(o.date||Date.now()):'Livraison prévue entre le '+day(o.date||Date.now(),1)+' et le '+day(o.date||Date.now(),2);
+   h+='<div class="card"><img src="'+esc(img)+'" alt="" onerror="this.onerror=null;this.src=\'/icon-192.png\'">'
+    +'<div class="in"><div class="t">'+esc(it.name)+'</div><div class="m">Commande #'+esc(o.id)+'</div>'
+    +'<div class="m">Quantité : '+esc(it.qty||1)+' · '+F((it.price||0)*(it.qty||1))+'</div>'
+    +'<span class="b '+cls+'">'+esc(label)+'</span><div class="d">'+esc(when)+'</div>'
+    +'</div></div>'});
+ });
+ $('list').innerHTML=h||'<div class="empty">'+(me?'Aucune commande ici pour le moment.':'Connecte-toi sur la boutique pour voir tes commandes.')+'<br><br><a style="color:#ffd700" href="/">← Retour à la boutique</a></div>'}
+load();
+</script></body></html>
