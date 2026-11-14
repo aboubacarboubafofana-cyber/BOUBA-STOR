@@ -1,6 +1,6 @@
 /* BOUBA STORE – « enveloppe » ultra rapide (App Shell) : l'appli s'ouvre instantanément depuis la mémoire du téléphone,
    puis se met à jour en arrière-plan. Un bandeau « Nouvelle version prête » propose d'actualiser. */
-const C='bouba-shell-v10',RT='bouba-ext-v1';
+const C='bouba-shell-v11',RT='bouba-ext-v1';
 const SHELL=['index.html','manifest.json','icon-192.png','icon-512.png','icon-maskable-512.png','bouton.html','amis.html','amis-chat.html','call.html','compte.html','firebase-config.js','bouba-data.js','alertes.js','amis5.js','bouba-chat.js','maj.js','articles-accueil.js',
  'promos.js','features.js','aide.js','fun.js','suite.js','bonus.js','more.js','pro.js','vibes.js','accueil.js','menu.js','monde.js','browser.js','star.js','onboarding.js','stats.js','commandes.js','vitesse.js','republier.js','partage.js'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(C).then(c=>Promise.all(SHELL.map(u=>c.add(new Request(u,{cache:'reload'})).catch(()=>{})))))});
@@ -52,5 +52,5 @@ async function ext(r){
 }
 self.addEventListener('push',e=>{let d={};try{const j=e.data.json();d=Object.assign({},j,j.notification||{},j.data||{})}catch(_){}
 const isCall=d.tag==='bouba-call';
-e.waitUntil(self.registration.showNotification(String(d.title||'BOUBA STORE'),{body:String(d.body||''),icon:'icon-192.png',badge:'icon-192.png',tag:d.tag||'bouba-new',renotify:true,requireInteraction:isCall,vibrate:isCall?[300,150,300,150,300,150,300]:[150],data:{url:d.url||'./'}}))});
+e.waitUntil(self.registration.showNotification(String(d.title||'BOUBA STORE'),{body:String(d.body||''),icon:'icon-192.png',badge:'icon-192.png',tag:d.tag||'bouba-new',renotify:true,requireInteraction:isCall,image:/^https:\/\//.test(d.image||'')?d.image:undefined,vibrate:isCall?[300,150,300,150,300,150,300]:[150],data:{url:d.url||'./'}}))});
 self.addEventListener('notificationclick',e=>{e.notification.close();const u=(e.notification.data&&e.notification.data.url)||'./';e.waitUntil(self.clients.matchAll({type:'window'}).then(l=>{for(const c of l)if('focus' in c)return c.focus();return self.clients.openWindow(u)}))});
