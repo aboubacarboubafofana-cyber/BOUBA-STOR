@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#000000">
+<title>Appel - BOUBA STOR</title>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://download.agora.io" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js">
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{--acc:#d4af37;--red:#e53935;--green:#25D366}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#000;color:#fff;overflow:hidden}
+#stage{position:fixed;inset:0;background:radial-gradient(circle at 50% 30%,#1b1608,#000 70%)}
+#rv{position:absolute;inset:0;width:100%;height:100%;background:#000;opacity:0;overflow:hidden}
+#rv video{object-fit:cover!important}
+body.video.live #rv{opacity:1}
+#lv{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:14px;width:100px;height:144px;border-radius:14px;border:2px solid var(--acc);background:#222;z-index:3;display:none;overflow:hidden}
+body.video #lv{display:block}
+#info{position:absolute;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top,0px) + 60px) 20px 0;text-align:center;z-index:2;transition:opacity .4s}
+#av{width:150px;height:150px;border-radius:50%;margin:0 auto 18px;background:linear-gradient(135deg,var(--acc),#8a6d0b);color:#000;font-size:52px;font-weight:900;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#av img{width:100%;height:100%;object-fit:cover}
+body.ringing #av{animation:pulse 1.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(212,175,55,.5)}100%{box-shadow:0 0 0 34px rgba(212,175,55,0)}}
+#nm{font-size:26px;font-weight:700}
+#st{margin-top:6px;color:#bbb;font-size:15px;padding:0 10px}
+body.video.live #info{opacity:0;pointer-events:none}
+body.video.live #mini{display:block}
+#mini{display:none;position:absolute;top:calc(env(safe-area-inset-top,0px) + 16px);left:16px;z-index:3;background:rgba(0,0,0,.45);padding:6px 12px;border-radius:16px;font-size:14px}
+#bar{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 28px);display:flex;justify-content:center;gap:18px;z-index:4;padding:0 16px}
+#bar button{width:62px;height:62px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:22px;backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center}
+#bar button.off{background:#fff;color:#000}
+#bar #endBtn{background:var(--red);box-shadow:0 6px 22px rgba(229,57,53,.5)}
+#bar .vonly{display:none}
+body.video #bar .vonly{display:flex}
+#inc{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 40px);display:none;justify-content:space-around;z-index:6;padding:0 40px}
+body.incoming #inc{display:flex}
+body.incoming #bar{display:none}
+.big{width:74px;height:74px;border-radius:50%;border:0;font-size:28px;color:#fff;display:flex;align-items:center;justify-content:center}
+.big.yes{background:var(--green)}.big.no{background:var(--red)}
+.lbl{text-align:center;font-size:12px;color:#ccc;margin-top:6px}
+#perm{position:absolute;inset:0;background:rgba(0,0,0,.94);z-index:10;display:none;align-items:center;justify-content:center;flex-direction:column;padding:30px;text-align:center;gap:12px}
+#perm h2{color:var(--acc)}#perm p{color:#aaa;font-size:14px;line-height:1.5}
+#perm button{background:var(--acc);color:#000;border:0;border-radius:12px;padding:13px;font-weight:900;width:100%;max-width:300px;font-size:15px}
+#perm .g{background:transparent;color:#fff;border:1px solid #444}
+#dbg{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 112px);text-align:center;font-size:11px;color:#777;z-index:5}
+#wa{display:none;margin:16px auto 0;background:#25D366;color:#000;border:0;border-radius:24px;padding:12px 18px;font-weight:800;font-size:14px}
+#tap{position:absolute;bottom:130px;left:0;right:0;text-align:center;z-index:5;display:none}
+#tap span{background:var(--acc);color:#000;font-weight:800;padding:9px 16px;border-radius:20px;font-size:13px}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="rv"></div>
+  <div id="lv"></div>
+  <div id="mini"><i class="fas fa-lock" style="color:var(--acc)"></i> <span id="mname"></span> · <span id="mtime">00:00</span></div>
+  <div id="info"><div id="av"></div><h2 id="nm">...</h2><p id="st">Initialisation…</p><button id="wa"></button></div>
+  <div id="dbg"></div>
+  <div id="tap"><span>🔊 Touche l'écran pour activer le son</span></div>
+  <div id="inc">
+    <div><button class="big no" id="noBtn"><i class="fas fa-phone-slash"></i></button><div class="lbl">Refuser</div></div>
+    <div><button class="big yes" id="yesBtn"><i class="fas fa-phone"></i></button><div class="lbl">Décrocher</div></div>
+  </div>
+  <div id="bar">
+    <button id="muteBtn" title="Micro"><i class="fas fa-microphone"></i></button>
+    <button id="camBtn" class="vonly" title="Caméra"><i class="fas fa-video"></i></button>
+    <button id="switchBtn" class="vonly" title="Changer de caméra"><i class="fas fa-camera-rotate"></i></button>
+    <button id="endBtn" title="Terminer"><i class="fas fa-phone-slash"></i></button>
+  </div>
+  <div id="perm">
+    <h2><i class="fas fa-microphone"></i> Autorisation requise</h2>
+    <p>BOUBA STOR a besoin de ton micro (et de ta caméra pour la vidéo).<br>Si le navigateur bloque : touche le cadenas 🔒 en haut → Autoriser, puis réessaie.</p>
+    <button id="permBtn">Autoriser</button>
+    <button class="g" onclick="location.replace('amis.html')">Retour au chat</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, onSnapshot, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const FB_CFG={apiKey:"AIzaSyAnLLXpUC35OleB0hCLUXnLU0lMiesY7j4",authDomain:"project-f4477c80-7c55-4db7-b2e.firebaseapp.com",databaseURL:"https://project-f4477c80-7c55-4db7-b2e-default-rtdb.europe-west1.firebasedatabase.app",projectId:"project-f4477c80-7c55-4db7-b2e",storageBucket:"project-f4477c80-7c55-4db7-b2e.firebasestorage.app",messagingSenderId:"697604298457",appId:"1:697604298457:web:4f9a6d66ec6fde9c1990c8"};
+const db=getFirestore(initializeApp(FB_CFG));
+const $=id=>document.getElementById(id);
+const LS=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}};
+const me=LS('b_me',null);
+if(!me||!me.key) location.replace('index.html');
+const q=new URLSearchParams(location.search);
+const chatIdFor=id=>[me.key,id].sort().join('_');
+const back=id=>location.replace('amis.html'+(id?'#chat='+encodeURIComponent(id):''));
+
+/* ===== SDK Agora : chargé tout de suite, en parallèle du reste ===== */
+const SDK_URLS=['https://download.agora.io/sdk/release/AgoraRTC_N-4.22.0.js','https://download.agora.io/sdk/release/AgoraRTC_N-4.20.0.js','https://download.agora.io/sdk/release/AgoraRTC_N-4.18.2.js'];
+const sdkReady=new Promise(res=>{let i=0;const next=()=>{ if(window.AgoraRTC) return res(true); if(i>=SDK_URLS.length) return res(false); const s=document.createElement('script'); s.src=SDK_URLS[i++]; s.onload=()=>window.AgoraRTC?res(true):next(); s.onerror=next; document.head.appendChild(s) }; next()});
+
+let friendId=null, friendPhone='', callRef=null, video=q.get('video')==='true', isCaller=false, ended=false, connectedAt=0, timerId=null, startedWithAnswer=false;
+let client=null, aT=null, vT=null, camIdx=0, remoteJoined=false;
+
+/* ===== Sonnerie UNIQUE (la même pour tous, répétée jusqu'au décrochage) ===== */
+const Ring=(function(){let ctx=null,timer=null,on=false;
+ function burst(t){const g=ctx.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.4,t+.03);g.gain.setValueAtTime(.4,t+.37);g.gain.linearRampToValueAtTime(0,t+.4);g.connect(ctx.destination);[440,480].forEach(f=>{const o=ctx.createOscillator();o.type='sine';o.frequency.value=f;o.connect(g);o.start(t);o.stop(t+.42)})}
+ function cycle(){if(!on||!ctx)return;const t=ctx.currentTime+.05;burst(t);burst(t+.6);try{navigator.vibrate&&navigator.vibrate([400,200,400])}catch(e){}}
+ return{start(){if(on)return;on=true;try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();if(ctx.resume)ctx.resume()}catch(e){return}cycle();timer=setInterval(cycle,3000)},
+  stop(){on=false;clearInterval(timer);try{navigator.vibrate&&navigator.vibrate(0)}catch(e){}}}})();
+const ringOn=v=>v?Ring.start():Ring.stop();
+
+const setSt=t=>{$('st').textContent=t};
+const setDbg=t=>{$('dbg').textContent=t};
+function setBody(c){document.body.className=(video?'video ':'')+(c||'')}
+const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+document.addEventListener('click',()=>{$('tap').style.display='none'});
+
+async function loadFriend(id){
+  friendId=id;
+  let u={}; try{ u=await (await fetch(FB_CFG.databaseURL+'/users/'+encodeURIComponent(id)+'.json')).json()||{} }catch(e){}
+  const name=u.name||'Contact', ph=u.av||u.photo||''; friendPhone=u.phone||u.tel||id;
+  $('nm').textContent=name; $('mname').textContent=name;
+  $('av').innerHTML=/^data:image\//.test(ph)?'<img src="'+ph+'">':String(name).trim().slice(0,2).toUpperCase();
+}
+
+/* ===== journal d'appel dans le chat ===== */
+async function logCall(status){
+  if(!isCaller||!friendId) return;
+  try{
+    const cid=chatIdFor(friendId), dur=connectedAt?Math.round((Date.now()-connectedAt)/1000):0;
+    await setDoc(doc(db,'chats',cid),{participants:[me.key,friendId]},{merge:true});
+    await addDoc(collection(db,'chats',cid,'messages'),{callLog:true,callType:video?'video':'voice',callStatus:status,duration:dur,senderId:me.key,timestamp:serverTimestamp()});
+    await setDoc(doc(db,'chats',cid),{lastText:(video?'📹 Appel vidéo':'📞 Appel vocal')+(status==='missed'?' manqué':''),lastAt:serverTimestamp(),['unread.'+friendId]:status==='ended'?0:increment(1)},{merge:true});
+  }catch(e){}
+}
+
+/* ===== MÉDIA : Agora (relais mondial, passe sur tous les réseaux) ===== */
+async function makeTracks(AR){
+  const aCfg={AEC:true,ANS:true,AGC:true};
+  try{
+    if(video){ const r=await AR.createMicrophoneAndCameraTracks(aCfg,'720p_2'); aT=r[0]; vT=r[1]; }
+    else { aT=await AR.createMicrophoneAudioTrack(aCfg); }
+  }catch(e){
+    console.error(e);
+    if(video&&e&&e.code!=='PERMISSION_DENIED'&&e.name!=='NotAllowedError'){ try{ aT=await AR.createMicrophoneAudioTrack(aCfg); vT=null; video=false; setBody('ringing'); }catch(e2){ $('perm').style.display='flex'; return false } }
+    else { $('perm').style.display='flex'; return false }
+  }
+  if(vT) vT.play($('lv'),{mirror:true,fit:'cover'});
+  return true;
+}
+async function joinCall(channel){
+  const ok=await sdkReady; if(!ok) throw new Error('Service d\'appel indisponible (réseau)');
+  const AR=window.AgoraRTC; try{AR.setLogLevel(3)}catch(e){}
+  AR.onAutoplayFailed=()=>{ $('tap').style.display='block' };
+  client=AR.createClient({mode:'rtc',codec:'vp8'});
+  client.on('user-published',async(user,type)=>{
+    try{ await client.subscribe(user,type) }catch(e){ return }
+    if(type==='video'&&user.videoTrack) user.videoTrack.play($('rv'),{fit:'cover'});
+    if(type==='audio'&&user.audioTrack) user.audioTrack.play();
+    onRemote();
+  });
+  client.on('user-joined',()=>onRemote());
+  client.on('user-left',()=>{ if(remoteJoined) hangup('Appel terminé'); });
+  client.on('connection-state-change',(cur)=>{ setDbg('connexion : '+cur); if(cur==='DISCONNECTED'&&!ended&&remoteJoined) setTimeout(()=>{ if(client&&client.connectionState==='DISCONNECTED') finish('Connexion perdue','ended') },6000) });
+  const tokenP=fetch('/api/agora?channel='+encodeURIComponent(channel)+'&key='+encodeURIComponent(me.key)).then(r=>r.json());
+  const [t,mediaOk]=await Promise.all([tokenP,makeTracks(AR)]);
+  if(!mediaOk) return false;
+  if(!t||!t.token) throw new Error((t&&t.error)||'jeton Agora indisponible');
+  await client.join(t.appId,channel,t.token,null);
+  await client.publish([aT,vT].filter(Boolean));
+  return true;
+}
+function onRemote(){
+  if(remoteJoined) return; remoteJoined=true;
+  ringOn(false); connectedAt=Date.now(); setBody('live'); setSt('00:00');
+  timerId=setInterval(()=>{const s=Math.round((Date.now()-connectedAt)/1000);setSt(fmt(s));$('mtime').textContent=fmt(s)},1000);
+}
+
+/* ===== APPELANT ===== */
+async function startCall(id){
+  isCaller=true; setBody('ringing'); setSt('Appel…');
+  callRef=doc(collection(db,'calls'));
+  const saved=setDoc(callRef,{from:me.key,to:id,fromName:me.name||'Moi',video,status:'ringing',createdAt:Date.now()});
+  /* l'ami est prévenu tout de suite, même application fermée */
+  fetch('/api/push',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({act:'to',kind:'call',fromKey:me.key,toKey:id,title:me.name||'BOUBA STOR',body:video?'📹 Appel vidéo entrant…':'📞 Appel vocal entrant…',callId:callRef.id,url:'call.html?answer='+callRef.id})})
+    .then(r=>r.json()).then(j=>{ if(j&&j.sent===0&&!ended&&!remoteJoined) setSt("Appel… (cet ami n'a pas activé les notifications : il ne verra l'appel que s'il a le chat ouvert)") }).catch(()=>{});
+  addDoc(collection(db,'notifications'),{toUid:id,title:me.name||'BOUBA STOR',body:video?'📹 Appel vidéo entrant':'📞 Appel vocal entrant',url:'call.html?answer='+callRef.id,type:'call',fromUid:me.key,createdAt:serverTimestamp()}).catch(()=>{});
+  loadFriend(id);
+  await saved; ringOn(true);
+  onSnapshot(callRef,s=>{ const d=s.data(); if(!d) return;
+    if(d.status==='declined') finish('Appel refusé','declined');
+    if(d.status==='ended') finish('Appel terminé','ended');
+  });
+  /* secours : si l'ami ne répond pas, on lui envoie le lien d'appel par WhatsApp (1 clic pour lui) */
+  setTimeout(()=>{ if(!remoteJoined&&!ended){ const b=$('wa'); b.textContent='📲 Prévenir '+($('nm').textContent||'mon ami')+' sur WhatsApp'; b.style.display='block';
+    b.onclick=()=>{ const d=String(friendPhone||'').replace(/\D/g,''); const num=d.length===10?'225'+d:d; const link=location.origin+'/call.html?answer='+callRef.id;
+      window.open('https://wa.me/'+num+'?text='+encodeURIComponent('📞 '+(me.name||'Un ami')+' t\'appelle sur BOUBA STOR ('+(video?'vidéo':'vocal')+'). Touche pour décrocher :\n'+link),'_blank') } } },9000);
+  try{ const ok=await joinCall(callRef.id); if(!ok){ try{await updateDoc(callRef,{status:'ended'})}catch(e){} return } }
+  catch(e){ console.error(e); setSt('Erreur : '+(e.message||e)); try{await updateDoc(callRef,{status:'ended'})}catch(x){} setTimeout(()=>finish('Appel impossible','missed'),3000); return }
+  setTimeout(async()=>{ if(!remoteJoined&&!ended){ try{await updateDoc(callRef,{status:'missed'})}catch(e){} finish('Pas de réponse','missed') } },45000);
+}
+
+/* ===== APPELÉ ===== */
+async function prepareAnswer(callId){
+  callRef=doc(db,'calls',callId);
+  let s=await getDoc(callRef); if(!s.exists()){ await new Promise(r=>setTimeout(r,700)); s=await getDoc(callRef); }
+  if(!s.exists()) return finish('Appel introuvable','ended',true);
+  const d=s.data(); video=!!d.video;
+  await loadFriend(d.from);
+  if(d.status!=='ringing'&&d.status!=='active') return finish('Appel terminé','ended',true);
+  if(q.get('auto')==='1') return accept();
+  setBody('incoming ringing'); setSt(video?'Appel vidéo entrant':'Appel vocal entrant'); ringOn(true);
+  $('yesBtn').onclick=()=>accept(); $('noBtn').onclick=async()=>{ try{await updateDoc(callRef,{status:'declined'})}catch(e){} finish('Refusé','declined',true) };
+  onSnapshot(callRef,x=>{ const z=x.data(); if(z&&['ended','missed','declined'].includes(z.status)&&!startedWithAnswer) finish('Appel manqué','missed',true) });
+}
+async function accept(){
+  startedWithAnswer=true; ringOn(false); setBody('ringing'); setSt('Connexion…');
+  try{
+    const ok=await joinCall(callRef.id); if(!ok) return;
+    updateDoc(callRef,{status:'active'}).catch(()=>{});
+    onSnapshot(callRef,x=>{ const z=x.data(); if(z&&z.status==='ended') finish('Appel terminé','ended') });
+    setTimeout(()=>{ if(!remoteJoined&&!ended) setSt('Connexion difficile…') },12000);
+  }catch(e){ console.error(e); setSt('Erreur : '+(e.message||e)); setTimeout(()=>finish('Appel impossible','ended'),3000) }
+}
+
+/* ===== FIN ===== */
+async function leave(){
+  try{ aT&&aT.close() }catch(e){} try{ vT&&vT.close() }catch(e){}
+  try{ client&&await client.leave() }catch(e){}
+}
+function finish(msg,status,quick){
+  if(ended) return; ended=true; ringOn(false); clearInterval(timerId);
+  setBody(''); setSt(msg); leave();
+  logCall(status).finally(()=>setTimeout(()=>back(friendId),quick?500:1400));
+}
+async function hangup(msg){ try{ if(callRef) await updateDoc(callRef,{status:'ended'}) }catch(e){} finish(msg||'Appel terminé', connectedAt?'ended':'missed') }
+$('endBtn').onclick=()=>hangup();
+$('permBtn').onclick=async()=>{try{const s=await navigator.mediaDevices.getUserMedia({audio:true,video});s.getTracks().forEach(t=>t.stop());location.reload()}catch(e){alert('Permission refusée. Touche le cadenas 🔒 en haut du navigateur pour autoriser.')}};
+
+$('muteBtn').onclick=async e=>{ if(!aT) return; const on=aT.enabled; await aT.setEnabled(!on); e.currentTarget.classList.toggle('off',on); e.currentTarget.innerHTML='<i class="fas fa-microphone'+(on?'-slash':'')+'"></i>' };
+$('camBtn').onclick=async e=>{ if(!vT) return; const on=vT.enabled; await vT.setEnabled(!on); e.currentTarget.classList.toggle('off',on); e.currentTarget.innerHTML='<i class="fas fa-video'+(on?'-slash':'')+'"></i>' };
+$('switchBtn').onclick=async()=>{ try{ if(!vT) return; const cams=await window.AgoraRTC.getCameras(); if(cams.length<2) return; camIdx=(camIdx+1)%cams.length; await vT.setDevice(cams[camIdx].deviceId) }catch(e){} };
+window.addEventListener('beforeunload',()=>{ if(callRef&&!ended&&remoteJoined) updateDoc(callRef,{status:'ended'}).catch(()=>{}) });
+
+/* ===== Démarrage ===== */
+(async()=>{
+  try{
+    setBody('');
+    if(q.get('decline')){ try{await updateDoc(doc(db,'calls',q.get('decline')),{status:'declined'})}catch(e){} return back() }
+    if(q.get('call')){ setBody(video?'video ringing':'ringing'); await startCall(q.get('call')) }
+    else if(q.get('answer')){ await prepareAnswer(q.get('answer')) }
+    else { setSt('Aucun appel'); setTimeout(()=>back(),1200) }
+  }catch(e){ console.error(e); setSt('Erreur : '+(e&&(e.name||e.message)||e)) }
+})();
+</script>
+</body>
+</html>
