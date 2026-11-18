@@ -564,12 +564,36 @@ function shareNet(n){
 function shareNative(){
  shareRich({card:{name:shopN(),shop:'Mode, vêtements & accessoires'},title:shopN(),text:'Découvre '+shopN()+' 👑\nMode, vêtements & accessoires · Livraison 24h à Abidjan · Wave, Orange Money, WhatsApp',link:siteUrl()});
 }
-function shareProd(id){
- const p=(S.products||{})[id];if(!p)return;
- const lienPartage = location.origin + '/api/p?id=' + encodeURIComponent(id);
- const texte = 'Regarde cet article sur ' + shopN() + ' 👑\n' + p.name + ' — ' + fmt(p.price) + ' F\n\nCommande ici : ' + lienPartage;
- window.open('https://wa.me/?text=' + encodeURIComponent(texte), '_blank');
- }
+async function shareProd(id){
+  const p=(S.products||{})[id];if(!p)return;
+  const texte = p.name + ' — ' + fmt(p.price) + ' F 👑 ' + shopN() + '\nLivraison 24h à Abidjan · Wave, Orange Money, WhatsApp';
+  
+  try {
+    // On prépare l'image du produit
+    const res = await fetch(p.img);
+    const blob = await res.blob();
+    const file = new File([blob], "produit.jpg", { type: blob.type || "image/jpeg" });
+
+    // On vérifie si le téléphone peut partager une image + texte
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: p.name,
+        text: texte
+      });
+    } else {
+      // Si le téléphone est ancien, on envoie le lien
+      const lien = location.origin + '/api/p?id=' + encodeURIComponent(id);
+      window.open('https://wa.me/?text=' + encodeURIComponent(texte + '\n\nCommande ici : ' + lien), '_blank');
+    }
+  } catch (err) {
+    // Si l'utilisateur annule, on ne fait rien. Sinon on envoie le lien de secours.
+    if (err.name !== 'AbortError') {
+      const lien = location.origin + '/api/p?id=' + encodeURIComponent(id);
+      window.open('https://wa.me/?text=' + encodeURIComponent(texte + '\n\nCommande ici : ' + lien), '_blank');
+    }
+  }
+}
 
 function addShare(){
  document.querySelectorAll('#grid .card').forEach(c=>{
