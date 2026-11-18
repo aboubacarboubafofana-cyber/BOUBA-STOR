@@ -1,6 +1,10 @@
 {
-  "name": "bouba-stor", 
+  "name": "bouba-stor",
+  "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
     "agora-token": "^2.0.3",
     "firebase-admin": "^12.0.0",
