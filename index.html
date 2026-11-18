@@ -565,34 +565,94 @@ function shareNative(){
  shareRich({card:{name:shopN(),shop:'Mode, vêtements & accessoires'},title:shopN(),text:'Découvre '+shopN()+' 👑\nMode, vêtements & accessoires · Livraison 24h à Abidjan · Wave, Orange Money, WhatsApp',link:siteUrl()});
 }
 async function shareProd(id){
-  const p=(S.products||{})[id];if(!p)return;
-  const texte = p.name + ' — ' + fmt(p.price) + ' F 👑 ' + shopN() + '\nLivraison 24h à Abidjan · Wave, Orange Money, WhatsApp';
-  
-  try {
-    // On prépare l'image du produit
-    const res = await fetch(p.img);
-    const blob = await res.blob();
-    const file = new File([blob], "produit.jpg", { type: blob.type || "image/jpeg" });
+ const p=(S.products||{})[id];if(!p)return;
+ toast('⏳ Création de l\'affiche pro...');
+ 
+ // 1. On crée le canevas (l'affiche) de 1080x1080
+ const canvas = document.createElement('canvas');
+ canvas.width = 1080;
+ canvas.height = 1080;
+ const ctx = canvas.getContext('2d');
 
-    // On vérifie si le téléphone peut partager une image + texte
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: p.name,
-        text: texte
-      });
-    } else {
-      // Si le téléphone est ancien, on envoie le lien
-      const lien = location.origin + '/api/p?id=' + encodeURIComponent(id);
-      window.open('https://wa.me/?text=' + encodeURIComponent(texte + '\n\nCommande ici : ' + lien), '_blank');
-    }
-  } catch (err) {
-    // Si l'utilisateur annule, on ne fait rien. Sinon on envoie le lien de secours.
-    if (err.name !== 'AbortError') {
-      const lien = location.origin + '/api/p?id=' + encodeURIComponent(id);
-      window.open('https://wa.me/?text=' + encodeURIComponent(texte + '\n\nCommande ici : ' + lien), '_blank');
-    }
-  }
+ // Fond noir
+ ctx.fillStyle = '#0a0a0a';
+ ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+ // Bordure dorée
+ ctx.strokeStyle = '#FFD700';
+ ctx.lineWidth = 12;
+ ctx.strokeRect(25, 25, canvas.width - 50, canvas.height - 50);
+
+ // En-tête : BOUBA STOR
+ ctx.fillStyle = '#FFD700';
+ ctx.font = 'bold 65px Arial';
+ ctx.textAlign = 'center';
+ ctx.fillText('BOUBA STOR', canvas.width / 2, 120);
+
+ // Ligne dorée sous l'en-tête
+ ctx.beginPath();
+ ctx.moveTo(200, 160);
+ ctx.lineTo(880, 160);
+ ctx.stroke();
+
+ // 2. On charge l'image du produit
+ const img = new Image();
+ img.crossOrigin = "anonymous"; // Très important pour éviter les bugs
+ img.src = p.img;
+
+ img.onload = async () => {
+   // Dessiner l'image du produit au centre (garder les proportions)
+   const maxW = 800, maxH = 500;
+   let w = img.width, h = img.height;
+   if (w > maxW) { h = h * (maxW / w); w = maxW; }
+   if (h > maxH) { w = w * (maxH / h); h = maxH; }
+   ctx.drawImage(img, (1080 - w) / 2, 200, w, h);
+
+   // 3. Ajouter le nom du produit
+   ctx.fillStyle = '#FFFFFF';
+   ctx.font = 'bold 55px Arial';
+   let nom = p.name;
+   if (nom.length > 30) nom = nom.substring(0, 27) + '...';
+   ctx.fillText(nom, canvas.width / 2, 780);
+
+   // 4. Ajouter le prix en gros
+   ctx.fillStyle = '#FFD700';
+   ctx.font = 'bold 85px Arial';
+   ctx.fillText(fmt(p.price) + ' FCFA', canvas.width / 2, 890);
+
+   // 5. Ajouter le bas de page
+   ctx.fillStyle = '#AAAAAA';
+   ctx.font = '35px Arial';
+   ctx.fillText('Livraison 24h à Abidjan • Wave • Orange Money', canvas.width / 2, 980);
+
+   // 6. Transformer le dessin en image
+   canvas.toBlob(async (blob) => {
+     const file = new File([blob], "affiche-bouba-stor.jpg", { type: "image/jpeg" });
+     const texte = p.name + ' — ' + fmt(p.price) + ' F 👑 BOUBA STOR\nCommandez ici : ' + location.origin + '/api/p?id=' + encodeURIComponent(id);
+
+     // 7. Partager sur WhatsApp
+     if (navigator.canShare && navigator.canShare({ files: [file] })) {
+       try {
+         await navigator.share({
+           files: [file],
+           title: p.name,
+           text: texte
+         });
+       } catch (err) {
+         if (err.name !== 'AbortError') alert("Erreur de partage");
+       }
+     } else {
+       // Si le téléphone est vieux, on ouvre WhatsApp avec juste le texte
+       window.open('https://wa.me/?text=' + encodeURIComponent(texte), '_blank');
+     }
+   }, 'image/jpeg', 0.9);
+ };
+
+ img.onerror = () => {
+   toast('❌ Impossible de créer l\'affiche. Partage du lien simple.');
+   const lien = location.origin + '/api/p?id=' + encodeURIComponent(id);
+   window.open('https://wa.me/?text=' + encodeURIComponent(p.name + ' - ' + fmt(p.price) + ' F\n' + lien), '_blank');
+ };
 }
 
 function addShare(){
