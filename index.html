@@ -564,10 +564,12 @@ function shareNet(n){
 function shareNative(){
  shareRich({card:{name:shopN(),shop:'Mode, vêtements & accessoires'},title:shopN(),text:'Découvre '+shopN()+' 👑\nMode, vêtements & accessoires · Livraison 24h à Abidjan · Wave, Orange Money, WhatsApp',link:siteUrl()});
 }
-async function shareProd(id){
+function shareProd(id){
  const p=(S.products||{})[id];if(!p)return;
- await shareRich({id,card:{name:p.name,price:p.price,shop:shopN(),cat:p.cat},title:p.name,text:p.name+' — '+fmt(p.price)+' F 👑 '+shopN()+'\nLivraison 24h à Abidjan · Wave, Orange Money, WhatsApp',img:p.img});
-}
+ const lienPartage = location.origin + '/api/p?id=' + encodeURIComponent(id);
+ const texte = 'Regarde cet article sur ' + shopN() + ' 👑\n' + p.name + ' — ' + fmt(p.price) + ' F\n\nCommande ici : ' + lienPartage;
+ window.open('https://wa.me/?text=' + encodeURIComponent(texte), '_blank');
+ }
 
 function addShare(){
  document.querySelectorAll('#grid .card').forEach(c=>{
