@@ -564,9 +564,24 @@ function shareNet(n){
 function shareNative(){
  shareRich({card:{name:shopN(),shop:'Mode, vêtements & accessoires'},title:shopN(),text:'💝 Découvre '+shopN()+' ❤️ La mode qui fait battre le cœur\nMode, vêtements & accessoires · Livraison 24h à Abidjan · Wave, Orange Money, WhatsApp',link:siteUrl()});
 }
-async function shareProd(id){
+function shareProd(id){
  const p=(S.products||{})[id];if(!p)return;
- await shareRich({id,card:{name:p.name,price:p.price,shop:shopN(),cat:p.cat},title:p.name,text:p.name+' — '+fmt(p.price)+' F 👑 '+shopN()+'\nLivraison 24h à Abidjan · Wave, Orange Money, WhatsApp',img:p.img});
+ 
+ // On utilise l'API /api/p pour que WhatsApp génère l'affiche avec les boutons
+ const lien = location.origin + '/api/p?id=' + encodeURIComponent(id);
+ const texte = p.name + ' — ' + fmt(p.price) + ' F 👑 ' + shopN() + '\nLivraison 24h à Abidjan · Wave, Orange Money, WhatsApp';
+ 
+ if (navigator.share) {
+   // Partage natif du lien
+   navigator.share({
+     title: p.name,
+     text: texte,
+     url: lien
+   }).catch(() => {});
+ } else {
+   // Solution de secours pour les vieux navigateurs
+   window.open('https://wa.me/?text=' + encodeURIComponent(texte + '\n\nCommander ici : ' + lien), '_blank');
+ }
 }
 
 function addShare(){
