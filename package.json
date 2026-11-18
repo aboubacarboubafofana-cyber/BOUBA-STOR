@@ -1,5 +1,5 @@
 {
-  "name": "bouba-stor",
+  "name": "bouba-stor", 
   "private": true,
   "dependencies": {
     "agora-token": "^2.0.3",
