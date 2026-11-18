@@ -27,11 +27,18 @@ module.exports=async(req,res)=>{
  const rawImg=origin+'/api/img?id='+encodeURIComponent(id)+(a.date?'&v='+a.date:'');
  const url=origin+'/api/p?id='+encodeURIComponent(id);
  const shopLink=origin+'/index.html?a='+encodeURIComponent(id);
+ 
+ // Préparation du lien WhatsApp
+ const tel=String(a.phone||'').replace(/[^\d+]/g,'');
+ const waNum = tel ? tel.replace(/\D/g,'') : '2250787619717'; // Utilise le numéro du vendeur ou celui par défaut
+ const waMsg = encodeURIComponent('Bonjour, je suis intéressé par l\'article : ' + a.name + ' (' + money(a.price) + ')');
+ const waLink = 'https://wa.me/' + waNum + '?text=' + waMsg;
+
  const ld=JSON.stringify({'@context':'https://schema.org','@type':'Product',name:a.name,image:rawImg,
   description:(a.desc||a.name+' chez '+shop),brand:{'@type':'Brand',name:shop},
   offers:{'@type':'Offer',url:url,priceCurrency:'XOF',price:String(Math.round(Number(a.price)||0)),
   availability:'https://schema.org/InStock',itemCondition:'https://schema.org/NewCondition'}}).replace(/</g,'\\u003c');
- const tel=String(a.phone||'').replace(/[^\d+]/g,'');
+ 
  res.setHeader('Content-Type','text/html; charset=utf-8');
  res.setHeader('Cache-Control','public, s-maxage=300, stale-while-revalidate=3600');
  res.status(200).send('<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">'
@@ -47,17 +54,30 @@ module.exports=async(req,res)=>{
  +'<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="'+title+'">'
  +'<meta name="twitter:description" content="'+desc+'"><meta name="twitter:image" content="'+esc(img)+'">'
  +'<script type="application/ld+json">'+ld+'</script>'
- +'<style>body{margin:0;background:#000;color:#fff;font-family:system-ui,sans-serif}main{max-width:520px;margin:0 auto;padding:16px}'
- +'img{width:100%;border-radius:14px;border:1px solid #ffd700;background:#111}h1{font-size:22px;margin:14px 0 4px}'
- +'.p{color:#ffd700;font-size:26px;font-weight:800;margin:4px 0}.s{color:#bbb;margin:4px 0 14px}'
- +'a.b{display:block;text-align:center;padding:14px;border-radius:12px;font-weight:800;text-decoration:none;margin:10px 0}'
- +'.y{background:#ffd700;color:#000}.g{border:1px solid #ffd700;color:#ffd700}</style></head><body><main>'
+ +'<style>'
+ +'body{margin:0;background:#000;color:#fff;font-family:system-ui,sans-serif}'
+ +'main{max-width:520px;margin:0 auto;padding:16px}'
+ +'img{width:100%;border-radius:14px;border:1px solid #ffd700;background:#111}'
+ +'h1{font-size:22px;margin:14px 0 4px}'
+ +'.p{color:#ffd700;font-size:26px;font-weight:800;margin:4px 0}'
+ +'.s{color:#bbb;margin:4px 0 14px}'
+ +'/* CSS pour les 2 boutons côte à côte */'
+ +'.btns-row{display:flex;gap:10px;margin-top:20px;margin-bottom:20px}'
+ +'.btns-row a{flex:1;display:flex;align-items:center;justify-content:center;padding:14px;border-radius:12px;font-weight:800;text-decoration:none;text-align:center;font-size:14px}'
+ +'.btn-site{background:#ffd700;color:#000}'
+ +'.btn-wa{background:#25D366;color:#fff}'
+ +'</style></head><body><main>'
  +'<div style="color:#ffd700;font-weight:800;margin-bottom:10px">BOUBA STORE</div>'
  +'<img src="'+esc(rawImg)+'" alt="'+esc(a.name)+'" onerror="this.onerror=null;this.src=\'/icon-512.png\'">'
  +'<h1>'+esc(a.name)+'</h1><div class="p">'+money(a.price)+'</div>'
  +'<div class="s">Vendu par '+esc(shop)+(a.cat?' · '+esc(a.cat):'')+'</div>'
- +(a.desc?'<p>'+esc(a.desc)+'</p>':'')
- +'<a class="b y" href="'+esc(shopLink)+'">🛒 Commander dans la boutique</a>'
- +(tel?'<a class="b g" href="tel:'+esc(tel)+'">📞 Appeler le vendeur</a>':'')
+ +(a.desc?'<p style="color:#ccc;font-size:14px;line-height:1.5;">'+esc(a.desc)+'</p>':'')
+ 
+ // Les 2 boutons côte à côte
+ +'<div class="btns-row">'
+ +'  <a class="btn-site" href="'+esc(shopLink)+'">🛒 Commander sur le site</a>'
+ +'  <a class="btn-wa" href="'+waLink+'" target="_blank">💬 Commander sur WhatsApp</a>'
+ +'</div>'
+ 
  +'</main></body></html>');
 };
