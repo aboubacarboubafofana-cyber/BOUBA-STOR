@@ -1,29 +1,8 @@
 {
   "rewrites": [
-    { "source": "/p/:id", "destination": "/api/p?id=:id" },
-    { "source": "/b/:id", "destination": "/api/b?id=:id" },
-    { "source": "/api/push", "destination": "/api/notifications?_route=push" },
-    { "source": "/api/notify", "destination": "/api/notifications?_route=notify" },
-    { "source": "/api/onesignal", "destination": "/api/notifications?_route=onesignal" },
-    { "source": "/api/mes-commandes", "destination": "/api/orders?_route=mes" },
-    { "source": "/api/shop-orders", "destination": "/api/orders?_route=shop" },
-    { "source": "/api/admin", "destination": "/api/system?_route=admin" },
-    { "source": "/api/social", "destination": "/api/system?_route=social" },
-    { "source": "/api/produits.xml", "destination": "/api/feed" },
-    { "source": "/api/produits", "destination": "/api/feed" }
-  ],
-  "headers": [
     {
-      "source": "/sitemap.xml",
-      "headers": [
-        { "key": "Content-Type", "value": "application/xml" }
-      ]
-    },
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=0, s-maxage=86400, stale-while-revalidate=86400" }
-      ]
+      "source": "/api/:path*",
+      "destination": "/api/index"
     }
   ]
 }
