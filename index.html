@@ -566,24 +566,14 @@ function shareNative(){
 }
 function shareProd(id){
  const p=(S.products||{})[id];if(!p)return;
- 
- // On utilise l'API /api/p pour que WhatsApp génère l'affiche avec les boutons
  const lien = location.origin + '/api/p?id=' + encodeURIComponent(id);
- const texte = p.name + ' — ' + fmt(p.price) + ' F 👑 ' + shopN() + '\nLivraison 24h à Abidjan · Wave, Orange Money, WhatsApp';
- 
+ const texte = p.name + ' — ' + fmt(p.price) + ' F 👑 ' + shopN() + '\nLivraison 24h à Abidjan';
  if (navigator.share) {
-   // Partage natif du lien
-   navigator.share({
-     title: p.name,
-     text: texte,
-     url: lien
-   }).catch(() => {});
+   navigator.share({ title: p.name, text: texte, url: lien }).catch(() => {});
  } else {
-   // Solution de secours pour les vieux navigateurs
-   window.open('https://wa.me/?text=' + encodeURIComponent(texte + '\n\nCommander ici : ' + lien), '_blank');
+   window.open('https://wa.me/?text=' + encodeURIComponent(texte + '\n\n' + lien), '_blank');
  }
 }
-
 function addShare(){
  document.querySelectorAll('#grid .card').forEach(c=>{
   if(c.querySelector('.shb'))return;
