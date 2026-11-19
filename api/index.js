@@ -2,15 +2,15 @@
 module.exports = async (req, res) => {
   // On récupère le chemin demandé (ex: /api/p, /api/img, etc.)
   const url = new URL(req.url, `http://${req.headers.host}`);
-  const path = url.pathname.replace(/^\/api\//, '').split('/')[0]; // Récupère le premier segment
+  // On extrait le nom de la fonction (ex: 'p' ou 'img')
+  const path = url.pathname.replace(/^\/api\//, '').split('/')[0] || 'index';
 
   try {
-    // On charge dynamiquement le bon fichier de logique depuis le dossier _lib
-    const handler = require(`./_lib/${path}.js`);
-    // On exécute la logique avec les objets req et res de Vercel
+    // On va chercher le fichier correspondant DANS le dossier 'lib'
+    const handler = require(`./lib/${path}.js`);
     return await handler(req, res);
   } catch (e) {
-    console.error(`Route /api/${path} introuvable ou erreur:`, e);
+    console.error(`Route /api/${path} introuvable:`, e.message);
     return res.status(404).json({ error: `Route /api/${path} introuvable` });
   }
 };
