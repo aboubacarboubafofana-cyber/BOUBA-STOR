@@ -2,11 +2,9 @@
   "name": "bouba-stor",
   "version": "1.0.0",
   "private": true,
-  "engines": {
-    "node": "22.x"
-  },
   "dependencies": {
-    "agora-token": "^2.0.3",
-    "sharp": "^0.34.5"
+    "sharp": "^0.33.5",
+    "opentype.js": "^1.3.4",
+    "@fontsource/roboto": "^5.0.8"
   }
 }
