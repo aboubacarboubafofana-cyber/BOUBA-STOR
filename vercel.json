@@ -1,8 +1,11 @@
 {
   "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/index"
+    { "source": "/api/:path*", "destination": "/api/index" }
+  ],
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "{api/lib/**,node_modules/@fontsource/roboto/files/roboto-latin-700-normal.woff}",
+      "maxDuration": 10
     }
-  ]
+  }
 }
