@@ -1,10 +1,19 @@
+// Routeur unique (plan gratuit) : /api/xxx  ->  api/lib/xxx.js
+const fs = require('fs');
+const path = require('path');
 module.exports = async (req, res) => {
-  const url = new URL(req.url, `http://${req.headers.host}`);
-  const path = url.pathname.replace(/^\/api\//, '').split('/')[0] || 'index';
-  try {
-    const handler = require(`./lib/${path}.js`);
-    return await handler(req, res);
-  } catch (e) {
-    return res.status(404).json({ error: `Route /api/${path} introuvable` });
+  const url = new URL(req.url, 'http://' + (req.headers.host || 'localhost'));
+  const name = url.pathname.replace(/^\/api\/?/, '').split('/')[0] || 'index';
+  // noms simples uniquement : pas de "..", pas de fichier interne (_art)
+  if (!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(name) || name === 'index') return res.status(404).json({ error: 'Route /api/' + name + ' introuvable' });
+  const file = path.join(__dirname, 'lib', name + '.js');
+  if (!fs.existsSync(file)) return res.status(404).json({ error: 'Route /api/' + name + ' introuvable' });
+  let handler;
+  try { handler = require(file); if (typeof handler !== 'function') handler = handler.default; } catch (e) {
+    console.error('Chargement /api/' + name + ' impossible :', e); return res.status(500).json({ error: 'Erreur interne' });
+  }
+  try { return await handler(req, res); } catch (e) {
+    console.error('Erreur /api/' + name + ' :', e);
+    if (!res.headersSent) return res.status(500).json({ error: 'Erreur interne' });
   }
 };
