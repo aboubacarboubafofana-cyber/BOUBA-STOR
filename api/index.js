@@ -1,4 +1,4 @@
-// Routeur unique (plan gratuit) : /api/xxx  ->  api/lib/xxx.js
+// Routeur unique (plan gratuit) : /api/xxx  ->  api/_lib/xxx.js
 const fs = require('fs');
 const path = require('path');
 module.exports = async (req, res) => {
@@ -6,7 +6,7 @@ module.exports = async (req, res) => {
   const name = url.pathname.replace(/^\/api\/?/, '').split('/')[0] || 'index';
   // noms simples uniquement : pas de "..", pas de fichier interne (_art)
   if (!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(name) || name === 'index') return res.status(404).json({ error: 'Route /api/' + name + ' introuvable' });
-  const file = path.join(__dirname, 'lib', name + '.js');
+  const file = path.join(__dirname, '_lib', name + '.js');
   if (!fs.existsSync(file)) return res.status(404).json({ error: 'Route /api/' + name + ' introuvable' });
   let handler;
   try { handler = require(file); if (typeof handler !== 'function') handler = handler.default; } catch (e) {
