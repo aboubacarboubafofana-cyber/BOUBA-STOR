@@ -4,7 +4,7 @@
   ],
   "functions": {
     "api/index.js": {
-      "includeFiles": "{api/lib/**,node_modules/@fontsource/roboto/files/roboto-latin-700-normal.woff}",
+      "includeFiles": "{api/_lib/**,node_modules/@fontsource/roboto/files/roboto-latin-700-normal.woff}",
       "maxDuration": 10
     }
   }
