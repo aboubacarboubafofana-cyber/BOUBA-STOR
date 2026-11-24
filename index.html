@@ -2543,6 +2543,52 @@ window.addEventListener('message',function(e){if(e.origin===location.origin&&e.d
     setTimeout(organiserBoutons, 500);
 })();
  </script>
+ <script>
+/* ==========================================
+   COUPE-CIRCUIT ANTI-ÉCRAN NOIR (1 CLIN D'ŒIL)
+   ========================================== */
+(function() {
+    // 1. Forcer la fermeture des loaders bloqués après 1,5 seconde
+    setTimeout(function() {
+        // Cacher tous les écrans de chargement connus
+        var loaders = document.querySelectorAll('.loader, #loader, .loading, #loading, .preloader, .sk');
+        loaders.forEach(function(el) { 
+            el.style.display = 'none'; 
+            el.style.opacity = '0';
+        });
+
+        // Si la page est vide (écran noir), on force l'affichage du contenu principal
+        var bodyContent = document.body.innerText.trim();
+        if (bodyContent === 'BOOUBA STOR' || bodyContent === 'BOUBA STOR' || bodyContent === 'Chargement...') {
+            // Si on est coincé sur une page blanche/noire
+            if (window.location.href.includes('bouton.html')) {
+                window.location.href = 'index.html'; // Redirection de secours
+            } else {
+                // Sinon, on recharge la page en vidant le cache de la page
+                location.reload(true);
+            }
+        }
+        
+        console.log("⏱️ Coupe-circuit exécuté : Écran débloqué.");
+    }, 1500); // 1,5 seconde
+
+    // 2. Rendre le bouton "X" (fermeture) TOUJOURS cliquable, même si le script d'origine plante
+    document.addEventListener('click', function(e) {
+        var target = e.target.closest('button, div, span');
+        if (target && (target.innerText === '✕' || target.innerText === 'X' || target.innerHTML.includes('✕'))) {
+            // Si c'est le bouton de fermeture d'un modal ou d'une page
+            if (target.closest('.modal')) {
+                target.closest('.modal').classList.remove('show');
+                target.closest('.modal').style.display = 'none';
+            }
+            if (target.closest('.page')) {
+                target.closest('.page').classList.remove('active');
+                target.closest('.page').style.display = 'none';
+            }
+        }
+    }, true);
+})();
+ </script>
 </body>
  </html>
 
