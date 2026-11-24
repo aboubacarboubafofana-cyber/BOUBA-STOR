@@ -1819,78 +1819,99 @@ img[data-ok="1"]{opacity:1;transition:opacity .25s}
 })();
 </script>
 <script>
-/* ===== Onglet Contrôle > 🌍 Fournisseurs ===== */
+/* ===== Onglet Contrôle > 🌍 Fournisseurs (CORRIGÉ ET OPTIMISÉ) ===== */
 (function(){
-var DIC={ensemble:'women two piece set',robe:'dress',robes:'dress',jupe:'skirt',pantalon:'pants',chemise:'shirt',haut:'top',parfum:'perfume',parfums:'perfume',"cosmétiques":'cosmetics',cosmetiques:'cosmetics',chaussures:'shoes',chaussure:'shoes',sandales:'sandals',sac:'handbag',sacs:'handbag',montre:'watch',montres:'watch',perruque:'wig',perruques:'wig',"mèches":'hair extensions',meches:'hair extensions',"téléphone":'mobile phone',telephone:'mobile phone',"écouteurs":'earphones',ecouteurs:'earphones',lunettes:'sunglasses',bijoux:'jewelry',ceinture:'belt',pagne:'african print fabric',boubou:'african boubou',enfant:'kids',enfants:'kids',homme:'men',femme:'women',"vêtements":'clothing',vetements:'clothing',tenue:'outfit',combinaison:'jumpsuit',short:'shorts',veste:'jacket',manteau:'coat',maquillage:'makeup',"crème":'cream',creme:'cream',savon:'soap',accessoires:'accessories',"bébé":'baby',bebe:'baby'};
-function trad(t){var o=[];String(t).toLowerCase().split(/[\s,;\/]+/).filter(Boolean).forEach(function(x){var v=DIC[x]||x;if(o.indexOf(v)<0)o.push(v)});return o.join(' ')}
-var enc=function(x){return encodeURIComponent(String(x).trim())};
-var fm=function(n){return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,' ')};
-function msg(p){return "Hello,\n\nI am interested in: "+(p||"[product]")+".\n\nCould you please tell me:\n1) Price per piece and minimum order quantity (MOQ)\n2) Available sizes and colors\n3) Can I order a sample first?\n4) Shipping cost and delivery time to Côte d'Ivoire\n5) Payment methods (I prefer platform-protected payment)\n\nThank you."}
-var LB='style="display:block;text-align:center;text-decoration:none;margin-bottom:8px"';
-window.supRender=function(b){
- b.innerHTML=
- '<div class="ctrl"><h4 style="color:gold;margin-bottom:6px">🌍 Trouver des fournisseurs</h4>'
- +'<div style="color:#aaa;font-size:12px;margin-bottom:6px">Tapez le produit en français : il est traduit pour les plateformes.</div>'
- +'<input id="sp_q" class="input" placeholder="ex : ensemble femme, parfum, perruque" autocomplete="off">'
- +'<input id="sp_qe" class="input" placeholder="Mots-clés en anglais (modifiable)">'
- +'<button class="gold" id="sp_go">🔎 Préparer la recherche</button></div>'
- +'<div class="ctrl" id="sp_res" style="display:none"><h4 style="color:gold;margin-bottom:8px">Ouvrir la recherche sur…</h4>'
- +'<a class="gold" '+LB+' id="sp_l1" target="_blank" rel="noopener">Alibaba (grossistes)</a>'
- +'<a class="gold" '+LB+' id="sp_l2" target="_blank" rel="noopener">AliExpress (petites quantités)</a>'
- +'<a class="gold" '+LB+' id="sp_l3" target="_blank" rel="noopener">DHgate (petites quantités)</a>'
- +'<a class="ghost" '+LB+' id="sp_l4" target="_blank" rel="noopener">Made-in-China (via Google)</a>'
- +'<a class="ghost" '+LB+' id="sp_l5" target="_blank" rel="noopener">1688, grossistes chinois (via Google)</a>'
- +'<a class="ghost" '+LB+' id="sp_l6" target="_blank" rel="noopener">Autres grossistes (Google)</a></div>'
- +'<div class="ctrl"><h4 style="color:gold;margin-bottom:6px">✉️ Message au fournisseur (anglais)</h4>'
- +'<textarea id="sp_msg" class="input" rows="7"></textarea><button class="gold" id="sp_cp">📋 Copier le message</button></div>'
- +'<div class="ctrl"><h4 style="color:gold;margin-bottom:6px">🧮 Prix de vente</h4>'
- +'<input id="sp_pu" class="input" type="number" inputmode="decimal" placeholder="Prix par pièce (USD)">'
- +'<input id="sp_qt" class="input" type="number" inputmode="numeric" placeholder="Quantité" value="20">'
- +'<input id="sp_tr" class="input" type="number" inputmode="decimal" placeholder="Transport total (USD)">'
- +'<input id="sp_du" class="input" type="number" inputmode="decimal" placeholder="Douane + frais (%)" value="20">'
- +'<input id="sp_tx" class="input" type="number" inputmode="decimal" placeholder="1 USD = … F CFA" value="600">'
- +'<input id="sp_mg" class="input" type="number" inputmode="decimal" placeholder="Marge souhaitée (%)" value="50">'
- +'<button class="gold" id="sp_calc">Calculer</button>'
- +'<div id="sp_out" style="display:none;margin-top:8px;border:1px dashed gold;border-radius:10px;padding:10px"></div>'
- +'<button class="gold" id="sp_pub" style="display:none;margin-top:8px">📦 Publier dans mes produits</button>'
- +'<div style="color:#aaa;font-size:12px;margin-top:8px">Taux et douane = estimations : vérifiez avant de commander.</div></div>'
- +'<div class="ctrl"><h4 style="color:gold;margin-bottom:6px">⚠️ Avant de commander</h4>'
- +'<div style="font-size:13px;line-height:1.6;color:#ddd">• Faites d\'abord un petit essai (échantillon).<br>• Payez via la plateforme (paiement protégé).<br>• Demandez le prix total livré, avec les délais.<br>• Regardez les avis et l\'ancienneté du fournisseur.<br>• Comparez au moins 3 fournisseurs.</div></div>';
- var g=function(i){return document.getElementById(i)};
- g('sp_msg').value=msg('');
- g('sp_q').addEventListener('input',function(){g('sp_qe').value=trad(g('sp_q').value)});
- g('sp_go').onclick=function(){
-  var q=g('sp_qe').value.trim()||trad(g('sp_q').value);
-  if(!q){alert('Écrivez un produit.');return}
-  g('sp_qe').value=q; var e=enc(q);
-  g('sp_l1').href='https://www.alibaba.com/trade/search?SearchText='+e;
-  g('sp_l2').href='https://www.aliexpress.com/wholesale?SearchText='+e;
-  g('sp_l3').href='https://www.dhgate.com/wholesale/search.do?searchkey='+e;
-  g('sp_l4').href='https://www.google.com/search?q='+enc(q+' wholesale supplier site:made-in-china.com');
-  g('sp_l5').href='https://www.google.com/search?q='+enc(q+' site:1688.com');
-  g('sp_l6').href='https://www.google.com/search?q='+enc(q+' wholesale supplier ship to Africa');
-  g('sp_msg').value=msg(q); g('sp_res').style.display='block';
-  g('sp_res').scrollIntoView({behavior:'smooth'});
- };
- g('sp_cp').onclick=function(){
-  var done=function(){g('sp_cp').textContent='✅ Copié !';setTimeout(function(){g('sp_cp').textContent='📋 Copier le message'},1800)};
-  if(navigator.clipboard)navigator.clipboard.writeText(g('sp_msg').value).then(done,function(){g('sp_msg').select();document.execCommand('copy');done()});
-  else{g('sp_msg').select();document.execCommand('copy');done()}
- };
- g('sp_calc').onclick=function(){
-  var pu=+g('sp_pu').value,qt=+g('sp_qt').value,tr=+g('sp_tr').value||0,du=+g('sp_du').value||0,tx=+g('sp_tx').value,mg=+g('sp_mg').value||0;
-  if(!(pu>0)||!(qt>0)||!(tx>0)){alert('Remplissez le prix, la quantité et le taux.');return}
-  var total=(pu*qt+tr)*(1+du/100), unitF=total/qt*tx, sell=Math.ceil(unitF*(1+mg/100)/100)*100;
-  g('sp_out').style.display='block';
-  g('sp_out').innerHTML='Coût total livré : <b>'+fm(total*tx)+' F</b><br>Coût par pièce : <b>'+fm(unitF)+' F</b><br>Prix de vente conseillé : <div style="color:gold;font-size:20px;font-weight:900">'+fm(sell)+' F</div><span style="color:#aaa;font-size:12px">Bénéfice par pièce : environ '+fm(sell-unitF)+' F</span>';
-  var nom=(g('sp_q').value.trim()||'Nouvel article');
-  g('sp_pub').style.display='block';
-  g('sp_pub').onclick=function(){
-   window._pf={name:nom.charAt(0).toUpperCase()+nom.slice(1),price:sell,cat:''};
-   editId='';tmpImg='';setTab('prods');
+  var DIC={
+    ensemble:'women two piece set',robe:'dress',robes:'dress',jupe:'skirt',pantalon:'pants',
+    chemise:'shirt',haut:'top',parfum:'perfume',parfums:'perfume',"cosmétiques":'cosmetics',
+    cosmetiques:'cosmetics',chaussures:'shoes',chaussure:'shoes',sandales:'sandals',
+    sac:'handbag',sacs:'handbag',montre:'watch',montres:'watch',perruque:'wig',
+    perruques:'wig',"mèches":'hair extensions',meches:'hair extensions',"téléphone":'mobile phone',
+    telephone:'mobile phone',"écouteurs":'earphones',ecouteurs:'earphones',lunettes:'sunglasses',
+    bijoux:'jewelry',ceinture:'belt',pagne:'african print fabric',boubou:'african boubou',
+    enfant:'kids',enfants:'kids',homme:'men',femme:'women',"vêtements":'clothing',
+    vetements:'clothing',tenue:'outfit',combinaison:'jumpsuit',short:'shorts',
+    veste:'jacket',manteau:'coat',maquillage:'makeup',"crème":'cream',creme:'cream',
+    savon:'soap',accessoires:'accessories',"bébé":'baby',bebe:'baby'
   };
- };
-};
+
+  function trad(t){
+    var o=[];
+    String(t).toLowerCase().split(/[\s,;\/]+/).filter(Boolean).forEach(function(x){
+      var v=DIC[x]||x;
+      if(o.indexOf(v)<0) o.push(v);
+    });
+    return o.join(' ');
+  }
+  
+  var enc=function(x){return encodeURIComponent(String(x).trim())};
+  var fm=function(n){return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,' ')};
+  
+  var msgTemplate="Hello,\n\nI am interested in: [PRODUCT].\n\nCould you please tell me:\n1) Price per piece and minimum order quantity (MOQ)\n2) Available sizes and colors\n3) Can I order a sample first?\n4) Shipping cost and delivery time to Côte d'Ivoire\n5) Payment methods (I prefer platform-protected payment)\n\nThank you.";
+
+  var LB='style="display:block;text-align:center;text-decoration:none;margin-bottom:8px;padding:12px;border-radius:12px;font-weight:800;color:#fff;"';
+
+  // Fonction principale qui génère l'interface
+  window.supRender=function(b){
+    b.innerHTML = 
+      '<div class="ctrl">' +
+        '<h4 style="color:gold;margin-bottom:6px">🌍 Trouver des fournisseurs</h4>' +
+        '<div style="color:#aaa;font-size:12px;margin-bottom:12px">' +
+          'Tapez le nom d\'un produit. L\'outil va le traduire en anglais (ou chinois) et générer les liens pour trouver des grossistes.' +
+        '</div>' +
+        '<input id="supInput" class="input" placeholder="Ex: ensemble femme, robe, parfum..." oninput="window.supUpdateLinks()" autocomplete="off">' +
+      '</div>' +
+      '<div id="supLinks" class="ctrl" style="display:none;">' +
+        '<div style="font-size:12px;color:#25D366;margin-bottom:10px;font-weight:bold;">' +
+          '✅ Traduction pour la recherche : <span id="supTrad" style="color:#fff;background:#222;padding:2px 6px;border-radius:4px;"></span>' +
+        '</div>' +
+        '<a id="lnkAlibaba" href="#" target="_blank" ' + LB + ' background:#FF6A00;box-shadow:0 4px 12px rgba(255,106,0,0.3);">🇨🇳 Rechercher sur Alibaba</a>' +
+        '<a id="lnkAliExpress" href="#" target="_blank" ' + LB + ' background:#E62E04;box-shadow:0 4px 12px rgba(230,46,4,0.3);">📦 Rechercher sur AliExpress</a>' +
+        '<a id="lnk1688" href="#" target="_blank" ' + LB + ' background:#FF7300;box-shadow:0 4px 12px rgba(255,115,0,0.3);">🏭 Rechercher sur 1688 (Chine)</a>' +
+        '<a id="lnkDHgate" href="#" target="_blank" ' + LB + ' background:#1A6FDF;box-shadow:0 4px 12px rgba(26,111,223,0.3);">🛒 Rechercher sur DHgate</a>' +
+        '<a id="lnkGoogle" href="#" target="_blank" ' + LB + ' background:#4285F4;box-shadow:0 4px 12px rgba(66,133,244,0.3);">🖼️ Voir sur Google Images</a>' +
+        '<button onclick="window.supCopyMsg()" style="width:100%;padding:14px;margin-top:10px;background:linear-gradient(135deg,#d4af37,#ffd700);color:#000;border:0;border-radius:12px;font-weight:900;font-size:14px;">📋 Copier le message de négociation</button>' +
+      '</div>';
+  };
+
+  // Mise à jour des liens en temps réel
+  window.supUpdateLinks=function(){
+    var input=document.getElementById('supInput');
+    var box=document.getElementById('supLinks');
+    if(!input||!box) return;
+    
+    var val=input.value.trim();
+    if(val.length < 2){
+      box.style.display='none';
+      return;
+    }
+    
+    box.style.display='block';
+    var enTrad = trad(val);
+    var encTrad = enc(enTrad);
+    
+    document.getElementById('supTrad').textContent = enTrad;
+    
+    document.getElementById('lnkAlibaba').href = 'https://www.alibaba.com/trade/search?SearchText=' + encTrad;
+    document.getElementById('lnkAliExpress').href = 'https://fr.aliexpress.com/w/wholesale-' + encTrad + '.html';
+    document.getElementById('lnk1688').href = 'https://s.1688.com/selloffer/offer_search.htm?keywords=' + encTrad;
+    document.getElementById('lnkDHgate').href = 'https://www.dhgate.com/wholesale/search.do?act=search&searchkey=' + encTrad;
+    document.getElementById('lnkGoogle').href = 'https://www.google.com/search?q=' + encTrad + '+wholesale&tbm=isch';
+  };
+
+  // Copier le message type
+  window.supCopyMsg=function(){
+    var input=document.getElementById('supInput');
+    var produit = input ? input.value : 'product';
+    var msg = msgTemplate.replace('[PRODUCT]', produit);
+    
+    navigator.clipboard.writeText(msg).then(function(){
+      if(typeof toast === 'function') toast('📋 Message copié ! Collez-le sur WhatsApp avec le fournisseur.');
+      else alert('Message copié !');
+    }).catch(function(){
+      alert('Erreur de copie. Voici le message :\n\n' + msg);
+    });
+  };
 })();
 </script>
 <script>
