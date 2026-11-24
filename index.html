@@ -2467,6 +2467,82 @@ window.addEventListener('message',function(e){if(e.origin===location.origin&&e.d
 })();
 </script>
 <script src="deeplink.js" defer></script>
+ <script>
+/* ==========================================
+   ORGANISATION DES BOUTONS DES CARTES PRODUITS
+   ========================================== */
+(function() {
+    function organiserBoutons() {
+        document.querySelectorAll('#grid .card').forEach(function(card) {
+            var info = card.querySelector('.info');
+            if (!info || info.getAttribute('data-clean') === '1') return;
+
+            // On repère le bouton principal et le bouton partager
+            var btnPrincipal = info.querySelector('.btn');
+            var btnPartager = info.querySelector('.shb');
+            
+            // Tous les autres boutons sont "secondaires"
+            var tousBoutons = Array.from(info.querySelectorAll('button'));
+            var boutonsSecondaires = tousBoutons.filter(function(b) {
+                return b !== btnPrincipal && b !== btnPartager;
+            });
+
+            if (boutonsSecondaires.length > 0) {
+                // 1. On crée le conteneur qui va cacher les boutons
+                var boiteOptions = document.createElement('div');
+                boiteOptions.className = 'card-options';
+                boiteOptions.style.cssText = 'display:none; flex-wrap:wrap; gap:6px; margin-top:8px; width:100%;';
+
+                // 2. On crée le bouton pour ouvrir/fermer
+                var boutonToggle = document.createElement('button');
+                boutonToggle.innerHTML = '⚙️ Plus d\'options';
+                boutonToggle.style.cssText = 'width:100%; padding:8px; background:transparent; border:1px dashed rgba(245,200,66,0.4); color:#f5c842; border-radius:8px; font-size:11px; margin-top:6px; cursor:pointer; font-weight:bold; transition: all 0.2s;';
+
+                // 3. On déplace les boutons importants (Offre, Taille...) dans la boîte
+                boutonsSecondaires.forEach(function(btn) {
+                    btn.style.flex = '1 1 45%'; // 2 boutons par ligne
+                    btn.style.padding = '8px 4px';
+                    btn.style.fontSize = '11px';
+                    btn.style.margin = '0';
+                    btn.style.background = 'rgba(245,200,66,0.1)';
+                    btn.style.border = '1px solid rgba(245,200,66,0.3)';
+                    btn.style.color = '#f5c842';
+                    btn.style.borderRadius = '6px';
+                    btn.style.textAlign = 'center';
+                    boiteOptions.appendChild(btn);
+                });
+
+                // 4. On insère le tout dans la carte
+                if (btnPartager) {
+                    btnPartager.parentNode.insertBefore(boutonToggle, btnPartager.nextSibling);
+                    btnPartager.parentNode.insertBefore(boiteOptions, boutonToggle.nextSibling);
+                } else if (btnPrincipal) {
+                    btnPrincipal.parentNode.insertBefore(boutonToggle, btnPrincipal.nextSibling);
+                    btnPrincipal.parentNode.insertBefore(boiteOptions, boutonToggle.nextSibling);
+                }
+
+                // 5. L'action du clic (Ouvrir / Fermer)
+                boutonToggle.onclick = function(e) {
+                    e.stopPropagation();
+                    var estCache = boiteOptions.style.display === 'none';
+                    boiteOptions.style.display = estCache ? 'flex' : 'none';
+                    boutonToggle.innerHTML = estCache ? '❌ Fermer les options' : '⚙️ Plus d\'options';
+                    boutonToggle.style.borderStyle = estCache ? 'solid' : 'dashed';
+                };
+            }
+            info.setAttribute('data-clean', '1');
+        });
+    }
+
+    // On surveille l'écran pour l'appliquer à chaque nouveau produit affiché
+    var grille = document.getElementById('grid');
+    if (grille) {
+        new MutationObserver(function() { organiserBoutons(); })
+        .observe(grille, { childList: true, subtree: true });
+    }
+    setTimeout(organiserBoutons, 500);
+})();
+ </script>
 </body>
  </html>
 
